@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+@theme {
+  /* Breakpoints — the same scale as HB Links, so components port across
+     without touching their classes (900:, max-700:, ...). */
+  --breakpoint-1920: 1920px;
+  --breakpoint-1800: 1800px;
+  --breakpoint-1600: 1600px;
+  --breakpoint-1440: 1440px;
+  --breakpoint-1280: 1280px;
+  --breakpoint-1080: 1080px;
+  --breakpoint-1079: 1079px;
+  --breakpoint-900: 900px;
+  --breakpoint-800: 800px;
+  --breakpoint-700: 700px;
+  --breakpoint-550: 550px;
+  --breakpoint-400: 400px;
+  --breakpoint-360: 360px;
+
+  /* Colors — not final until Andranik weighs in. The logo is black on white
+     (components/UI/Logo.jsx draws it in currentColor); the accent is the
+     gold of the homepage hero's stage light. The names match HB Links'
+     (bg-third, text-fourth, ...) so ported components keep working; only the
+     values are LeTara's. */
+  --color-primary: #1a1a1a; /* dark surfaces */
+  --color-secondary: #111111; /* darker surfaces */
+  --color-third: #e9a648; /* the accent: the hero's gold */
+  --color-fourth: #6b6b6b; /* muted text */
+
+  /* Faces (next/font variables, set in app/layout.js) */
+  --font-display: var(--font-bebas-neue), "Arial Narrow", sans-serif; /* the logo's face */
+  --font-script: var(--font-courier-prime), "Courier New", monospace; /* a screenplay's typewriter */
+  --font-quote: var(--font-oswald), "Arial Narrow", sans-serif; /* Oswald Light: Andranik's quote (About) */
+}
+
+/* The homepage's drawn intro (components/Hero/HeroIntro.jsx) plays on phones
+   too; only screens held sideways too short to pin it get its finished frame
+   as a still. Keep in step with STILL_QUERY in components/Hero/arrival.js. */
+@custom-variant intro-still {
+  @media (max-height: 500px) and (orientation: landscape) {
+    @slot;
+  }
+}
+
+/* The timelapse heroes (components/Hero/HeroBuildSequence.jsx) show a still
+   of the finished job instead on touch screens — phones and tablets,
+   scrolled with a finger, where scrubbing the timelapse felt off — and on
+   anything held sideways too short to pin the hero. Keep in step with
+   STATIC_QUERY in components/Hero/arrival.js. */
+@custom-variant hero-static {
+  @media (max-height: 500px) and (orientation: landscape), (hover: none) and (pointer: coarse) {
+    @slot;
+  }
+}
+
+/* Windows short for the quote dialog (a laptop, once the browser's bars take
+   their share): its spacing tightens, so the tallest step, the visit
+   calendar, fits without scrolling wherever it can (the user asked to see
+   the whole step). Only the dialog and its form use it. */
+@custom-variant short {
+  @media (max-height: 760px) {
+    @slot;
+  }
+}
+
+/* One vh and one svh, held steady: UI/StableViewport pins them in px when
+   the page opens, so iPhone browsers other than Safari can't resize them
+   each time their bottom bar slides in or out. Heights in the page's flow
+   that follow the screen (the heroes) use these, as calc(N * var(--vh)),
+   instead of vh/svh. Before that script runs they're the live units. */
+:root {
+  --vh: 1vh;
+  --svh: 1svh;
+}
+
+/* Big screens. The site is laid out for up to 1920px; past that (and tall
+   enough — a 2560 × 1080 ultrawide stays put) `wide-zoom` scales a block
+   up whole, so a 2560px screen shows the layout at 4/3 instead of the same
+   small layout with wide empty margins (the user found that
+   "disproportioned" on HB Links). Up to 4K at 100%, then it holds. It goes
+   on each section, the footer, the hero's copy, and the navbar's contents
+   and dropdown panels; the bar itself grows by --wide-zoom (Navbar), its
+   links' boxes left unzoomed, because the dropdowns track the pointer from
+   those boxes' positions, which Safari misreports inside a zoomed element.
+   Nothing with vh/svh goes inside a zoomed block: zoom scales viewport
+   units too. */
+:root {
+  --wide-zoom: 1;
+}
+
+@media (min-width: 2100px) and (min-height: 1000px) {
+  :root {
+    --wide-zoom: 1.1;
+  }
+}
+
+@media (min-width: 2350px) and (min-height: 1100px) {
+  :root {
+    --wide-zoom: 1.2;
+  }
+}
+
+@media (min-width: 2500px) and (min-height: 1200px) {
+  :root {
+    --wide-zoom: 1.3333;
+  }
+}
+
+@media (min-width: 3000px) and (min-height: 1500px) {
+  :root {
+    --wide-zoom: 1.6;
+  }
+}
+
+@media (min-width: 3600px) and (min-height: 1800px) {
+  :root {
+    --wide-zoom: 2;
+  }
+}
+
+@utility wide-zoom {
+  zoom: var(--wide-zoom);
+}
+
+/* A homepage service card that's hovered (where there's a mouse to hover
+   with) or whose link has keyboard focus: the pieces inside it react
+   together (components/Home/Services.jsx). */
+@custom-variant card-on {
+  @media (hover: hover) {
+    &:where(.service-card:hover *) {
+      @slot;
+    }
+  }
+  &:where(.service-card:has(.service-link:focus-visible) *) {
+    @slot;
+  }
+}
+
+*,
+*::after,
+*::before {
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+
+/* Two white homepage sections in a row share the space between them: the
+   second drops its top padding, so the gap is one section's padding, the
+   same as everywhere else (SECTION in components/Home/parts.jsx). */
+.section-light + .section-light {
+  padding-top: 0;
+}
+
+/* Sprocket holes along a strip of film (the homepage testimonials): white
+   rounded squares every 26px, punched through to the white section behind. */
+.film-holes {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='12'%3E%3Crect x='7' width='12' height='12' rx='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 26px 12px;
+}
+
+/* A frame of that film: a whole number of holes wide, so the reel is too and
+   the holes line up again when the running film wraps around. Browsers
+   without round() get the plain width. */
+.film-frame {
+  width: min(84vw, 442px);
+  width: min(round(84vw, 26px), 442px);
+}
+
+/* "Reduce motion" turns smooth scrolling into a plain jump. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::after,
+  *::before {
+    scroll-behavior: auto;
+  }
+}
+
+/* The scroll reveals (components/Home/Reveal): hidden until marked revealed,
+   then they rise and fade in. A CSS animation of opacity and transform only,
+   which the browser runs on its compositor, off the main thread, so it stays
+   smooth on a phone while the page scrolls (Framer Motion's `y` ran in
+   JavaScript and stuttered there). It names only its first frame and fills
+   backwards, so it never holds a transform or a transition over the
+   element's own. With "reduce motion" the rise is a third as far: calmer,
+   but the same reveal (the user's iPhone has it on). */
+[data-reveal]:not([data-revealed]) {
+  opacity: 0;
+}
+[data-revealed] {
+  animation: reveal-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s) backwards;
+}
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+}
+@keyframes reveal-rise-calm {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-revealed] {
+    animation-name: reveal-rise-calm;
+  }
+}
+
+/* The page transition's loading line under the logo
+   (components/UI/PageTransition): it draws across, then slides off — with
+   "reduce motion" it pulses. CSS, so it runs on the compositor and keeps
+   moving while the next page's script loads and runs. */
+.laser-line {
+  transform-origin: left;
+  animation: laser-sweep 1.1s ease-in-out infinite;
+}
+@keyframes laser-sweep {
+  0% {
+    transform: translateX(0) scaleX(0);
+  }
+  50% {
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    transform: translateX(100%) scaleX(1);
+  }
+}
+@keyframes laser-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .laser-line {
+    animation-name: laser-pulse;
+  }
+}
+
+body {
+  background: white;
+  color: #222;
+  padding: 0;
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* A thin scrollbar for the quote dialog's scrolling body (on its dark) —
+   Firefox via `scrollbar-*`, WebKit/Chromium via the pseudo-elements. */
+.modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+.modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+/* …and on the white of the thank-you */
+.modal-scroll.modal-scroll-light {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+.modal-scroll.modal-scroll-light::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+}
