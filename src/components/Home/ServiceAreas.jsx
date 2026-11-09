@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, HexDot, LEDE, SECTION, SectionLabel, Viewfinder } from "@/components/Home/parts";
+import { CONTAINER, H2, HexDot, LEDE, Lines, SECTION, SectionLabel, Viewfinder } from "@/components/Home/parts";
 import { SERVICE_AREAS } from "@/data/areas";
 import { BUSINESS } from "@/data/business";
 
@@ -24,8 +24,13 @@ const CARD_CROP = 140;
 // placeholders for now) in a grid, then the map across the foot, under a
 // bar naming the city it shows. Los Angeles, the target city, leads, wide
 // on a phone and on a wide screen. Pick a city and the map goes to it; it
-// opens on Los Angeles.
-export default function ServiceAreas() {
+// opens on Los Angeles. A service page passes its own `number`, `heading`
+// (its lines) and `intro`.
+export default function ServiceAreas({
+  number = "05",
+  heading = ["Building across", "Los Angeles."],
+  intro = "From the Valley to the hills around it. Pick a city to see it on the map, and if yours isn't here, ask: we may still build there.",
+}) {
   const [active, setActive] = useState(0);
   const area = SERVICE_AREAS[active];
   return (
@@ -34,16 +39,14 @@ export default function ServiceAreas() {
         <div className="grid gap-6 1080:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] 1080:items-end">
           <div>
             <Reveal>
-              <SectionLabel number="05">Where we build</SectionLabel>
+              <SectionLabel number={number}>Where we build</SectionLabel>
             </Reveal>
             <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-              Building across <br />
-              Los Angeles.
+              <Lines lines={heading} />
             </Reveal>
           </div>
           <Reveal as="p" delay={0.1} className={`max-w-xl 1080:pb-1 ${LEDE.dark}`}>
-            From the Valley to the hills around it. Pick a city to see it on the map, and if yours isn&apos;t here,
-            ask: we may still build there.
+            {intro}
           </Reveal>
         </div>
 

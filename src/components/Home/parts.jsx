@@ -1,4 +1,6 @@
-// Pieces the homepage sections share.
+import { Fragment } from "react";
+
+// Pieces the homepage sections share (and the service pages, which reuse them).
 
 // The page's width and side gutters, the same as the hero copy's.
 export const CONTAINER = "mx-auto w-full max-w-[1600px] px-6 700:px-8";
@@ -21,6 +23,17 @@ export const LEDE = {
   dark: "text-[16px] 900:text-[17px] leading-relaxed text-white/60 pointer-events-none",
   light: "text-[16px] 900:text-[17px] leading-relaxed text-black/60 pointer-events-none",
 };
+
+// A heading written as its lines ([first, second, ...]), each after the
+// first on a line of its own.
+export function Lines({ lines }) {
+  return lines.map((line, i) => (
+    <Fragment key={line}>
+      {i > 0 && <br />}
+      {line}
+    </Fragment>
+  ));
+}
 
 // A small hexagon (the logo's shape) in gold, filled or outlined.
 export function HexDot({ filled = true, className = "" }) {

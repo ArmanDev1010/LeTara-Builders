@@ -34,40 +34,43 @@
 // Everything is drawn from numbers here, nothing is downloaded. World units
 // are feet: y points up, the front of the house faces -z, the ADU is at +x.
 // Black, white and greys, plus two colors: the gold light and blueprint blue.
+//
+// Its math, colors and lighting pieces are exported for the service pages'
+// turntable (Hero/studio/studio.js), which draws one object in the same look.
 
-const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const lerp = (a, b, k) => a + (b - a) * k;
-const smooth = (a, b, v) => {
+export const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+export const lerp = (a, b, k) => a + (b - a) * k;
+export const smooth = (a, b, v) => {
   const k = clamp((v - a) / (b - a));
   return k * k * (3 - 2 * k);
 };
-const mix = (c1, c2, k) => c1.map((v, i) => Math.round(lerp(v, c2[i], k)));
-const rgba = ([r, g, b], a = 1) => `rgba(${r},${g},${b},${a})`;
-const RAD = Math.PI / 180;
-const TAU = Math.PI * 2;
+export const mix = (c1, c2, k) => c1.map((v, i) => Math.round(lerp(v, c2[i], k)));
+export const rgba = ([r, g, b], a = 1) => `rgba(${r},${g},${b},${a})`;
+export const RAD = Math.PI / 180;
+export const TAU = Math.PI * 2;
 // the same "random" numbers every frame, so the scene is a function of t
-function rng(seed) {
+export function rng(seed) {
   let s = seed >>> 0;
   return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
 }
-const makeCanvas = (w, h) =>
+export const makeCanvas = (w, h) =>
   typeof OffscreenCanvas !== "undefined"
     ? new OffscreenCanvas(w, h)
     : Object.assign(document.createElement("canvas"), { width: w, height: h });
 
 // 3D vectors
-const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-const norm = (a) => {
+export const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+export const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+export const norm = (a) => {
   const l = Math.hypot(a[0], a[1], a[2]) || 1;
   return [a[0] / l, a[1] / l, a[2] / l];
 };
-const lerp3 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
+export const lerp3 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
 
 // ---- palette ---------------------------------------------------------------
-const GOLD = { core: [255, 244, 214], mid: [255, 170, 58], deep: [196, 92, 16] };
-const BLUE = { core: [232, 244, 255], mid: [74, 150, 255], deep: [20, 64, 190] };
+export const GOLD = { core: [255, 244, 214], mid: [255, 170, 58], deep: [196, 92, 16] };
+export const BLUE = { core: [232, 244, 255], mid: [74, 150, 255], deep: [20, 64, 190] };
 // the light's colors, from gold (0) to blue (1); halfway (0.5) it's white
 const lightColors = (s) => ({
   core: mix(GOLD.core, BLUE.core, s),
@@ -178,7 +181,7 @@ const FILL = norm([0.25, 0.55, -0.8]); // a little from the camera's side
 // A box's faces: the four corners (bottom left, bottom right, top right, top
 // left, as you face it from outside) and its outward normal. The underside
 // is left out: the camera is always above the ground.
-function faces({ min: [x0, y0, z0], max: [x1, y1, z1] }) {
+export function faces({ min: [x0, y0, z0], max: [x1, y1, z1] }) {
   return {
     "z-": { n: [0, 0, -1], p: [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]] },
     "z+": { n: [0, 0, 1], p: [[x1, y0, z1], [x0, y0, z1], [x0, y1, z1], [x1, y1, z1]] },
@@ -188,12 +191,12 @@ function faces({ min: [x0, y0, z0], max: [x1, y1, z1] }) {
   };
 }
 // the point `u` across and `v` up a face
-const onFace = ({ p: [a, b, , d] }, u, v) => [
+export const onFace = ({ p: [a, b, , d] }, u, v) => [
   a[0] + (b[0] - a[0]) * u + (d[0] - a[0]) * v,
   a[1] + (b[1] - a[1]) * u + (d[1] - a[1]) * v,
   a[2] + (b[2] - a[2]) * u + (d[2] - a[2]) * v,
 ];
-function edges({ min, max }) {
+export function edges({ min, max }) {
   const c = (i) => [i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2]];
   const out = [];
   for (let i = 0; i < 8; i++) for (const bit of [1, 2, 4]) if (!(i & bit)) out.push([c(i), c(i | bit)]);
@@ -258,7 +261,7 @@ const dreamCorners = (t, calm) => PIECES.flatMap((q) => edges(moved(q.box, offse
 // Far to near, for boxes that don't overlap: wherever two are apart along an
 // axis and the camera is past one of them on it, that one is the nearer.
 // Pairs that can't be told apart this way keep their distance order.
-function drawOrder(list, eye) {
+export function drawOrder(list, eye) {
   const n = list.length;
   const after = Array.from({ length: n }, () => []);
   const indegree = new Array(n).fill(0);
@@ -488,13 +491,13 @@ function camera(width, height, portrait, t, calm, box) {
 }
 
 // ---- shapes on screen --------------------------------------------------------
-function path(ctx, pts) {
+export function path(ctx, pts) {
   ctx.beginPath();
   ctx.moveTo(pts[0][0], pts[0][1]);
   for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
   ctx.closePath();
 }
-const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
+export const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
 
 // A face's color in the light: a little ambient, the fill from the camera's
 // side, and the key light (gold, or blue while it's blue) where it faces it.
@@ -508,7 +511,7 @@ function shade(mat, n, colors) {
 
 // a light sprite for the lit windows' glow: a hot core in a glow
 const sprites = {};
-function sprite(color) {
+export function sprite(color) {
   const key = color.join(",");
   if (sprites[key]) return sprites[key];
   const c = makeCanvas(64, 64), g = c.getContext("2d");
@@ -935,9 +938,11 @@ function drawGlows(ctx, cam, glows, idle) {
 
 // DESIGN's notes: a dot on the drawing, a leader out from it, and the label
 // on a dark plate with a blue edge, big enough to read (the user asked),
-// kept on screen.
-function drawNotes(ctx, cam, t, fonts, width) {
-  const a = smooth(T.notes[0], T.notes[1], t) * (1 - smooth(T.rise[0], T.rise[0] + 0.05, t));
+// kept on screen. `a` is how far they've come up, 0-1.
+const NOTE_TONES = {
+  blue: { ink: BLUE.core, edge: BLUE.mid, plate: "rgba(3,8,22,0.82)" },
+};
+function drawNotes(ctx, cam, a, notes, fonts, width, tone = NOTE_TONES.blue) {
   if (a <= 0) return;
   const fs = Math.round(clamp(cam.s / 64, 11, 15));
   const padX = Math.round(fs * 0.55), plateH = Math.round(fs * 1.7);
@@ -946,7 +951,7 @@ function drawNotes(ctx, cam, t, fonts, width) {
   ctx.font = `700 ${fs}px ${fonts.mono}`;
   ctx.textBaseline = "middle";
   const reach = clamp(cam.s / 26, 18, 40);
-  for (const { at, dir, text } of NOTES) {
+  for (const { at, dir, text } of notes) {
     const [x, y] = cam.toScreen(at);
     const label = text.toUpperCase();
     const plateW = ctx.measureText(label).width + padX * 2;
@@ -955,23 +960,23 @@ function drawNotes(ctx, cam, t, fonts, width) {
     let px = dir[0] > 0 ? ex + 10 : ex - 10 - plateW;
     px = clamp(px, 8, width - 8 - plateW);
     const py = ey - plateH / 2;
-    ctx.strokeStyle = rgba(BLUE.core, 0.85);
+    ctx.strokeStyle = rgba(tone.ink, 0.85);
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(ex, ey);
     ctx.lineTo(dir[0] > 0 ? px : px + plateW, ey);
     ctx.stroke();
-    ctx.fillStyle = rgba(BLUE.core, 1);
+    ctx.fillStyle = rgba(tone.ink, 1);
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, TAU);
     ctx.fill();
-    ctx.fillStyle = "rgba(3,8,22,0.82)";
+    ctx.fillStyle = tone.plate;
     ctx.fillRect(px, py, plateW, plateH);
-    ctx.strokeStyle = rgba(BLUE.mid, 0.9);
+    ctx.strokeStyle = rgba(tone.edge, 0.9);
     ctx.lineWidth = 1;
     ctx.strokeRect(px + 0.5, py + 0.5, plateW - 1, plateH - 1);
-    ctx.fillStyle = rgba(BLUE.core, 1);
+    ctx.fillStyle = rgba(tone.ink, 1);
     ctx.fillText(label, px + padX, ey + 1);
   }
   ctx.restore();
@@ -980,7 +985,7 @@ function drawNotes(ctx, cam, t, fonts, width) {
 // ---- the light and the air ---------------------------------------------------
 // The source, the haze around it, and a bank of fog behind the house that
 // it reads against.
-function drawLight(ctx, colors, flare, [lx, ly], scale) {
+export function drawLight(ctx, colors, flare, [lx, ly], scale) {
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   ctx.save();
@@ -1087,7 +1092,7 @@ function godRays(ctx, dpr, [sx, sy], colors, flare, strength, drawOccluders, lit
 }
 
 // over everything: a bloom round the light, and an anamorphic streak through it
-function drawBloom(ctx, colors, flare, [lx, ly], scale) {
+export function drawBloom(ctx, colors, flare, [lx, ly], scale) {
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   const R = scale * 0.15 * flare;
@@ -1122,7 +1127,7 @@ const DUST = (() => {
   for (let i = 0; i < 140; i++) out.push({ x: r(), y: r(), d: 0.35 + r() * 1.35, p: r() * TAU, s: 0.6 + r() });
   return out;
 })();
-function drawDust(ctx, t, idle, colors, width, height, [lx, ly], front) {
+export function drawDust(ctx, t, idle, colors, width, height, [lx, ly], front) {
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   for (const q of DUST) {
@@ -1149,7 +1154,7 @@ function drawDust(ctx, t, idle, colors, width, height, [lx, ly], front) {
 
 // film grain: one tile of noise, laid over the frame at a new offset each time
 let grain = null;
-function grainTile() {
+export function grainTile() {
   if (grain) return grain;
   const c = makeCanvas(256, 256);
   const g = c.getContext("2d"), img = g.createImageData(256, 256), r = rng(5);
@@ -1284,7 +1289,7 @@ export function drawScene(ctx, { width, height, dpr = 1, t, portrait = false, la
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawBloom(ctx, colors, flare, light, lightScale);
   // the notes over the light and its bloom, so the glare never washes them out
-  drawNotes(ctx, cam, t, fonts, width);
+  drawNotes(ctx, cam, smooth(T.notes[0], T.notes[1], t) * (1 - smooth(T.rise[0], T.rise[0] + 0.05, t)), NOTES, fonts, width);
 
   // in front of the lens: out-of-focus dust, a vignette, grain
   drawDust(ctx, calm ? 0 : t, calm ? 0 : idle, colors, width, height, light, true);

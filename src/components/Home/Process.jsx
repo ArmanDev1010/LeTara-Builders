@@ -3,7 +3,7 @@
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, LEDE, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
+import { CONTAINER, H2, LEDE, LIGHT, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
 import QuoteButton from "@/components/Quote/QuoteButton";
 import { phoneDisplay, phoneHref } from "@/data/business";
@@ -56,7 +56,17 @@ function Step({ step, index, lit }) {
 // lights at once, the steps rising only a little. The moving parts use
 // `transform` (not Tailwind's `translate`/`scale` properties), which every
 // browser animates off the main thread, so it stays smooth on a phone.
-export default function Process() {
+//
+// A service page passes its own `number`, `heading` (its lines), `intro`
+// and `steps` (each step's text, worded for that service; the steps
+// themselves stay the same five).
+export default function Process({
+  number = "03",
+  heading = ["Five steps,", "one team."],
+  intro = "How a project goes with us, from the first call to the final walkthrough.",
+  steps,
+}) {
+  const list = steps ? PROCESS.map((step, i) => ({ ...step, text: steps[i] ?? step.text })) : PROCESS;
   const listRef = useRef(null);
   const lit = useInView(listRef, { once: true, margin: "0px 0px -20% 0px" });
   const phone = phoneHref();
@@ -65,16 +75,15 @@ export default function Process() {
       <div className={CONTAINER}>
         <div className="flex flex-col items-start 1080:items-center 1080:text-center">
           <Reveal>
-            <SectionLabel number="03" tone="light">
+            <SectionLabel number={number} tone="light">
               How we work
             </SectionLabel>
           </Reveal>
           <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-            Five steps, <br />
-            one team.
+            <Lines lines={heading} />
           </Reveal>
           <Reveal as="p" delay={0.1} className={`mt-5 max-w-xl ${LEDE.light}`}>
-            How a project goes with us, from the first call to the final walkthrough.
+            {intro}
           </Reveal>
         </div>
 
@@ -91,7 +100,7 @@ export default function Process() {
               }`}
             />
           </span>
-          {PROCESS.map((step, i) => (
+          {list.map((step, i) => (
             <Step key={step.label} step={step} index={i} lit={lit} />
           ))}
         </ol>

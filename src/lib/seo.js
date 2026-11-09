@@ -91,6 +91,10 @@ export function buildBreadcrumbs(trail) {
   };
 }
 
+// An FAQ answer as plain text: "{{Get a free quote}}" (a button on the
+// page, see Home/FAQ) becomes its words.
+export const plainAnswer = (answer) => answer.replace(/\{\{(.+?)\}\}/g, "$1.");
+
 // FAQPage — only for FAQs that are also shown on the page (Google's
 // guidance: the structured data has to match what's visible). Null when
 // there are none, so a page never renders an empty block.
@@ -102,7 +106,27 @@ export function buildFAQSchema(faqs) {
     mainEntity: faqs.map(({ question, answer }) => ({
       "@type": "Question",
       name: question,
-      acceptedAnswer: { "@type": "Answer", text: answer },
+      acceptedAnswer: { "@type": "Answer", text: plainAnswer(answer) },
     })),
+  };
+}
+
+// A service page's Service, provided by LeTara, in the target city.
+export function buildServiceSchema(page) {
+  const phone = phoneHref();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: page.metaTitle,
+    serviceType: page.serviceType,
+    description: page.description,
+    url: `${BASE_URL}${page.href}`,
+    provider: {
+      "@type": "GeneralContractor",
+      name: BUSINESS.name,
+      url: BASE_URL,
+      ...(phone && { telephone: phone.replace("tel:", "") }),
+    },
+    areaServed: { "@type": "City", name: "Los Angeles" },
   };
 }

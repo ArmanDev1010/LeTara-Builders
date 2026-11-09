@@ -42,6 +42,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${script.variable} ${quote.variable}`}>
+      {/* Safari on iPhone turns any number that looks like a phone number
+          into a tel: link before React loads; it did it to the license
+          number (CSLB #1147978) and broke hydration on every page. Written
+          here, in the head itself: the metadata API's formatDetection lands
+          after the content while Next.js streams (in dev, at least), too
+          late for Safari. The real phone links are written out. */}
+      <head>
+        <meta name="format-detection" content="telephone=no, email=no, address=no" />
+      </head>
       <body>
         {/* without JavaScript, show what the scroll reveals (Home/Reveal) would fade in */}
         <noscript>

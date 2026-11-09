@@ -3,12 +3,38 @@
 import { useState } from "react";
 import { TbPhone } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, LEDE, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
+import { CONTAINER, H2, LEDE, LIGHT, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
 import QuoteButton from "@/components/Quote/QuoteButton";
+import { useModal } from "@/context/ModalContext";
 import { phoneDisplay, phoneHref } from "@/data/business";
 import { FAQS } from "@/data/faq";
 import { buildFAQSchema } from "@/lib/seo";
+
+// An answer, where "{{Get a free quote}}" is a button that opens the quote
+// request (the price questions end with one: no prices on the page, the
+// user's call on HB Links). The schema reads it as plain words (plainAnswer).
+function Answer({ text }) {
+  const { toggleModal } = useModal();
+  return text.split(/\{\{(.+?)\}\}/).map((part, i) =>
+    i % 2 ? (
+      <button
+        key={part}
+        type="button"
+        onClick={toggleModal}
+        aria-haspopup="dialog"
+        className="pointer-events-auto inline-flex items-center gap-1.5 font-semibold text-neutral-950 hover:text-black/60 transition-colors duration-200 cursor-pointer outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third"
+      >
+        <span className="underline decoration-third decoration-2 underline-offset-4">{part}</span>
+        <span aria-hidden="true" className="text-third">
+          →
+        </span>
+      </button>
+    ) : (
+      part
+    ),
+  );
+}
 
 function Item({ faq, index, open, onToggle }) {
   const id = `faq-${index}`;
@@ -63,7 +89,9 @@ function Item({ faq, index, open, onToggle }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="pl-[52px] 700:pl-[60px] pr-2 700:pr-12 pb-7 text-[15.5px] leading-relaxed text-black/60 pointer-events-none">{faq.answer}</p>
+          <p className="pl-[52px] 700:pl-[60px] pr-2 700:pr-12 pb-7 text-[15.5px] leading-relaxed text-black/60 pointer-events-none">
+            <Answer text={faq.answer} />
+          </p>
         </div>
       </div>
     </li>
@@ -73,27 +101,31 @@ function Item({ faq, index, open, onToggle }) {
 // The FAQ, on white: the heading, and a way to ask anything else, held in
 // place on the left while the questions open on the right, one at a time,
 // numbered in the typewriter face. Its FAQPage markup comes from the same
-// list, so it always matches what's shown (data/faq.js).
-export default function FAQ() {
+// list, so it always matches what's shown (data/faq.js). A service page
+// passes its own `faqs`, `number`, `heading` (its lines) and `intro`.
+export default function FAQ({
+  faqs = FAQS,
+  number = "06",
+  heading = ["Questions,", "answered."],
+  intro = "Don't see yours? Ask us directly. There's no such thing as a small question when it's your home.",
+}) {
   const [open, setOpen] = useState(0);
   const phone = phoneHref();
   return (
     <section id="faq" className={`${SECTION} ${LIGHT}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(FAQS)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(faqs)) }} />
       <div className={`${CONTAINER} grid gap-12 1080:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] 1440:gap-24`}>
         <div className="1080:sticky 1080:top-32 1080:self-start">
           <Reveal>
-            <SectionLabel number="06" tone="light">
+            <SectionLabel number={number} tone="light">
               Questions
             </SectionLabel>
           </Reveal>
           <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-            Questions, <br />
-            answered.
+            <Lines lines={heading} />
           </Reveal>
           <Reveal as="p" delay={0.1} className={`mt-5 max-w-sm ${LEDE.light}`}>
-            Don&apos;t see yours? Ask us directly. There&apos;s no such thing as a small question when it&apos;s
-            your home.
+            {intro}
           </Reveal>
           <Reveal delay={0.15} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
             <QuoteButton tone="light" />
@@ -110,7 +142,7 @@ export default function FAQ() {
         </div>
 
         <Reveal as="ol" delay={0.1} className="border-t border-black/10">
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <Item key={faq.question} faq={faq} index={i} open={open === i} onToggle={() => setOpen(open === i ? null : i)} />
           ))}
         </Reveal>

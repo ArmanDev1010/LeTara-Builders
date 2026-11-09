@@ -43,8 +43,7 @@ const SPAN = [
   "min-h-[220px] 700:min-h-[240px] 1080:min-h-0",
 ];
 
-// A service as a card that opens its page (the homepage's services section
-// for now, until there are service pages). The whole card is the link: it
+// A service as a card that opens its page. The whole card is the link: it
 // lies over the card, under the text, and the text lets clicks through. The
 // lead card's quote button sits above it, so it still opens the quote.
 //
@@ -54,9 +53,9 @@ const SPAN = [
 // Motion only the colors change and the rule fades in. The arrow box is
 // always there, so a phone shows the card opens too.
 function ServiceCard({ service, index }) {
-  const { title, kicker, blurb, text, image, icon, href } = service;
+  const { title, kicker, blurb, text, image, icon, href, slug } = service;
   const main = index === 0;
-  const titleId = `service-${index}`;
+  const titleId = `card-${slug}`;
   return (
     <Reveal
       as="li"

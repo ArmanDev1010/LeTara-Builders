@@ -5,13 +5,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import Logo from "@/components/UI/Logo";
 
-// Between pages, a wall goes up: PANELS dark panels, each edged in the accent
-// color, rise from the bottom in a wave from left to right and close the
-// screen. On it the logo, with an accent line sweeping under it while the
-// next page loads. Once that page is in (its hero image painted, or the
-// homepage's drawn hero its first frame), the logo fades and the panels lift
-// off the top in the same wave, uncovering it. (The mechanics are HB Links';
-// the colors are placeholders until LeTara's palette is decided.)
+// Between pages, a gold line opens into the wall, like a projector's
+// shutter: a thin gold line (the site's gold rule) draws across the middle
+// of the screen from the left, then splits in two, one half gliding to the
+// top and the other to the bottom, opening the wall between them (PANELS
+// dark stripes) until they're its top and bottom edges. On the wall the
+// logo, a gold line sweeping under it while the next page loads. Once that
+// page is in (its hero image painted, or a drawn hero its first frame), the
+// logo fades and it all plays back: the two lines glide back together,
+// closing the wall into one line, and the line draws off to the right.
+// Simple, and nothing comes at the visitor.
+//
+// How it got here (11-09): the panels rose in a wave as on HB Links (too
+// close to HB's; the user liked the wall's look, not its motion), then a
+// hexagon iris opening from the middle ("jumps in your face"), a plain fade
+// ("boring") and slanted blades sweeping across, all rejected.
 //
 // It takes over clicks on links to other pages of the site (any <a>, so
 // next/link everywhere): covers first, then navigates. New tabs, other
@@ -19,12 +27,12 @@ import Logo from "@/components/UI/Logo";
 // link to one of the homepage's sections (/#services) that this page also
 // has scrolls to this page's own instead: once there are service or area
 // pages with their own sections, "Services" on one stays on it. With
-// "reduce motion" on, the panels fade in and out in the same wave instead
-// of sliding.
+// "reduce motion" on, the wall fades in and out instead.
 const PANELS = 5;
 const EASE = [0.76, 0, 0.24, 1];
-const COVER = { duration: 0.45, stagger: 0.04 };
-const REVEAL = { duration: 0.6, stagger: 0.05, after: 0.15 }; // after the wordmark fades
+const LINE = 0.3; // the gold line drawing across, and drawing off (s)
+const OPEN = 0.45; // the wall opening from it, and closing back
+const AFTER = 0.15; // the way back starts once the logo has faded
 const MIN_SHUT_MS = 250; // the wall stays shut at least this long, so the logo reads
 const IMAGE_WAIT_MS = 700; // the longest it waits for the new page's hero image
 const MAX_WAIT_MS = 10000; // opens anyway if the page never arrives
@@ -57,6 +65,7 @@ export default function PageTransition() {
   phaseRef.current = phase;
   const target = useRef(null); // { href, pathname }
   const shutAt = useRef(0);
+  const half = useRef(0); // half the screen's height, how far each line glides
 
   useEffect(() => {
     const onClick = (event) => {
@@ -92,6 +101,7 @@ export default function PageTransition() {
       event.preventDefault();
       if (phaseRef.current !== "idle") return;
       target.current = { href: url.pathname + url.search + url.hash, pathname: url.pathname };
+      half.current = window.innerHeight / 2;
       router.prefetch(target.current.href);
       setPhase("cover");
     };
@@ -130,47 +140,72 @@ export default function PageTransition() {
   if (phase === "idle") return null;
 
   const revealing = phase === "reveal";
-  const hidden = calm ? { opacity: 0 } : { y: "100%" };
-  const closed = calm ? { opacity: 1 } : { y: "0%" };
-  const gone = calm ? { opacity: 0 } : { y: "-100%" };
+  const stripes = Array.from({ length: PANELS }, (_, i) => (
+    <div key={i} className={`relative h-full flex-1 ${i % 2 ? "bg-primary" : "bg-secondary"}`}>
+      {calm && <span className="absolute inset-x-0 top-0 h-[3px] bg-third" />}
+      {calm && <span className="absolute inset-x-0 bottom-0 h-[3px] bg-third" />}
+      <span className="absolute inset-y-0 right-0 w-px bg-white/[0.06]" />
+    </div>
+  ));
 
   return (
-    <div aria-hidden="true" className="fixed inset-0 z-[100002] flex overflow-hidden">
-      {Array.from({ length: PANELS }, (_, i) => (
+    <div aria-hidden="true" className="fixed inset-0 z-[100002] overflow-hidden">
+      {calm ? (
         <motion.div
-          key={i}
-          initial={hidden}
-          animate={revealing ? gone : closed}
-          transition={
-            revealing
-              ? { duration: REVEAL.duration, delay: REVEAL.after + i * REVEAL.stagger, ease: EASE }
-              : { duration: COVER.duration, delay: i * COVER.stagger, ease: EASE }
-          }
+          initial={{ opacity: 0 }}
+          animate={{ opacity: revealing ? 0 : 1 }}
+          transition={revealing ? { duration: OPEN, delay: AFTER } : { duration: OPEN }}
           onAnimationComplete={() => {
-            if (i !== PANELS - 1) return;
             if (phaseRef.current === "cover") shut();
             else if (phaseRef.current === "reveal") setPhase("idle");
           }}
-          // a hair wider than its share, so no seam of page shows between panels
-          className={`relative h-full flex-1 ${i < PANELS - 1 ? "-mr-px" : ""} ${
-            i % 2 ? "bg-primary" : "bg-secondary"
-          }`}
+          className="absolute inset-0 flex"
         >
-          <span className="absolute inset-x-0 top-0 h-[3px] bg-third" />
-          <span className="absolute inset-x-0 bottom-0 h-[3px] bg-third" />
-          <span className="absolute inset-y-0 right-0 w-px bg-white/[0.06]" />
+          {stripes}
         </motion.div>
-      ))}
+      ) : (
+        <>
+          {/* the wall, opening up and down from the middle as the lines part
+              (by scale, so the compositor runs it while the next page loads) */}
+          <motion.div
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: revealing ? 0 : 1 }}
+            transition={revealing ? { duration: OPEN, delay: AFTER, ease: EASE } : { duration: OPEN, delay: LINE, ease: EASE }}
+            onAnimationComplete={() => {
+              if (phaseRef.current === "cover") shut();
+            }}
+            className="absolute inset-0 flex"
+          >
+            {stripes}
+          </motion.div>
+          {/* the gold line: drawn across as one (two lines, one over the
+              other), then parting to the top and bottom edges; back together
+              and drawn off the other way to finish */}
+          {[-1, 1].map((dir) => (
+            <motion.div
+              key={dir}
+              initial={{ scaleX: 0, y: 0 }}
+              animate={revealing ? { scaleX: 0, y: 0 } : { scaleX: 1, y: dir * (half.current - 1.5) }}
+              style={{ originX: revealing ? 1 : 0 }}
+              transition={
+                revealing
+                  ? { y: { duration: OPEN, delay: AFTER, ease: EASE }, scaleX: { duration: LINE, delay: AFTER + OPEN, ease: EASE } }
+                  : { scaleX: { duration: LINE, ease: EASE }, y: { duration: OPEN, delay: LINE, ease: EASE } }
+              }
+              onAnimationComplete={() => {
+                if (dir === 1 && phaseRef.current === "reveal") setPhase("idle");
+              }}
+              className="absolute inset-x-0 top-1/2 -mt-[1.5px] h-[3px] bg-third"
+            />
+          ))}
+        </>
+      )}
 
       {/* on the shut wall: the logo and the loading line */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: revealing ? 0 : 1 }}
-        transition={
-          revealing
-            ? { duration: 0.15 }
-            : { duration: 0.3, delay: COVER.duration * 0.7 + (PANELS - 1) * COVER.stagger }
-        }
+        transition={revealing ? { duration: 0.15 } : { duration: 0.35, delay: calm ? OPEN * 0.6 : LINE + OPEN * 0.6 }}
         className="pointer-events-none absolute inset-0 grid place-items-center"
       >
         <div className="flex flex-col items-center">

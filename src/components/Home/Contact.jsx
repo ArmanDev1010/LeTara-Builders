@@ -1,7 +1,7 @@
 import { BsInstagram } from "react-icons/bs";
 import { TbCertificate, TbMapPin, TbPhone } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, LEDE, SECTION, SectionLabel } from "@/components/Home/parts";
+import { CONTAINER, H2, LEDE, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
 import EstimateForm from "@/components/Quote/EstimateForm";
 import { BUSINESS, phoneDisplay, phoneHref } from "@/data/business";
@@ -55,8 +55,13 @@ function Line({ icon: Icon, label, value, href, big, external }) {
 // Get a free quote: the same step-by-step form as the quote dialog, set in the
 // page beside the other ways to reach us (HB Links' idea, LeTara's design),
 // on black with the hero's gold glow low on the left. A sent request opens
-// the same thank-you.
-export default function Contact() {
+// the same thank-you. A service page passes its own `number`, `heading`
+// (its lines) and `intro`.
+export default function Contact({
+  number = "07",
+  heading = ["Tell us what", "you're planning."],
+  intro = "A few quick questions, about a minute, and you pick a time for us to come see the property.",
+}) {
   return (
     <section id="contact" className={`${SECTION} overflow-hidden bg-[#070605] text-neutral-50`}>
       <div
@@ -66,14 +71,13 @@ export default function Contact() {
       <div className={`relative ${CONTAINER} grid gap-14 1080:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] 1440:gap-24`}>
         <div>
           <Reveal>
-            <SectionLabel number="07">Get a free quote</SectionLabel>
+            <SectionLabel number={number}>Get a free quote</SectionLabel>
           </Reveal>
           <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-            Tell us what <br />
-            you&apos;re planning.
+            <Lines lines={heading} />
           </Reveal>
           <Reveal as="p" delay={0.1} className={`mt-5 max-w-md ${LEDE.dark}`}>
-            A few quick questions, about a minute, and you pick a time for us to come see the property.
+            {intro}
           </Reveal>
           <Reveal as="ul" delay={0.15} className="mt-8 border-t border-white/10">
             {LINES.map((line) => (
