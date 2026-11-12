@@ -214,7 +214,10 @@ export default function Navbar() {
               <Logo layout="horizontal" className="h-[32px] 700:h-[35px] 1080:h-[40px]" />
             </Link>
 
-            <ul className="max-1080:hidden absolute inset-y-0 left-1/2 -translate-x-1/2 flex gap-6 1280:gap-[calc(2.75rem*var(--wide-zoom))]">
+            {/* centered in the room between the logo and the buttons (which
+                are wider) until 1440px, then on the bar: with "Projects"
+                added (11-12) the links ran into Instagram at 1080-1100px */}
+            <ul className="max-1080:hidden absolute inset-y-0 left-[calc(50%-60px)] 1440:left-1/2 -translate-x-1/2 flex gap-6 1280:gap-[calc(2.75rem*var(--wide-zoom))]">
               {NAV_LINKS.map(({ title, href, menu: name }) => {
                 const link = `uppercase text-[12px] font-semibold tracking-[0.16em] transition-colors duration-200 hover:text-third focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-third ${linkTone(href)}`;
                 if (!name)

@@ -5,12 +5,16 @@ import { Fragment } from "react";
 // The page's width and side gutters, the same as the hero copy's.
 export const CONTAINER = "mx-auto w-full max-w-[1600px] px-6 700:px-8";
 
-// Every section's padding, the same top and bottom everywhere (about HB
-// Links' spacing). A white section after another white one drops its top
-// padding (`.section-light`, globals.css), so the distance between the two
-// stays one padding, not two. On a big screen each section grows whole
-// (`wide-zoom`, globals.css): nothing inside one may be sized in vh/svh/dvh.
-export const SECTION = "wide-zoom relative scroll-mt-24 py-20 1080:py-28";
+// Every section's padding, the same top and bottom: 112px on a phone, 128px
+// from 1080px (11-10: the user asked for more room between sections, a phone
+// most of all; it was 80 / 112, about HB Links'). The old 80 / 112 stays
+// above the first section after a hero and around a black section
+// (`section-dark`, globals.css). A white section after another white one
+// drops its top padding (`.section-light`, globals.css), so the distance
+// between the two stays one padding, not two.
+// On a big screen each section grows whole (`wide-zoom`, globals.css):
+// nothing inside one may be sized in vh/svh/dvh.
+export const SECTION = "wide-zoom relative scroll-mt-24 py-28 1080:py-32";
 export const LIGHT = "section-light bg-white text-neutral-950";
 
 // A section's heading: Bebas, the logo's face. Sized so a section's heading

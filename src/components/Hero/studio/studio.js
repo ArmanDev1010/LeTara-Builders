@@ -50,6 +50,8 @@ const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
 // so many feet (cladding).
 const MATS = {
   stucco: { albedo: 0.62 },
+  siding: { albedo: 0.4, slats: 0.75 },
+  shingle: { albedo: 0.17, slats: 0.9 },
   existing: { albedo: 0.4 },
   clad: { albedo: 0.2, slats: 1.1 },
   concrete: { albedo: 0.46 },
@@ -111,6 +113,56 @@ function extentOf(project, pts, e = [Infinity, Infinity, -Infinity, -Infinity]) 
 }
 const corners = (b) => edges(b).flat();
 
+// A gable roof inside a box's bounds (`gable: "x"`: its ridge runs along x;
+// `"z"`: along z), the eaves at the bottom and the ridge at the top: two
+// slopes (`ridge`: their top edge catches the light) and two triangular ends
+// (`tri`, the apex written twice). It sits inside its box, so the boxes'
+// drawing order (drawOrder) still holds; keep its box clear of every other.
+function gableFaces({ min: [x0, y0, z0], max: [x1, y1, z1], gable }) {
+  const h = y1 - y0;
+  if (gable === "x") {
+    const zm = (z0 + z1) / 2, d = (z1 - z0) / 2;
+    return {
+      "z-": { n: norm([0, d, -h]), p: [[x0, y0, z0], [x1, y0, z0], [x1, y1, zm], [x0, y1, zm]], ridge: true },
+      "z+": { n: norm([0, d, h]), p: [[x1, y0, z1], [x0, y0, z1], [x0, y1, zm], [x1, y1, zm]], ridge: true },
+      "x-": { n: [-1, 0, 0], p: [[x0, y0, z1], [x0, y0, z0], [x0, y1, zm], [x0, y1, zm]], tri: true },
+      "x+": { n: [1, 0, 0], p: [[x1, y0, z0], [x1, y0, z1], [x1, y1, zm], [x1, y1, zm]], tri: true },
+    };
+  }
+  const xm = (x0 + x1) / 2, d = (x1 - x0) / 2;
+  return {
+    "x-": { n: norm([-h, d, 0]), p: [[x0, y0, z1], [x0, y0, z0], [xm, y1, z0], [xm, y1, z1]], ridge: true },
+    "x+": { n: norm([h, d, 0]), p: [[x1, y0, z0], [x1, y0, z1], [xm, y1, z1], [xm, y1, z0]], ridge: true },
+    "z-": { n: [0, 0, -1], p: [[x0, y0, z0], [x1, y0, z0], [xm, y1, z0], [xm, y1, z0]], tri: true },
+    "z+": { n: [0, 0, 1], p: [[x1, y0, z1], [x0, y0, z1], [xm, y1, z1], [xm, y1, z1]], tri: true },
+  };
+}
+const shapeFaces = (b) => (b.gable ? gableFaces(b) : faces(b));
+
+// A shape's planes, each facing out: its faces' and its floor's.
+function planesOf(b) {
+  const out = Object.values(shapeFaces(b)).map((f) => ({ n: f.n, q: f.p[0] }));
+  out.push({ n: [0, -1, 0], q: b.min });
+  return out;
+}
+// Whether a shape (its planes) stands between the eye and point p: the line
+// from one to the other clipped against each plane, stopping just short of p.
+function hides(planes, eye, p) {
+  const d = sub(p, eye);
+  let t0 = 0, t1 = 0.995;
+  for (const { n, q } of planes) {
+    const den = dot(n, d), num = dot(n, sub(q, eye));
+    if (Math.abs(den) < 1e-9) {
+      if (num < 0) return false;
+      continue;
+    }
+    if (den > 0) t1 = Math.min(t1, num / den);
+    else t0 = Math.max(t0, num / den);
+    if (t0 >= t1) return false;
+  }
+  return true;
+}
+
 // A window's pane as a thin box on its wall, for the diagram, where the
 // windows come away from the walls as a layer of their own (pushed out
 // along the wall's face).
@@ -135,17 +187,23 @@ function prepare(asset) {
   if (prepared.has(asset)) return prepared.get(asset);
   const render = asset.boxes.filter((b) => !b.diagramOnly);
   const panes = asset.paneLayer ? asset.windows.filter((w) => w.pane !== false).map((w, i) => paneBox(asset, w, i)) : [];
-  const diagram = [...asset.boxes, ...panes];
+  const diagram = [...asset.boxes.filter((b) => !b.renderOnly && !b.phantom), ...panes];
+  const phantoms = asset.boxes.filter((b) => b.phantom && !b.renderOnly);
   const extent = [Infinity, Infinity, -Infinity, -Infinity];
-  const pts = render.flatMap(corners);
+  const lotPts = asset.lot ? asset.lot.x.flatMap((x) => asset.lot.z.map((z) => [x, 0, z])) : [];
+  const pts = [...render.flatMap(corners), ...lotPts];
   for (let i = 0; i <= 8; i++) {
     const yaw = lerp(asset.yaw[0] - 18, asset.yaw[1], i / 8);
     extentOf(view(asset.target, asset.dist, yaw, asset.pitch).project, pts, extent);
   }
   const d = asset.diagram;
   const dv = view(d.target ?? asset.target, d.dist ?? asset.dist, d.yaw, d.pitch);
-  const diagramExtent = extentOf(dv.project, diagram.flatMap((b) => corners(moved(b, explodeOf(asset, b)))));
-  const p = { render, diagram, extent, diagramExtent };
+  const diagramExtent = extentOf(dv.project, [
+    ...[...diagram, ...phantoms].flatMap((b) => corners(moved(b, explodeOf(asset, b)))),
+    ...lotPts,
+    ...Object.values(asset.marks ?? {}),
+  ]);
+  const p = { render, diagram, phantoms, extent, diagramExtent };
   prepared.set(asset, p);
   return p;
 }
@@ -175,12 +233,12 @@ function drawWord(ctx, word, box, portrait, fonts) {
   const size = Math.min(((box.x1 - box.x0) * 0.98 * 100) / m.width, ((box.y1 - box.y0) * 0.62) / capH);
   ctx.font = `${size}px ${fonts.display}`;
   const w = ctx.measureText(word).width;
-  const baseline = box.y0 + (box.y1 - box.y0) * 0.36 + (capH * size) / 2;
+  const baseline = box.y0 + (box.y1 - box.y0) * (portrait ? 0.5 : 0.36) + (capH * size) / 2;
   ctx.textBaseline = "alphabetic";
   ctx.lineJoin = "round";
-  ctx.fillStyle = rgba(GOLD.mid, portrait ? 0.06 : 0.05);
+  ctx.fillStyle = rgba(GOLD.mid, portrait ? 0.12 : 0.05);
   ctx.fillText(word, (box.x0 + box.x1) / 2 - w / 2, baseline);
-  ctx.strokeStyle = rgba(GOLD.mid, portrait ? 0.3 : 0.24);
+  ctx.strokeStyle = rgba(GOLD.mid, portrait ? 0.55 : 0.24);
   ctx.lineWidth = Math.max(1, size / 140);
   ctx.strokeText(word, (box.x0 + box.x1) / 2 - w / 2, baseline);
   ctx.restore();
@@ -231,7 +289,7 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
     ctx.fillStyle = g;
   }
   ctx.fill();
-  if (mat.slats && key !== "y+") {
+  if (mat.slats && key !== "y+" && !face.tri) {
     const h = b.max[1] - b.min[1];
     ctx.beginPath();
     for (let v = mat.slats / h; v < 1; v += mat.slats / h) {
@@ -261,7 +319,7 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
       ctx.fillStyle = g;
       ctx.fill();
       const span = Math.hypot(...sub(onFace(face, w.u[0], w.v[0]), onFace(face, w.u[1], w.v[1])));
-      glows.push({ at: onFace(face, (w.u[0] + w.u[1]) / 2, (w.v[0] + w.v[1]) / 2), r: span * 0.55, a: 0.45 * lit });
+      glows.push({ at: onFace(face, (w.u[0] + w.u[1]) / 2, (w.v[0] + w.v[1]) / 2), r: span * 0.55, a: 0.45 * lit, box: b.id });
     }
     path(ctx, quad);
     ctx.strokeStyle = "rgba(4,4,4,0.9)";
@@ -276,6 +334,32 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
     ctx.strokeStyle = rgba(GOLD.mid, 0.38);
     ctx.stroke();
   }
+  if (face.ridge) {
+    ctx.beginPath();
+    ctx.moveTo(pts[3][0], pts[3][1]);
+    ctx.lineTo(pts[2][0], pts[2][1]);
+    ctx.strokeStyle = rgba(GOLD.mid, 0.5);
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+}
+
+// The property line, when the asset has a `lot`: the ground inside it a
+// shade lighter (darker on white), its edge dashed in gold on the turntable,
+// so the home and everything built on its lot read as one property.
+function drawLot(ctx, cam, lot, dark) {
+  const [x0, x1] = lot.x, [z0, z1] = lot.z;
+  const pts = [[x0, 0, z0], [x1, 0, z0], [x1, 0, z1], [x0, 0, z1]].map(cam.toScreen);
+  ctx.save();
+  path(ctx, pts);
+  ctx.fillStyle = dark ? "rgba(255,236,200,0.035)" : "rgba(17,17,17,0.035)";
+  ctx.fill();
+  // in the drawing the edge is solid: dashes there mean the cutaway
+  if (dark) ctx.setLineDash([6, 5]);
+  ctx.strokeStyle = dark ? rgba(GOLD.mid, 0.4) : "rgba(17,17,17,0.16)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
 }
 
 // light spilling from the windows and the lamps
@@ -296,7 +380,13 @@ function drawGlows(ctx, cam, glows) {
 // ---- the turntable --------------------------------------------------------------
 export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrait = false, build = 1, spin = 0, calm = false, lite = false, fonts }) {
   const P = prepare(asset);
-  const box = room(width, height, portrait, layout);
+  const room0 = room(width, height, portrait, layout);
+  // On a phone the name has a band of its own above the object, where it
+  // reads (behind the object it was mostly hidden; the user caught it), and
+  // the object fits under it. On a wide screen it stays behind the object.
+  const tall = room0.y1 - room0.y0;
+  const wordBox = portrait ? { ...room0, y1: room0.y0 + tall * 0.24 } : room0;
+  const box = portrait ? { ...room0, y0: room0.y0 + tall * 0.2 } : room0;
   // it comes round a little as it assembles, then turns with the scroll
   // (neither with Reduce Motion: the camera holds still)
   const yaw = calm ? asset.yaw[0] : lerp(asset.yaw[0], asset.yaw[1], spin) - 18 * (1 - easeInOut(build));
@@ -337,9 +427,10 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
   const light = cam.toScreen(asset.light);
   const lightScale = Math.max(box.x1 - box.x0, box.y1 - box.y0) * 0.6;
   drawLight(ctx, GOLD, 1, light, lightScale);
-  drawWord(ctx, asset.word, box, portrait, fonts);
+  drawWord(ctx, asset.word, wordBox, portrait, fonts);
   drawDust(ctx, calm ? 0 : spin * 0.6, 0, GOLD, width, height, light, false);
   drawStage(ctx, cam, asset);
+  if (asset.lot) drawLot(ctx, cam, asset.lot, true);
 
   const glows = [];
   const parts = P.render.map((b) => ({ b: moved(b, offsetOf(b)), a: smooth(0, 0.3, placed(b.layer)) }));
@@ -349,13 +440,27 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
     if (a <= 0) continue;
     ctx.save();
     ctx.globalAlpha = a;
-    const fs = faces(b);
-    for (const key of ["z-", "z+", "x-", "x+", "y+"]) if (visible(fs[key], eye)) drawFace(ctx, cam, asset, b, key, fs[key], lit, glows);
+    for (const [key, face] of Object.entries(shapeFaces(b))) if (visible(face, eye)) drawFace(ctx, cam, asset, b, key, face, lit, glows);
     ctx.restore();
   }
   for (const lamp of asset.lamps ?? []) {
     const at = add(lamp.at, scale(asset.layers[lamp.layer]?.build ?? ZERO, far * (1 - easeInOut(placed(lamp.layer)))));
     glows.push({ at, r: lamp.r, a: (lamp.a ?? 0.8) * lit });
+  }
+  // The glows are drawn over everything, so a glow behind a roof or a wall
+  // showed through it (the porch's lamp and the windows under its roof shone
+  // on the roof; the user caught it, 11-12). Each is dimmed by how much of it
+  // is hidden: its middle and four points round it, each checked against
+  // the solid shapes in front (not posts, beams and slats, which would make
+  // it flicker as the camera turns, and not its own wall).
+  const occluders = parts
+    .filter(({ b, a }) => a > 0.5 && Math.min(b.max[0] - b.min[0], b.max[2] - b.min[2]) >= 1.5)
+    .map(({ b }) => ({ id: b.id, planes: planesOf(b) }));
+  for (const g of glows) {
+    const k = g.r * 0.45;
+    const pts = [g.at, add(g.at, [k, 0, 0]), add(g.at, [-k, 0, 0]), add(g.at, [0, k, 0]), add(g.at, [0, -k, 0])];
+    const seen = pts.filter((p) => !occluders.some((o) => o.id !== g.box && hides(o.planes, eye, p))).length;
+    g.a *= seen / pts.length;
   }
   drawGlows(ctx, cam, glows);
   drawBloom(ctx, GOLD, 1, light, lightScale);
@@ -386,15 +491,26 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
 // Each numbered layer (`labels`, { layer: number }) gets a hexagon with its
 // number, on a leader from its left edge. `ghost` layers (what's already
 // there, like the house under an addition) are drawn faint.
+//
+// A cutaway (`phantom` boxes, the area pages' home): `cut` 0-1 opens it, the
+// part cut away fading out of the drawing into a dashed outline, so it reads
+// as cut, not missing; the cut walls' tops (`section`) are filled dark, as in
+// an architect's section. With `diagramWindows` the walls show their windows.
 const FACE_FILL = { "y+": [255, 255, 255], "z-": [242, 241, 238], "z+": [242, 241, 238], "x-": [232, 230, 226], "x+": [232, 230, 226] };
+// a little color on the rooms inside: the floor warm, the fabrics and the
+// stone a shade darker
+const MAT_TINT = { floor: [252, 245, 233], fabric: [226, 222, 215], stone: [228, 224, 218], wood: [240, 232, 220] };
+const SECTION_FILL = [44, 42, 40];
 const HEX = (cx, cy, r) => Array.from({ length: 6 }, (_, i) => [cx + r * Math.cos(((60 * i - 90) * Math.PI) / 180), cy + r * Math.sin(((60 * i - 90) * Math.PI) / 180)]);
 
-export function drawDiagram(ctx, { width, height, dpr = 1, asset, spread = 1, active = null, labels = {}, fonts }) {
+export function drawDiagram(ctx, { width, height, dpr = 1, asset, spread = 1, cut = 1, active = null, labels = {}, fonts }) {
   const P = prepare(asset);
   const d = asset.diagram;
   const { eye, project } = view(d.target ?? asset.target, d.dist ?? asset.dist, d.yaw, d.pitch);
   const e = P.diagramExtent;
-  const pad = { l: 58, r: 12, t: 16, b: 16 };
+  // the numbers sit on the drawing when the asset places them (`marks`),
+  // otherwise in a column on the left
+  const pad = asset.marks ? { l: 16, r: 16, t: 18, b: 12 } : { l: 58, r: 12, t: 16, b: 16 };
   const s = Math.min((width - pad.l - pad.r) / (e[2] - e[0]), (height - pad.t - pad.b) / (e[3] - e[1]));
   const ox = pad.l + (width - pad.l - pad.r) / 2 - (s * (e[0] + e[2])) / 2;
   const oy = pad.t + (height - pad.t - pad.b) / 2 - (s * (e[1] + e[3])) / 2;
@@ -404,28 +520,88 @@ export function drawDiagram(ctx, { width, height, dpr = 1, asset, spread = 1, ac
   };
   const ghosts = asset.ghost ?? [];
   const gold = [233, 166, 72];
+  // what the one being read lights: its own layer, or the layers it covers
+  // (`covers`: on the area pages, new construction is the whole home)
+  const lit = active ? (asset.covers?.[active] ?? [active]) : [];
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, width, height);
   ctx.lineJoin = "round";
+  if (asset.lot) drawLot(ctx, { toScreen }, asset.lot, false);
   const boxes = P.diagram.map((b) => moved(b, scale(explodeOf(asset, b), spread)));
-  for (const b of drawOrder(boxes, eye)) {
+  // while the cutaway opens, the part cut away is still drawn, fading
+  const solid = cut < 1 ? [...boxes, ...P.phantoms] : boxes;
+  for (const b of drawOrder(solid, eye)) {
     const ghost = ghosts.includes(b.layer);
-    const on = active && b.layer === active;
-    const fs = faces(b);
-    for (const key of ["z-", "z+", "x-", "x+", "y+"]) {
-      if (!visible(fs[key], eye)) continue;
-      const pts = fs[key].p.map(toScreen);
+    const on = lit.includes(b.layer);
+    ctx.globalAlpha = b.phantom ? 1 - cut : 1;
+    for (const [key, face] of Object.entries(shapeFaces(b))) {
+      if (!visible(face, eye)) continue;
+      const pts = face.p.map(toScreen);
       path(ctx, pts);
-      const base = b.mat === "glass" ? [214, 224, 230] : FACE_FILL[key];
+      if (b.section && key === "y+") {
+        ctx.fillStyle = rgba(on ? [176, 112, 28] : SECTION_FILL);
+        ctx.fill();
+        continue;
+      }
+      const tint = MAT_TINT[b.mat];
+      let base = b.mat === "glass" ? [214, 224, 230] : face.ridge ? [236, 234, 229] : FACE_FILL[key];
+      if (tint) base = base.map((v, i) => Math.round((v * tint[i]) / 255));
       ctx.fillStyle = rgba(on ? mix(base, gold, key === "y+" ? 0.3 : 0.42) : ghost ? mix(base, [255, 255, 255], 0.6) : base);
       ctx.fill();
       ctx.strokeStyle = on ? "rgba(176,112,28,0.95)" : ghost ? "rgba(17,17,17,0.22)" : "rgba(17,17,17,0.72)";
       ctx.lineWidth = on ? 1.4 : 1;
       ctx.stroke();
+      if (!asset.diagramWindows) continue;
+      for (const w of asset.windows) {
+        if (w.box !== b.id || w.face !== key) continue;
+        path(ctx, [[w.u[0], w.v[0]], [w.u[1], w.v[0]], [w.u[1], w.v[1]], [w.u[0], w.v[1]]].map(([u, v]) => toScreen(onFace(face, u, v))));
+        ctx.fillStyle = rgba(on ? mix([214, 224, 230], gold, 0.3) : [214, 224, 230]);
+        ctx.fill();
+        ctx.strokeStyle = on ? "rgba(176,112,28,0.9)" : "rgba(17,17,17,0.6)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
     }
   }
+  ctx.globalAlpha = 1;
+  // the part cut away, dashed: the faces it showed, outlined
+  if (cut > 0 && P.phantoms.length) {
+    ctx.save();
+    ctx.globalAlpha = cut;
+    ctx.setLineDash([4, 3]);
+    ctx.lineWidth = 1;
+    for (const b of P.phantoms) {
+      ctx.strokeStyle = lit.includes(b.layer) ? "rgba(176,112,28,0.95)" : "rgba(17,17,17,0.5)";
+      for (const [key, face] of Object.entries(shapeFaces(b))) {
+        if (key === "y+" || !visible(face, eye)) continue;
+        path(ctx, face.p.map(toScreen));
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
 
+  ctx.font = `700 11px ${fonts.mono}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  // the numbers on the drawing: a hexagon on each part, at its place
+  if (asset.marks) {
+    for (const [layer, number] of Object.entries(labels)) {
+      if (!asset.marks[layer]) continue;
+      const [x, y] = toScreen(asset.marks[layer]);
+      const on = layer === active;
+      path(ctx, HEX(x, y, 13));
+      ctx.fillStyle = on ? rgba(gold) : "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = on ? rgba(gold) : "rgba(17,17,17,0.55)";
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+      ctx.fillStyle = on ? "#111" : "rgba(17,17,17,0.8)";
+      ctx.fillText(String(number).padStart(2, "0"), x, y + 0.5);
+    }
+    return;
+  }
   // the numbers: a hexagon left of each layer, kept apart, on a leader
   const marks = Object.entries(labels)
     .map(([layer, number]) => {
@@ -440,9 +616,6 @@ export function drawDiagram(ctx, { width, height, dpr = 1, asset, spread = 1, ac
   for (let i = 1; i < marks.length; i++) marks[i].y = Math.max(marks[i].y, marks[i - 1].y + 32);
   const overflow = marks.length ? marks[marks.length - 1].y - (height - 18) : 0;
   if (overflow > 0) for (const m of marks) m.y -= overflow;
-  ctx.font = `700 11px ${fonts.mono}`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
   for (const m of marks) {
     const on = m.layer === active;
     const cx = 22, r = 13;

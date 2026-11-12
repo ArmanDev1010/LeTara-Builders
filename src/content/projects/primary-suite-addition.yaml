@@ -1,0 +1,12 @@
+title: "Primary suite addition"
+services:
+  - home-additions
+location:
+  discriminant: other
+  value: "Sherman Oaks"
+status: finished
+summary: "A primary suite added at the back of the house, with its own bath and a walk-in closet."
+description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nThe suite opens onto the yard through wide doors."
+gallery: []
+featured: false
+sample: true

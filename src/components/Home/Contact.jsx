@@ -58,18 +58,23 @@ function Line({ icon: Icon, label, value, href, big, external }) {
 // the same thank-you. A service page passes its own `number`, `heading`
 // (its lines) and `intro`.
 export default function Contact({
-  number = "07",
+  number = "05",
   heading = ["Tell us what", "you're planning."],
   intro = "A few quick questions, about a minute, and you pick a time for us to come see the property.",
 }) {
   return (
-    <section id="contact" className={`${SECTION} overflow-hidden bg-[#070605] text-neutral-50`}>
+    <section id="contact" className={`${SECTION} section-dark overflow-hidden bg-[#070605] text-neutral-50`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_0%_100%,rgba(233,166,72,0.14),transparent_70%)]"
       />
-      <div className={`relative ${CONTAINER} grid gap-14 1080:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] 1440:gap-24`}>
-        <div>
+      {/* on a phone the heading, then the form, then the other ways to reach
+          us (the user asked for the form first); from 1080px the heading and
+          those ways on the left, the form beside them */}
+      <div
+        className={`relative ${CONTAINER} grid gap-x-14 1440:gap-x-24 gap-y-10 [grid-template-areas:'head''form''lines'] 1080:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] 1080:grid-rows-[auto_1fr] 1080:[grid-template-areas:'head_form''lines_form']`}
+      >
+        <div className="[grid-area:head]">
           <Reveal>
             <SectionLabel number={number}>Get a free quote</SectionLabel>
           </Reveal>
@@ -79,14 +84,14 @@ export default function Contact({
           <Reveal as="p" delay={0.1} className={`mt-5 max-w-md ${LEDE.dark}`}>
             {intro}
           </Reveal>
-          <Reveal as="ul" delay={0.15} className="mt-8 border-t border-white/10">
-            {LINES.map((line) => (
-              <Line key={line.label} {...line} />
-            ))}
-          </Reveal>
         </div>
+        <Reveal as="ul" delay={0.15} className="[grid-area:lines] 1080:-mt-2 border-t border-white/10 self-start">
+          {LINES.map((line) => (
+            <Line key={line.label} {...line} />
+          ))}
+        </Reveal>
 
-        <Reveal delay={0.1} className="relative self-start border border-white/10 bg-[#0d0c0b] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
+        <Reveal delay={0.1} className="[grid-area:form] relative self-start border border-white/10 bg-[#0d0c0b] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
           <div aria-hidden="true" className="h-[2px] bg-gradient-to-r from-third via-third/60 to-transparent" />
           <EstimateForm talk={false} />
         </Reveal>

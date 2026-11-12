@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import Logo from "@/components/UI/Logo";
 
 // Between pages, a gold line opens into the wall, like a projector's
@@ -27,7 +27,10 @@ import Logo from "@/components/UI/Logo";
 // link to one of the homepage's sections (/#services) that this page also
 // has scrolls to this page's own instead: once there are service or area
 // pages with their own sections, "Services" on one stays on it. With
-// "reduce motion" on, the wall fades in and out instead.
+// "reduce motion" on it plays the same, a quarter slower: the user's iPhone
+// has it on, and the fade it used to get there read as the lines missing.
+// (MotionConfig reducedMotion="never" here, or the site-wide "user" setting
+// would skip the lines' and the wall's transforms.)
 const PANELS = 5;
 const EASE = [0.76, 0, 0.24, 1];
 const LINE = 0.3; // the gold line drawing across, and drawing off (s)
@@ -140,72 +143,55 @@ export default function PageTransition() {
   if (phase === "idle") return null;
 
   const revealing = phase === "reveal";
-  const stripes = Array.from({ length: PANELS }, (_, i) => (
-    <div key={i} className={`relative h-full flex-1 ${i % 2 ? "bg-primary" : "bg-secondary"}`}>
-      {calm && <span className="absolute inset-x-0 top-0 h-[3px] bg-third" />}
-      {calm && <span className="absolute inset-x-0 bottom-0 h-[3px] bg-third" />}
-      <span className="absolute inset-y-0 right-0 w-px bg-white/[0.06]" />
-    </div>
-  ));
+  const k = calm ? 1.25 : 1; // Reduce Motion: the same, slower
+  const line = LINE * k, open = OPEN * k;
 
   return (
+    <MotionConfig reducedMotion="never">
     <div aria-hidden="true" className="fixed inset-0 z-[100002] overflow-hidden">
-      {calm ? (
+      {/* the wall, opening up and down from the middle as the lines part
+          (by scale, so the compositor runs it while the next page loads) */}
+      <motion.div
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: revealing ? 0 : 1 }}
+        transition={revealing ? { duration: open, delay: AFTER, ease: EASE } : { duration: open, delay: line, ease: EASE }}
+        onAnimationComplete={() => {
+          if (phaseRef.current === "cover") shut();
+        }}
+        className="absolute inset-0 flex"
+      >
+        {Array.from({ length: PANELS }, (_, i) => (
+          <div key={i} className={`relative h-full flex-1 ${i % 2 ? "bg-primary" : "bg-secondary"}`}>
+            <span className="absolute inset-y-0 right-0 w-px bg-white/[0.06]" />
+          </div>
+        ))}
+      </motion.div>
+      {/* the gold line: drawn across as one (two lines, one over the
+          other), then parting to the top and bottom edges; back together
+          and drawn off the other way to finish */}
+      {[-1, 1].map((dir) => (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: revealing ? 0 : 1 }}
-          transition={revealing ? { duration: OPEN, delay: AFTER } : { duration: OPEN }}
+          key={dir}
+          initial={{ scaleX: 0, y: 0 }}
+          animate={revealing ? { scaleX: 0, y: 0 } : { scaleX: 1, y: dir * (half.current - 1.5) }}
+          style={{ originX: revealing ? 1 : 0 }}
+          transition={
+            revealing
+              ? { y: { duration: open, delay: AFTER, ease: EASE }, scaleX: { duration: line, delay: AFTER + open, ease: EASE } }
+              : { scaleX: { duration: line, ease: EASE }, y: { duration: open, delay: line, ease: EASE } }
+          }
           onAnimationComplete={() => {
-            if (phaseRef.current === "cover") shut();
-            else if (phaseRef.current === "reveal") setPhase("idle");
+            if (dir === 1 && phaseRef.current === "reveal") setPhase("idle");
           }}
-          className="absolute inset-0 flex"
-        >
-          {stripes}
-        </motion.div>
-      ) : (
-        <>
-          {/* the wall, opening up and down from the middle as the lines part
-              (by scale, so the compositor runs it while the next page loads) */}
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: revealing ? 0 : 1 }}
-            transition={revealing ? { duration: OPEN, delay: AFTER, ease: EASE } : { duration: OPEN, delay: LINE, ease: EASE }}
-            onAnimationComplete={() => {
-              if (phaseRef.current === "cover") shut();
-            }}
-            className="absolute inset-0 flex"
-          >
-            {stripes}
-          </motion.div>
-          {/* the gold line: drawn across as one (two lines, one over the
-              other), then parting to the top and bottom edges; back together
-              and drawn off the other way to finish */}
-          {[-1, 1].map((dir) => (
-            <motion.div
-              key={dir}
-              initial={{ scaleX: 0, y: 0 }}
-              animate={revealing ? { scaleX: 0, y: 0 } : { scaleX: 1, y: dir * (half.current - 1.5) }}
-              style={{ originX: revealing ? 1 : 0 }}
-              transition={
-                revealing
-                  ? { y: { duration: OPEN, delay: AFTER, ease: EASE }, scaleX: { duration: LINE, delay: AFTER + OPEN, ease: EASE } }
-                  : { scaleX: { duration: LINE, ease: EASE }, y: { duration: OPEN, delay: LINE, ease: EASE } }
-              }
-              onAnimationComplete={() => {
-                if (dir === 1 && phaseRef.current === "reveal") setPhase("idle");
-              }}
-              className="absolute inset-x-0 top-1/2 -mt-[1.5px] h-[3px] bg-third"
-            />
-          ))}
-        </>
-      )}
+          className="absolute inset-x-0 top-1/2 -mt-[1.5px] h-[3px] bg-third"
+        />
+      ))}
 
       {/* on the shut wall: the logo and the loading line */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: revealing ? 0 : 1 }}
-        transition={revealing ? { duration: 0.15 } : { duration: 0.35, delay: calm ? OPEN * 0.6 : LINE + OPEN * 0.6 }}
+        transition={revealing ? { duration: 0.15 } : { duration: 0.35, delay: line + open * 0.6 }}
         className="pointer-events-none absolute inset-0 grid place-items-center"
       >
         <div className="flex flex-col items-center">
@@ -219,5 +205,6 @@ export default function PageTransition() {
         </div>
       </motion.div>
     </div>
+    </MotionConfig>
   );
 }

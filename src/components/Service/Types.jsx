@@ -12,7 +12,7 @@ const TYPE = { fontFamily: "var(--font-courier-prime), 'Courier New', monospace"
 // lot from above, the house from the side or its rooms, with what this type
 // adds in gold. Shapes: `lot` (the property line, dashed), `house` (what's
 // there), `new` (what's built), `room` (a room, gold when `on`), `area`, a
-// `pergola` (slatted), `circle`, `dim` (a dimension, with ticks), `ground`
+// `pergola` (slatted), `old` (what was there, dashed), `circle`, `dim` (a dimension, with ticks), `ground`
 // (a side view's ground line) and `text`.
 function Shape({ t, x, y, w, h, x1, y1, x2, y2, cx, cy, r, label, label2, on }) {
   const lit = t === "new" || on;
@@ -100,6 +100,18 @@ function Shape({ t, x, y, w, h, x1, y1, x2, y2, cx, cy, r, label, label2, on }) 
       );
     case "area":
       return <rect x={x} y={y} width={w} height={h} fill={lit ? "rgba(233,166,72,0.2)" : "#f4f3f0"} stroke={lit ? GOLD : "rgba(0,0,0,0.25)"} strokeWidth={lit ? 1.5 : 0.6} />;
+    case "old":
+      // what was there (a house coming down, or the footprint of one lost), dashed
+      return (
+        <g>
+          <rect x={x} y={y} width={w} height={h} fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth="0.9" strokeDasharray="3 2.5" />
+          {label && (
+            <text x={x + w / 2} y={y + h - 5} fontSize="5.5" textAnchor="middle" fill="rgba(0,0,0,0.45)" style={TYPE}>
+              {label}
+            </text>
+          )}
+        </g>
+      );
     default: {
       // house, new, room
       const fill = lit ? "rgba(233,166,72,0.28)" : t === "house" ? "#efede9" : "#ffffff";

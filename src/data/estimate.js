@@ -1,13 +1,15 @@
-import { TbHelp, TbHomeEdit, TbHomePlus, TbStairsUp, TbTrees } from "react-icons/tb";
+import { TbCrane, TbHelp, TbHomeEdit, TbHomePlus, TbStairsUp, TbTrees } from "react-icons/tb";
 
 // The step-by-step quote request (components/Quote/EstimateForm). Each
 // project's `title` is also the value sent with the request, so the lead
-// reads exactly what the visitor picked. The services of data/services.js;
-// no "Design-Build" option, since every project is design-build.
+// reads exactly what the visitor picked. The services of data/services.js,
+// in Andranik's order (his yard sign); no "Design-Build" option, since every
+// project is design-build.
 export const PROJECT_OPTIONS = [
-  { title: "ADU", hint: "a second home on your lot, attached or detached", icon: TbHomePlus },
+  { title: "New Construction", hint: "a new home from the ground up, or a rebuild", icon: TbCrane },
   { title: "Home Addition", hint: "more room: a new wing or a second story", icon: TbStairsUp },
-  { title: "Full Remodel", hint: "kitchen, baths or the whole house", icon: TbHomeEdit },
+  { title: "ADU", hint: "a second home on your lot, attached or detached", icon: TbHomePlus },
+  { title: "Home Remodel", hint: "kitchen, baths or the whole house", icon: TbHomeEdit },
   { title: "Outdoor Living", hint: "pergolas, patios and outdoor kitchens", icon: TbTrees },
   { title: "Not Sure Yet", hint: "we'll help you work out what fits", icon: TbHelp },
 ];

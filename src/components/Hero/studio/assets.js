@@ -21,6 +21,16 @@
 //   diagram   the diagram's angle
 //   diagramOnly  boxes only the diagram shows (the inside, hidden in the
 //             hero by the walls; the utility trench)
+//   renderOnly   boxes only the hero shows (a wall the diagram has in pieces)
+//   phantom   in the diagram, cut away and drawn as a dashed outline (a
+//             cutaway: the roof and walls over the rooms inside)
+//   section   a cut wall: its top filled dark in the diagram, as an
+//             architect fills a section
+//   diagramWindows  the diagram draws the windows on its walls
+//   marks     where the diagram puts each layer's number, on the part itself
+//             (otherwise the numbers stand in a column on its left)
+//   covers    the layers a layer lights in the diagram, when more than its
+//             own (on the area pages, new construction: all but the ADU)
 
 const adu = {
   word: "ADU",
@@ -179,4 +189,194 @@ const outdoor = {
   diagram: { yaw: -30, pitch: 26 },
 };
 
-export const ASSETS = { adu, addition, remodel, outdoor };
+// a new two-story home, from the ground up (both floors are one "walls"
+// layer in the list, each with its own lift)
+const house = {
+  word: "NEW BUILD",
+  target: [13, 9, 8],
+  dist: 92,
+  yaw: [-36, -12],
+  pitch: 20,
+  light: [10, 22, 24],
+  stage: 23,
+  order: ["site", "foundation", "walls", "roof"],
+  paneLayer: "windows",
+  layers: {
+    site: {},
+    foundation: { explode: [0, 3, 0], build: [0, 6, 0] },
+    walls: { explode: [0, 10, 0], build: [0, 10, 0] },
+    roof: { explode: [0, 25, 0], build: [0, 16, 0] },
+    interior: { explode: [0, 3, 0] },
+  },
+  boxes: [
+    { id: "drive", min: [-4, 0, -9], max: [30, 0.3, -2], mat: "deck", layer: "site" },
+    { id: "utility", min: [-16, 0, 9], max: [0, 0.3, 9.8], mat: "metal", layer: "site", diagramOnly: true },
+    { id: "slab", min: [0, 0, 0], max: [26, 0.8, 18], mat: "concrete", layer: "foundation" },
+    { id: "ground", min: [0, 0.8, 0], max: [26, 10.8, 18], mat: "stucco", layer: "walls" },
+    { id: "upper", min: [4, 10.8, -2], max: [26, 20, 18], mat: "clad", layer: "walls", explode: [0, 18, 0], build: [0, 13, 0] },
+    { id: "roof", min: [3, 20, -3], max: [27, 20.8, 19], mat: "roof", layer: "roof" },
+    { id: "kitchen", min: [2, 0.8, 14], max: [12, 3.8, 16.5], mat: "cabinet", layer: "interior", diagramOnly: true },
+    { id: "sofa", min: [14, 0.8, 4], max: [22, 2.4, 7], mat: "fabric", layer: "interior", diagramOnly: true },
+  ],
+  windows: [
+    { box: "ground", face: "z-", u: [0.05, 0.55], v: [0, 0.86] },
+    { box: "ground", face: "z-", u: [0.68, 0.8], v: [0, 0.8] },
+    { box: "ground", face: "x-", u: [0.3, 0.7], v: [0.35, 0.78] },
+    { box: "upper", face: "z-", u: [0.08, 0.46], v: [0.25, 0.85] },
+    { box: "upper", face: "z-", u: [0.56, 0.92], v: [0.25, 0.85] },
+    { box: "upper", face: "x-", u: [0.25, 0.75], v: [0.3, 0.8] },
+  ],
+  diagram: { yaw: -32, pitch: 22 },
+};
+
+// An area page's property (Area pages): one Craftsman home on its lot, with
+// every service on it, the way the homepage's scene shows one property:
+//   new construction: the house, in lap siding, a low gable roof with wide
+//     eaves over its single-story wing, and a front porch on stone piers
+//     under a gable of its own;
+//   a home addition: a second story on the house, its gable to the street;
+//   a remodel: the living room, kitchen and bath inside, seen in the
+//     drawing, where the single-story wing is cut away (its roof and the
+//     top of its walls dashed, the cut walls filled dark);
+//   an ADU: a small matching cottage in the back corner of the yard;
+//   outdoor living: a patio beside the house under a pergola, with an
+//     outdoor kitchen and a fire pit.
+// The property line (`lot`) ties them into one lot. Each service is a layer
+// named by its slug, so the area page's list lights it in the drawing; the
+// turntable puts them in place in turn. `word` is the area's name, set by
+// the page. Roofs are gables (`gable`, studio.js). (11-11: two houses on a
+// street, then a modern house with an ADU set apart, both read as a
+// neighborhood; the user asked for one normal home with a roof, like a
+// Craftsman, showing the services the way the homepage does. 11-12: the
+// drawing whole, not pulled apart, with the cutaway for the remodel.)
+const pergolaSlats = Array.from({ length: 7 }, (_, i) => {
+  const x = 39 + 2.2 * i;
+  return { id: `slat${i}`, min: [x, 9.7, 4], max: [x + 0.5, 10.1, 22], mat: "wood", layer: "outdoor-living" };
+});
+
+const property = {
+  word: "LOS ANGELES",
+  target: [24, 7, 17],
+  dist: 160,
+  yaw: [-34, -14],
+  pitch: 26,
+  light: [24, 30, 52],
+  stage: 50,
+  lot: { x: [-10, 58], z: [-15, 49] },
+  order: ["site", "new-construction", "home-additions", "adu-contractor", "outdoor-living"],
+  layers: {
+    site: {},
+    "new-construction": { build: [0, 11, 0] },
+    "home-additions": { build: [0, 12, 0] },
+    "home-remodeling": {},
+    "adu-contractor": { build: [0, 9, 0] },
+    "outdoor-living": { build: [0, 9, 0] },
+  },
+  boxes: [
+    // the drive and the front walk
+    { id: "drive", min: [21, 0, -15], max: [30, 0.25, 0], mat: "deck", layer: "site" },
+    { id: "walk", min: [8, 0, -15], max: [10, 0.2, -10.5], mat: "concrete", layer: "site" },
+    // the house: its slab and walls, the side-gabled roof over the
+    // single-story wing, the porch on its piers and its own gable. In the
+    // drawing the wing is cut away: its walls stop at 5.6 ft (`section`,
+    // their tops filled dark), the rest of them, its roof and the porch's
+    // dashed (`phantom`), and the wing beside it has walls of its own.
+    { id: "hSlab", min: [0, 0, 0], max: [34, 0.8, 26], mat: "concrete", layer: "new-construction" },
+    { id: "hGround", min: [0, 0.8, 0], max: [34, 10.8, 26], mat: "siding", layer: "new-construction", renderOnly: true },
+    { id: "hGroundR", min: [17, 0.8, 0], max: [34, 10.8, 26], mat: "siding", layer: "new-construction", diagramOnly: true },
+    { id: "stubF", min: [0, 0.8, 0], max: [17, 5.6, 0.5], mat: "siding", layer: "new-construction", diagramOnly: true, section: true },
+    { id: "stubL", min: [0, 0.8, 0.5], max: [0.5, 5.6, 25.5], mat: "siding", layer: "new-construction", diagramOnly: true, section: true },
+    { id: "stubB", min: [0, 0.8, 25.5], max: [17, 5.6, 26], mat: "siding", layer: "new-construction", diagramOnly: true, section: true },
+    { id: "wallsCut", min: [0, 5.6, 0], max: [17, 10.8, 26], mat: "siding", layer: "new-construction", diagramOnly: true, phantom: true },
+    { id: "hRoof", min: [-1.5, 10.8, -2], max: [17, 17.6, 28], mat: "shingle", gable: "x", layer: "new-construction", phantom: true },
+    { id: "porch", min: [2, 0, -8.5], max: [16, 1.4, 0], mat: "concrete", layer: "new-construction" },
+    { id: "steps", min: [7.5, 0, -10.5], max: [10.5, 0.7, -8.5], mat: "concrete", layer: "new-construction" },
+    { id: "pierL", min: [2.4, 1.4, -8.2], max: [4.2, 4.4, -6.4], mat: "stone", layer: "new-construction" },
+    { id: "pierR", min: [13.8, 1.4, -8.2], max: [15.6, 4.4, -6.4], mat: "stone", layer: "new-construction" },
+    { id: "postL", min: [2.8, 4.4, -7.8], max: [3.8, 9.4, -6.8], mat: "wood", layer: "new-construction" },
+    { id: "postR", min: [14.2, 4.4, -7.8], max: [15.2, 9.4, -6.8], mat: "wood", layer: "new-construction" },
+    { id: "porchRoof", min: [1, 9.4, -9.2], max: [17, 13.8, -2], mat: "shingle", gable: "z", layer: "new-construction", phantom: true },
+    // the addition: a second story on the house, its gable to the street
+    { id: "hUpper", min: [17, 10.8, 0], max: [34, 19.8, 26], mat: "siding", layer: "home-additions" },
+    { id: "hUpperRoof", min: [16, 19.8, -1], max: [35, 25.6, 27], mat: "shingle", gable: "z", layer: "home-additions" },
+    // the remodel, inside the cut-away wing (drawing only): a living room at
+    // the front (a rug, the sofa, a table, a chair, the fireplace), the
+    // kitchen behind it (counters along two walls, an island) and a bath in
+    // the back corner (its walls, a tub, a vanity)
+    { id: "floor", min: [0.5, 0.8, 0.5], max: [17, 0.85, 25.5], mat: "floor", layer: "home-remodeling", diagramOnly: true },
+    { id: "rug", min: [2.5, 0.85, 3], max: [12.5, 0.9, 12.5], mat: "fabric", layer: "home-remodeling", diagramOnly: true },
+    { id: "sofa", min: [3, 0.9, 9.5], max: [11, 2.3, 12.3], mat: "fabric", layer: "home-remodeling", diagramOnly: true },
+    { id: "sofaBack", min: [3, 0.9, 12.3], max: [11, 3.4, 13.2], mat: "fabric", layer: "home-remodeling", diagramOnly: true },
+    { id: "table", min: [5, 0.9, 5], max: [9, 2, 7.2], mat: "wood", layer: "home-remodeling", diagramOnly: true },
+    { id: "chair", min: [12.8, 0.9, 4], max: [15.6, 2.8, 7], mat: "fabric", layer: "home-remodeling", diagramOnly: true },
+    { id: "hearth", min: [0.5, 0.85, 2], max: [2, 5.6, 6.5], mat: "stone", layer: "home-remodeling", diagramOnly: true },
+    { id: "counterB", min: [7.5, 0.85, 23.4], max: [17, 3.8, 25.5], mat: "cabinet", layer: "home-remodeling", diagramOnly: true },
+    { id: "counterR", min: [14.9, 0.85, 16.5], max: [17, 3.8, 23.4], mat: "cabinet", layer: "home-remodeling", diagramOnly: true },
+    { id: "island", min: [9.5, 0.85, 17.8], max: [13, 3.6, 20.6], mat: "counter", layer: "home-remodeling", diagramOnly: true },
+    { id: "bathWallF", min: [0.5, 0.85, 17], max: [6.9, 5.6, 17.4], mat: "drywall", layer: "home-remodeling", diagramOnly: true, section: true },
+    { id: "bathWallR", min: [6.5, 0.85, 20], max: [6.9, 5.6, 25.5], mat: "drywall", layer: "home-remodeling", diagramOnly: true, section: true },
+    { id: "tub", min: [0.5, 0.85, 20.5], max: [3.1, 2.6, 25.5], mat: "counter", layer: "home-remodeling", diagramOnly: true },
+    { id: "vanity", min: [3.8, 0.85, 23.8], max: [6.5, 3.3, 25.5], mat: "cabinet", layer: "home-remodeling", diagramOnly: true },
+    // the ADU, a matching cottage in the back corner of the yard
+    { id: "aduSlab", min: [-6, 0, 32], max: [8, 0.6, 44], mat: "concrete", layer: "adu-contractor" },
+    { id: "aduBody", min: [-6, 0.6, 32], max: [8, 9.6, 44], mat: "siding", layer: "adu-contractor" },
+    { id: "aduRoof", min: [-7, 9.6, 31], max: [9, 14.4, 45], mat: "shingle", gable: "x", layer: "adu-contractor" },
+    // beside the house: the patio under the pergola, the outdoor kitchen,
+    // the fire pit
+    { id: "patio", min: [37, 0, 3], max: [55, 0.35, 23], mat: "deck", layer: "outdoor-living" },
+    { id: "postA", min: [38, 0.35, 4], max: [38.8, 9, 4.8], mat: "wood", layer: "outdoor-living" },
+    { id: "postB", min: [53.2, 0.35, 4], max: [54, 9, 4.8], mat: "wood", layer: "outdoor-living" },
+    { id: "postC", min: [38, 0.35, 21.2], max: [38.8, 9, 22], mat: "wood", layer: "outdoor-living" },
+    { id: "postD", min: [53.2, 0.35, 21.2], max: [54, 9, 22], mat: "wood", layer: "outdoor-living" },
+    { id: "beamF", min: [37.5, 9, 4], max: [54.5, 9.7, 4.8], mat: "wood", layer: "outdoor-living" },
+    { id: "beamB", min: [37.5, 9, 21.2], max: [54.5, 9.7, 22], mat: "wood", layer: "outdoor-living" },
+    ...pergolaSlats,
+    { id: "grill", min: [47, 0.35, 18], max: [53, 3.4, 20.5], mat: "stone", layer: "outdoor-living" },
+    { id: "fire", min: [41, 0.35, 9], max: [45, 1.6, 13], mat: "stone", layer: "outdoor-living" },
+  ],
+  windows: [
+    // the wing, under the porch: windows either side of the front door
+    { box: "hGround", face: "z-", u: [0.1, 0.21], v: [0.28, 0.76] },
+    { box: "hGround", face: "z-", u: [0.244, 0.285], v: [0, 0.74] },
+    { box: "hGround", face: "z-", u: [0.32, 0.43], v: [0.28, 0.76] },
+    // the two-story wing: a row of three below, two above
+    { box: "hGround", face: "z-", u: [0.59, 0.91], v: [0.3, 0.78] },
+    { box: "hUpper", face: "z-", u: [0.14, 0.44], v: [0.3, 0.8] },
+    { box: "hUpper", face: "z-", u: [0.56, 0.86], v: [0.3, 0.8] },
+    { box: "hGround", face: "x-", u: [0.5, 0.69], v: [0.3, 0.75] },
+    { box: "hGround", face: "x-", u: [0.23, 0.38], v: [0.3, 0.75] },
+    // the ADU: its door and a window
+    { box: "aduBody", face: "z-", u: [0.12, 0.3], v: [0, 0.78] },
+    { box: "aduBody", face: "z-", u: [0.45, 0.85], v: [0.3, 0.78] },
+    { box: "aduBody", face: "x-", u: [0.3, 0.7], v: [0.35, 0.75] },
+    // in the drawing: the same windows on the walls it has in pieces, cut
+    // through on the cut-away wing (the front door too)
+    { box: "hGroundR", face: "z-", u: [0.18, 0.82], v: [0.3, 0.78] },
+    { box: "stubF", face: "z-", u: [0.2, 0.42], v: [0.58, 1] },
+    { box: "stubF", face: "z-", u: [0.49, 0.57], v: [0, 1] },
+    { box: "stubF", face: "z-", u: [0.64, 0.86], v: [0.58, 1] },
+    { box: "stubL", face: "x-", u: [0.5, 0.7], v: [0.58, 1] },
+    { box: "stubL", face: "x-", u: [0.22, 0.38], v: [0.58, 1] },
+  ],
+  lamps: [
+    { at: [43, 2.4, 11], r: 2.6, layer: "outdoor-living" },
+    { at: [42, 8.6, 13], r: 1.4, a: 0.6, layer: "outdoor-living" },
+    { at: [49, 8.6, 13], r: 1.4, a: 0.6, layer: "outdoor-living" },
+  ],
+  diagram: { yaw: -24, pitch: 34 },
+  diagramWindows: true,
+  // the numbers in the drawing: on the porch, the upper wing's gable, over
+  // the ADU, in the cut-away rooms, over the pergola
+  // new construction is the whole home: pointing at it lights everything on
+  // the lot but the ADU (the user asked, 11-12)
+  covers: { "new-construction": ["site", "new-construction", "home-additions", "home-remodeling", "outdoor-living"] },
+  marks: {
+    "new-construction": [9, 2.6, -4.6],
+    "home-additions": [25.5, 22, -1],
+    "adu-contractor": [1, 16.5, 38],
+    "home-remodeling": [8.5, 6.5, 15],
+    "outdoor-living": [46, 12.5, 13],
+  },
+};
+
+export const ASSETS = { adu, addition, remodel, outdoor, house, property };

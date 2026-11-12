@@ -21,14 +21,15 @@ const BUILD_TIME = 2400;
 // copy (`children`) sits at the bottom left as on the homepage, the object
 // beside it or above it. With Reduce Motion it comes together from half as
 // far and the camera holds still. A phone held sideways shows it with the
-// copy below, as the homepage does.
-export default function ServiceHero({ asset: key, label, children }) {
+// copy below, as the homepage does. An area page shows its street (the
+// `street` asset) with the area's name as the `word`.
+export default function ServiceHero({ asset: key, label, word, children }) {
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const copyRef = useRef(null);
 
   useEffect(() => {
-    const asset = ASSETS[key];
+    const asset = word ? { ...ASSETS[key], word: word.toUpperCase() } : ASSETS[key];
     const section = sectionRef.current;
     const canvas = canvasRef.current;
     const copy = copyRef.current;
@@ -102,7 +103,7 @@ export default function ServiceHero({ asset: key, label, children }) {
       still.removeEventListener("change", resize);
       calm.removeEventListener("change", redraw);
     };
-  }, [key]);
+  }, [key, word]);
 
   return (
     // As tall as the screen (in steady --svh, see UI/StableViewport), never

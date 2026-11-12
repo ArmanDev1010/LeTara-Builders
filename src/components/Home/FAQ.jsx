@@ -105,11 +105,11 @@ function Item({ faq, index, open, onToggle }) {
 // passes its own `faqs`, `number`, `heading` (its lines) and `intro`.
 export default function FAQ({
   faqs = FAQS,
-  number = "06",
+  number = "07",
   heading = ["Questions,", "answered."],
   intro = "Don't see yours? Ask us directly. There's no such thing as a small question when it's your home.",
 }) {
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = useState(null); // all closed at first (the user asked)
   const phone = phoneHref();
   return (
     <section id="faq" className={`${SECTION} ${LIGHT}`}>

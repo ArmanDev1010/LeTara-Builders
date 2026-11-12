@@ -2,6 +2,7 @@ import { SERVICES } from "@/data/services";
 import aduContractor from "./adu-contractor";
 import homeAdditions from "./home-additions";
 import homeRemodeling from "./home-remodeling";
+import newConstruction from "./new-construction";
 import outdoorLiving from "./outdoor-living";
 
 // One page per service (data/services.js), served at /<slug>-los-angeles
@@ -14,7 +15,7 @@ import outdoorLiving from "./outdoor-living";
 // services by slug, each with a line on why it goes with this one.
 //
 // Keep next.config.mjs' SERVICE_SLUGS in step when adding one.
-const PAGES = [aduContractor, homeAdditions, homeRemodeling, outdoorLiving];
+const PAGES = [newConstruction, homeAdditions, aduContractor, homeRemodeling, outdoorLiving];
 
 export const SERVICE_PAGES = PAGES.map((page) => {
   const service = SERVICES.find((s) => s.slug === page.slug);

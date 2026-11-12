@@ -12,7 +12,7 @@ export const BUSINESS = {
   legalName: "LeTara Builders, Inc.", // CA Secretary of State entity #6532559
   tagline: "Dream. Design. Build.",
   description:
-    "Licensed and insured design-build general contractor for ADUs, home additions, full-scale remodels and outdoor living spaces.",
+    "Licensed and insured design-build general contractor for new construction, home additions, ADUs, remodels and outdoor living spaces.",
   license: 1147978,
   // Written once as digits; the printed number and the tel: link are both
   // made from it (see phoneDisplay / phoneHref).
@@ -30,6 +30,10 @@ export const BUSINESS = {
     // world of visual effects" and "more than 200 episodes of television".
     vfxYears: 15,
     episodes: 200,
+    // From his own "Meet the contractor" graphic (Instagram), shown under
+    // his name on the About portrait.
+    titles: ["Founder, LeTara Builders & Vista Pergolas", "Licensed General Contractor"],
+    awards: ["Emmy® Award Winner", "Multiple Emmy® Nominee", "Multiple Leo Award Winner"],
   },
 };
 

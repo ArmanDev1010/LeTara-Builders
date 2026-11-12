@@ -1,10 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { TbArrowRight } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, LEDE, LIGHT, PhotoStandIn, SECTION, SectionLabel } from "@/components/Home/parts";
+import { CONTAINER, H2, LEDE, LIGHT, Lines, PhotoStandIn, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
-import QuoteButton from "@/components/Quote/QuoteButton";
 import { SERVICES } from "@/data/services";
 
 const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
@@ -13,8 +11,7 @@ const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 const CHAMFER = "[clip-path:polygon(0_0,calc(100%-22px)_0,100%_22px,100%_100%,0_100%)]";
 
 // The service's icon on a hexagon in the card's top left, dark-filled with
-// a gold edge, so it reads over a project photo as well as on the black
-// stand-in. It fills gold when the card is hovered.
+// a gold edge. It fills gold when the card is hovered.
 function ServiceIcon({ icon: Icon }) {
   return (
     <span
@@ -35,45 +32,31 @@ function ServiceIcon({ icon: Icon }) {
 }
 
 // The bento's spans: the lead card tall on the left (across the top below
-// 1080px), the second wide beside it, the other two under that.
-const SPAN = [
-  "700:col-span-2 1080:col-span-1 1080:row-span-2 min-h-[380px] 700:min-h-[340px] 1080:min-h-0",
-  "700:col-span-2 min-h-[220px] 700:min-h-[240px] 1080:min-h-0",
-  "min-h-[220px] 700:min-h-[240px] 1080:min-h-0",
-  "min-h-[220px] 700:min-h-[240px] 1080:min-h-0",
-];
+// 1080px), the other four two by two beside it (under it below 1080px).
+const LEAD = "700:col-span-2 1080:col-span-1 1080:row-span-2 min-h-[380px] 700:min-h-[340px] 1080:min-h-0";
+const CARD = "min-h-[220px] 700:min-h-[240px] 1080:min-h-0";
 
 // A service as a card that opens its page. The whole card is the link: it
-// lies over the card, under the text, and the text lets clicks through. The
-// lead card's quote button sits above it, so it still opens the quote.
+// lies over the card, under the text, and the text lets clicks through.
+// (The lead card's quote button came off on 11-10, at the user's request.)
 //
-// On hover (or the link's keyboard focus) the photo eases in closer, the
+// On hover (or the link's keyboard focus) the stand-in eases in closer, the
 // icon's hexagon and the arrow box fill gold, the arrow nudges on, the text
 // lifts a little and a gold rule draws in along the foot. With Reduce
 // Motion only the colors change and the rule fades in. The arrow box is
 // always there, so a phone shows the card opens too.
 function ServiceCard({ service, index }) {
-  const { title, kicker, blurb, text, image, icon, href, slug } = service;
+  const { title, kicker, blurb, text, icon, href, slug } = service;
   const main = index === 0;
   const titleId = `card-${slug}`;
   return (
     <Reveal
       as="li"
       delay={0.06 * index}
-      className={`service-card relative isolate overflow-hidden bg-[#0b0b0b] text-neutral-50 ${CHAMFER} ${SPAN[index]}`}
+      className={`service-card relative isolate overflow-hidden bg-[#0b0b0b] text-neutral-50 ${CHAMFER} ${index === 0 ? LEAD : CARD}`}
     >
       <div className={`pointer-events-none absolute inset-0 transition-[scale] duration-[900ms] ${EASE} motion-safe:card-on:scale-[1.05]`}>
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            fill
-            sizes={main ? "(min-width: 1080px) 42vw, 100vw" : "(min-width: 1080px) 28vw, (min-width: 700px) 50vw, 100vw"}
-            className="object-cover"
-          />
-        ) : (
-          <PhotoStandIn icon={icon} />
-        )}
+        <PhotoStandIn icon={icon} />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
       <ServiceIcon icon={icon} />
@@ -96,7 +79,7 @@ function ServiceCard({ service, index }) {
 
       <div
         className={`relative z-[2] h-full flex flex-col justify-end p-5 pt-24 700:p-7 700:pt-24 pointer-events-none transition-[translate] duration-500 ${EASE} motion-safe:card-on:-translate-y-1 ${
-          main ? "" : "pr-16 700:pr-20"
+          main ? "max-700:pr-16" : "pr-16 700:pr-20"
         }`}
       >
         <p className="font-script text-[11px] uppercase tracking-[0.2em] text-third">
@@ -111,10 +94,7 @@ function ServiceCard({ service, index }) {
           {title}
         </h3>
         {main ? (
-          <>
-            <p className="mt-3 max-w-md text-[15.5px] leading-relaxed text-white/70">{text}</p>
-            <QuoteButton className="mt-6 w-fit pointer-events-auto" />
-          </>
+          <p className="mt-3 max-w-md text-[15.5px] leading-relaxed text-white/70">{text}</p>
         ) : (
           <p className="mt-2 text-[14px] leading-snug text-white/60">{blurb}</p>
         )}
@@ -132,29 +112,34 @@ function ServiceCard({ service, index }) {
 }
 
 // What we build, on white. Design-build is the umbrella (the heading), not
-// a card: every project is designed and built by the one team. ADUs lead
-// as the big card, the other three beside it (after a bento layout the
-// user liked). Each card is a project photo with its name over it, black
-// stand-ins until there are real photos; the icon stays on either.
-export default function Services() {
+// a card: every project is designed and built by the one team. The five
+// services in Andranik's order (his yard sign), New Construction leading as
+// the big card, the other four beside it (after a bento layout the user
+// liked). Each card is black, with the service's icon large and faint in
+// its top right and on a hexagon in its top left, and its name over it (no
+// photos: the user's call, 11-11).
+// An area page passes its own `number`, `heading` (its lines) and `intro`.
+export default function Services({
+  number = "02",
+  heading = ["Design-Build,", "under one roof."],
+  intro = "Every project here is design-build: one team designs it, takes it through permits and builds it, so nothing gets lost between the drawings and the job site.",
+}) {
   return (
     <section id="services" className={`${SECTION} ${LIGHT}`}>
       <div className={CONTAINER}>
         <div className="grid gap-6 1080:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] 1080:items-end">
           <div>
             <Reveal>
-              <SectionLabel number="02" tone="light">
+              <SectionLabel number={number} tone="light">
                 What we build
               </SectionLabel>
             </Reveal>
             <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-              Design-Build, <br />
-              under one roof.
+              <Lines lines={heading} />
             </Reveal>
           </div>
           <Reveal as="p" delay={0.1} className={`${LEDE.light} max-w-xl 1080:pb-1`}>
-            Every project here is design-build: one team designs it, takes it through permits and builds it, so
-            nothing gets lost between the drawings and the job site.
+            {intro}
           </Reveal>
         </div>
 

@@ -1,16 +1,8 @@
 import "./globals.css";
 
 import { Bebas_Neue, Courier_Prime, Oswald } from "next/font/google";
-import { Toaster } from "react-hot-toast";
-import { ModalProvider } from "@/context/ModalContext";
-import MotionPreferences from "@/components/UI/MotionPreferences";
-import Footer from "@/components/Footer/Footer";
-import Navbar from "@/components/Navigation/Navbar";
-import PageTransition from "@/components/UI/PageTransition";
-import StableViewport from "@/components/UI/StableViewport";
-import QuoteModals from "@/components/Quote/QuoteModals";
 import { BUSINESS } from "@/data/business";
-import { BASE_URL, LAUNCHED, buildBusinessSchema, buildPageMetadata } from "@/lib/seo";
+import { BASE_URL, LAUNCHED, buildPageMetadata } from "@/lib/seo";
 
 // Bebas Neue is the face the logo is set in; Courier Prime is a screenplay's
 // typewriter face. Both are CSS variables (font-display / font-script in
@@ -19,7 +11,7 @@ const display = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--fon
 const script = Courier_Prime({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-courier-prime" });
 // Oswald Light: a lighter condensed face in Bebas' family of shapes (Bebas
 // has one weight), for Andranik's quote on his portrait (font-quote; the
-// user asked for it a weight lighter).
+// user's favourite of the quote's looks).
 const quote = Oswald({ weight: "300", subsets: ["latin"], variable: "--font-oswald" });
 
 // The site-wide defaults: no canonical or og:url (path: null), so a page
@@ -39,6 +31,9 @@ export const metadata = {
     : { index: false, follow: false },
 };
 
+// The page itself, for everything: the site (app/(site)/layout.js adds its
+// navbar, footer, quote dialog and page transition) and the projects editor
+// (app/keystatic), which has none of them.
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${script.variable} ${quote.variable}`}>
@@ -51,27 +46,7 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="format-detection" content="telephone=no, email=no, address=no" />
       </head>
-      <body>
-        {/* without JavaScript, show what the scroll reveals (Home/Reveal) would fade in */}
-        <noscript>
-          <style>{"[data-reveal]{opacity:1!important}"}</style>
-        </noscript>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBusinessSchema()) }}
-        />
-        <MotionPreferences>
-          <ModalProvider>
-            <Toaster position="top-center" containerStyle={{ zIndex: 100001 }} />
-            <Navbar />
-            {children}
-            <Footer />
-            <QuoteModals />
-            <PageTransition />
-          </ModalProvider>
-        </MotionPreferences>
-        <StableViewport />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

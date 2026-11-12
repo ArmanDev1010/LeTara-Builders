@@ -2,7 +2,6 @@
 // testimonials): not real clients or real reviews. Replace them with real
 // ones, with the clients' permission, before launch, and never mark them up
 // as reviews (no Review or aggregateRating schema) until they're real.
-// Photos are black stand-ins until then too.
 export const TESTIMONIALS = [
   {
     pull: "It came out exactly like the drawings.",
@@ -23,7 +22,7 @@ export const TESTIMONIALS = [
     text: "They listened more than they talked at the first visit. The design came back with ideas we hadn't thought of, and the quote matched the plans line for line.",
     name: "Karen S.",
     area: "Studio City",
-    project: "Full Remodel",
+    project: "Home Remodel",
   },
   {
     pull: "The backyard is where we live now.",
@@ -40,3 +39,16 @@ export const TESTIMONIALS = [
     project: "ADU",
   },
 ];
+
+// The rating line over the reviews. PLACEHOLDER rating and count, standing
+// in for the design until Andranik's Google Business Profile gives the real
+// ones: replace both (or set them to null, which shows the line without
+// numbers) before launch. The links work now: a Google search for the
+// reviews, and the business on Google Maps; point them at the profile itself
+// once it's set up.
+export const REVIEWS_SUMMARY = {
+  rating: 5.0,
+  count: 12,
+  readAll: "https://www.google.com/search?q=LeTara+Builders+reviews",
+  profile: "https://www.google.com/maps/search/?api=1&query=LeTara+Builders",
+};

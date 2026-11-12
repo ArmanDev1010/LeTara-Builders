@@ -111,9 +111,19 @@ export function buildFAQSchema(faqs) {
   };
 }
 
+// LeTara as the provider of a page's Service.
+function provider() {
+  const phone = phoneHref();
+  return {
+    "@type": "GeneralContractor",
+    name: BUSINESS.name,
+    url: BASE_URL,
+    ...(phone && { telephone: phone.replace("tel:", "") }),
+  };
+}
+
 // A service page's Service, provided by LeTara, in the target city.
 export function buildServiceSchema(page) {
-  const phone = phoneHref();
   return {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -121,12 +131,22 @@ export function buildServiceSchema(page) {
     serviceType: page.serviceType,
     description: page.description,
     url: `${BASE_URL}${page.href}`,
-    provider: {
-      "@type": "GeneralContractor",
-      name: BUSINESS.name,
-      url: BASE_URL,
-      ...(phone && { telephone: phone.replace("tel:", "") }),
-    },
+    provider: provider(),
     areaServed: { "@type": "City", name: "Los Angeles" },
+  };
+}
+
+// An area page's Service: design-build, provided by LeTara, in that area
+// (a neighborhood of Los Angeles, or a city of its own).
+export function buildAreaSchema(page) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: page.metaTitle,
+    serviceType: "Design-build construction",
+    description: page.description,
+    url: `${BASE_URL}${page.href}`,
+    provider: provider(),
+    areaServed: { "@type": "Place", name: `${page.name}, CA` },
   };
 }

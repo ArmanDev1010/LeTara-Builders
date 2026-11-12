@@ -1,0 +1,11 @@
+title: "Kitchen and living room remodel"
+services:
+  - home-remodeling
+location:
+  discriminant: studio-city
+status: finished
+summary: "A closed-off kitchen opened to the living room, with an island, new cabinets and new light."
+description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nA wall came out between the kitchen and the living room, with a new beam to carry the roof, and the wiring and plumbing were brought up to code while the walls were open."
+gallery: []
+featured: false
+sample: true

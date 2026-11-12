@@ -5,9 +5,10 @@ import { BUSINESS, phoneDisplay, phoneHref } from "@/data/business";
 // The copy over a drawn hero (the homepage's and a service page's), laid out
 // like HB Links' hero: on a service page the trail back (`crumbs`, each
 // { label, href }, the page itself last), the title over two lines (`title`),
-// the credentials, a line about the work (`lede`), and the buttons: the
-// quote request first, then the phone, stacked full width on a phone.
-export default function HeroCopy({ crumbs, title, lede }) {
+// the credentials (ending with the page's `place`: Los Angeles, or an area
+// page's area), a line about the work (`lede`), and the buttons: the quote
+// request first, then the phone, stacked full width on a phone.
+export default function HeroCopy({ crumbs, title, lede, place = "Los Angeles" }) {
   const phone = phoneHref();
   return (
     <div className="max-w-4xl">
@@ -55,7 +56,7 @@ export default function HeroCopy({ crumbs, title, lede }) {
           </>
         )}
         <span className="text-third 700:text-2xl text-xl">/</span>
-        <span>Los Angeles</span>
+        <span>{place}</span>
       </p>
 
       <p className="550:mt-6 mt-6 font-light max-w-2xl text-neutral-200 text-[15px] 700:text-base 900:text-[17px] pointer-events-none">

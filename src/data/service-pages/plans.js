@@ -7,6 +7,25 @@
 const STREET = { t: "text", x: 120, y: 155, label: "STREET" };
 const LOT = { t: "lot", x: 16, y: 10, w: 208, h: 132 };
 
+// new construction: what the lot starts as (an `old` house is dashed), and
+// the new home in gold
+export const NEW_PLANS = {
+  custom: [LOT, { t: "new", x: 52, y: 40, w: 136, h: 74, label: "NEW HOME" }, { t: "text", x: 120, y: 28, label: "EMPTY LOT, BUILT ON" }, STREET],
+  rebuild: [
+    LOT,
+    { t: "old", x: 70, y: 74, w: 100, h: 46, label: "OLD HOUSE" },
+    { t: "new", x: 46, y: 30, w: 148, h: 70, label: "NEW HOME" },
+    STREET,
+  ],
+  loss: [
+    LOT,
+    { t: "old", x: 56, y: 40, w: 128, h: 74 },
+    { t: "new", x: 62, y: 46, w: 116, h: 62, label: "REBUILT" },
+    { t: "text", x: 120, y: 28, label: "THE SAME FOOTPRINT, OR NEW" },
+    STREET,
+  ],
+};
+
 export const ADU_PLANS = {
   detached: [
     LOT,

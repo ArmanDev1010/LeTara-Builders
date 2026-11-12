@@ -1,0 +1,12 @@
+title: "Garage conversion and kitchen"
+services:
+  - adu-contractor
+  - home-remodeling
+location:
+  discriminant: van-nuys
+status: finished
+summary: "The garage turned into a small home of its own, and the main house's kitchen remodeled at the same time."
+description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nTwo projects under one contract: a garage conversion into an ADU with its own kitchen and bath, and a new kitchen in the house."
+gallery: []
+featured: false
+sample: true

@@ -1,9 +1,13 @@
+import { areaPageHref } from "@/lib/routes";
+
 // Where LeTara builds: the navbar's Service Areas menu and the homepage's
 // service-areas section (whose map shows the one picked). Los Angeles is
 // the target city, first and wide everywhere it's listed, as on HB Links,
-// and its map shows the whole city (`zoom`). The rest are placeholders in
-// the Valley until Andranik confirms where he works; deliberately not HB
-// Links' list (see CLAUDE.md).
+// and its map shows the whole city (`zoom`); its page is the homepage. Every
+// other area has a page of its own (data/area-pages) at
+// /design-build-contractor-<slug>. The rest are placeholders in the Valley
+// until Andranik confirms where he works; deliberately not HB Links' list
+// (see CLAUDE.md).
 export const SERVICE_AREAS = [
   { name: "Los Angeles", zoom: 10 },
   { name: "North Hills" },
@@ -14,4 +18,7 @@ export const SERVICE_AREAS = [
   { name: "Studio City" },
   { name: "Burbank" },
   { name: "Glendale" },
-].map((area) => ({ zoom: 12, ...area, href: "/#service-areas" }));
+].map((area) => {
+  const slug = area.name.toLowerCase().replaceAll(" ", "-");
+  return { zoom: 12, ...area, slug, href: area.zoom === 10 ? "/" : areaPageHref(slug) };
+});

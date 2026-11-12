@@ -1,7 +1,7 @@
 import { REMODEL_PLANS } from "./plans";
 
 // The remodeling page, /home-remodeling-los-angeles: kitchens, bathrooms and
-// whole houses on one page (LeTara's "Full Remodels"; HB Links splits
+// whole houses on one page (LeTara's "Home Remodels"; HB Links splits
 // kitchens and baths out). What its answers say about permits is the
 // building code's (finish work needs none; walls, plumbing, wiring and gas
 // do). No claims about LeTara's certifications, prices or durations until
@@ -148,6 +148,7 @@ const homeRemodeling = {
   ],
 
   related: [
+    { slug: "new-construction", note: "When a remodel would touch every room, a knock-down rebuild is worth pricing too." },
     { slug: "home-additions", note: "If the house needs more room, not just better rooms, an addition can be planned with the remodel." },
     { slug: "outdoor-living", note: "Opening the kitchen to the yard? A patio, pergola or outdoor kitchen can be planned with it." },
     { slug: "adu-contractor", note: "Converting the garage or building out back can add the room a remodel can't." },

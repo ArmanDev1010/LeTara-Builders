@@ -1,277 +1,162 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
-import { TbStarFilled } from "react-icons/tb";
+import { FcGoogle } from "react-icons/fc";
+import { TbArrowUpRight, TbStarFilled } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
-import { TESTIMONIALS } from "@/data/testimonials";
+import { CONTAINER, H2, LEDE, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
+import { HEX } from "@/components/Navigation/HexButton";
+import { REVIEWS_SUMMARY, TESTIMONIALS } from "@/data/testimonials";
 
-const SPEED = 28; // px a second the film runs at
-const CALM_RATE = 0.5; // with Reduce Motion it runs at half that
-const COPIES = 3; // the reel, written out enough times to cover a wide screen as it wraps
-const HOLD_MS = 2500; // after a drag or a swipe, the wait before the film runs on
+// A cut corner, top right, as on the services cards (the navbar's points).
+const CHAMFER = "[clip-path:polygon(0_0,calc(100%-18px)_0,100%_18px,100%_100%,0_100%)]";
 
-function Frame({ review, index }) {
-  const { pull, text, name, area, project } = review;
+function Stars({ className = "" }) {
   return (
-    <li className="film-frame shrink-0 flex flex-col border-l border-white/10 px-7 700:px-9 py-9 pointer-events-none">
-      <div className="flex items-center justify-between gap-4">
-        <span className="font-script text-[11px] uppercase tracking-[0.2em] text-white/40">
-          Frame {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="flex gap-0.5 text-third" aria-label="5 out of 5">
-          {Array.from({ length: 5 }, (_, i) => (
-            <TbStarFilled key={i} aria-hidden="true" className="text-[13px]" />
-          ))}
-        </span>
-      </div>
-      <blockquote className="mt-6 flex-1">
-        <p className="font-display uppercase text-[26px] 700:text-[28px] leading-[1] tracking-[0.01em] text-neutral-50">
-          “{pull}”
-        </p>
-        <p className="mt-4 text-[15px] leading-relaxed text-white/60">{text}</p>
-      </blockquote>
-      <div className="mt-7 flex items-center gap-3.5">
-        {/* their photo, black until there are real ones */}
-        <span aria-hidden="true" className="w-11 h-11 shrink-0 rounded-full bg-black border border-white/15" />
-        <span>
-          <span className="block text-[15px] font-semibold text-neutral-50">{name}</span>
-          <span className="block mt-0.5 font-script text-[11px] uppercase tracking-[0.12em] text-white/45">
-            {area} · {project}
-          </span>
-        </span>
-      </div>
-    </li>
+    <span className={`flex gap-0.5 text-third ${className}`} aria-hidden="true">
+      {Array.from({ length: 5 }, (_, i) => (
+        <TbStarFilled key={i} />
+      ))}
+    </span>
   );
 }
 
-// Testimonials as a strip of film running edge to edge across the white:
-// each review a frame, with the sprocket holes punched through above and
-// below. The film runs on its own, slowly and without end: the reel is
-// written out three times, and each time it has run one reel's length it
-// steps back by exactly that, onto the same frame, so the seam never shows.
-// Each frame is a whole number of sprocket holes wide (.film-frame) so the
-// holes line up across the wrap too.
-//
-// The running is a Web Animation of the track's transform, one reel long and
-// repeating, which the browser plays off the main thread, so it stays smooth
-// on a phone. Its time is the film's position: a drag or a fling pauses it
-// and sets that time by hand, and when the film runs on it carries on from
-// there.
-//
-// It can be dragged or swiped either way (a fling glides on), after which
-// it waits a moment before running on. No buttons and no stopping on hover
-// (the user's call). It stops while it's off screen. With Reduce Motion it
-// runs at half the speed and a swipe doesn't glide on: calmer, but it still
-// runs, because the user's own iPhone has Reduce Motion on, and on HB Links
-// they reported testimonials that didn't move there as broken.
-//
-// The film's own px and the screen's can differ: on a big screen the section
-// is zoomed (wide-zoom, globals.css). Its reel is measured and moved in its
-// own px; pointer and wheel distances, in the screen's, are divided by
-// `scale` to match.
-//
-// The reviews are placeholders for now (data/testimonials.js).
-export default function Testimonials() {
-  const headRef = useRef(null);
-  const viewRef = useRef(null);
-  const trackRef = useRef(null);
-  const calm = useReducedMotion();
-  const calmRef = useRef(false);
-  const updateRef = useRef(null);
+const initials = (name) =>
+  name
+    .split(/[\s&]+/)
+    .filter((part) => /^[A-Za-z]/.test(part))
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
 
-  useEffect(() => {
-    calmRef.current = !!calm;
-    updateRef.current?.();
-  }, [calm]);
-
-  useEffect(() => {
-    const view = viewRef.current;
-    const track = trackRef.current;
-
-    let reel = 0; // one copy of the reel's width (the film's px)
-    let scale = 1; // screen px per film px
-    let run = null; // the running film (a Web Animation)
-    let glide = 0; // what's left of a swipe's speed, px a second
-    let drag = null;
-    let visible = false;
-    let holdUntil = 0;
-    let holdTimer = 0;
-    let raf = 0;
-    let last = 0;
-
-    const wrap = (v) => (reel ? ((v % reel) + reel) % reel : v);
-    // how far the film has run, in px within one reel, and setting it
-    const at = () => wrap(((run?.currentTime ?? 0) / 1000) * SPEED);
-    const seek = (x) => {
-      if (run) run.currentTime = (wrap(x) / SPEED) * 1000;
-    };
-
-    // it runs while it's on screen, unless held: dragged, gliding or just
-    // let go; slower with Reduce Motion
-    const update = () => {
-      if (!run) return;
-      run.playbackRate = calmRef.current ? CALM_RATE : 1;
-      const go = visible && !drag && !glide && performance.now() >= holdUntil;
-      if (go && run.playState !== "running") run.play();
-      if (!go && run.playState === "running") run.pause();
-    };
-    updateRef.current = update;
-    const hold = () => {
-      holdUntil = performance.now() + HOLD_MS;
-      clearTimeout(holdTimer);
-      holdTimer = setTimeout(update, HOLD_MS);
-      update();
-    };
-
-    const measure = () => {
-      if (view.offsetWidth) scale = view.getBoundingClientRect().width / view.offsetWidth || 1;
-      const width = track.querySelector("ol")?.getBoundingClientRect().width / scale;
-      if (!width || width === reel) return;
-      let x;
-      if (run) {
-        x = (at() / reel) * width; // the same place in the resized reel
-        run.cancel();
-      } else {
-        // the first time, frame one starts on the page's left gutter
-        const head = headRef.current;
-        x =
-          -(head.getBoundingClientRect().left - view.getBoundingClientRect().left) / scale -
-          parseFloat(getComputedStyle(head).paddingLeft);
-      }
-      reel = width;
-      run = track.animate([{ transform: "translate3d(0,0,0)" }, { transform: `translate3d(${-reel}px,0,0)` }], {
-        duration: (reel / SPEED) * 1000,
-        iterations: Infinity,
-      });
-      run.pause();
-      seek(x);
-      update();
-    };
-
-    // a fling coasting to a stop
-    const coast = (now) => {
-      const dt = Math.min(0.05, Math.max(0, now - last) / 1000);
-      last = now;
-      seek(at() + glide * dt);
-      glide *= 0.03 ** dt;
-      if (Math.abs(glide) < 8) {
-        glide = 0;
-        raf = 0;
-        hold();
-      } else {
-        raf = requestAnimationFrame(coast);
-      }
-    };
-
-    const onDown = (e) => {
-      if (e.button !== 0 || !run) return;
-      cancelAnimationFrame(raf);
-      raf = 0;
-      glide = 0;
-      const x = e.clientX / scale;
-      drag = { id: e.pointerId, startX: x, from: at(), lastX: x, lastT: e.timeStamp, speed: 0 };
-      update();
-      view.setPointerCapture(e.pointerId);
-    };
-    const onMove = (e) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      const x = e.clientX / scale;
-      seek(drag.from - (x - drag.startX));
-      const dt = e.timeStamp - drag.lastT;
-      if (dt > 0) drag.speed = 0.8 * (((drag.lastX - x) / dt) * 1000) + 0.2 * drag.speed;
-      drag.lastX = x;
-      drag.lastT = e.timeStamp;
-    };
-    const onUp = (e) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      // a swipe carries on a little and slows to a stop
-      const fling = e.type === "pointerup" && !calmRef.current && e.timeStamp - drag.lastT < 80;
-      glide = fling ? Math.max(-2400, Math.min(2400, drag.speed)) : 0;
-      drag = null;
-      if (glide) {
-        last = performance.now();
-        raf = requestAnimationFrame(coast);
-      } else {
-        hold();
-      }
-    };
-    // a sideways swipe on a trackpad moves the film; an up-and-down one
-    // scrolls the page as usual
-    const onWheel = (e) => {
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || !run) return;
-      e.preventDefault();
-      cancelAnimationFrame(raf);
-      raf = 0;
-      glide = 0;
-      seek(at() + e.deltaX / scale);
-      hold();
-    };
-
-    view.addEventListener("pointerdown", onDown);
-    view.addEventListener("pointermove", onMove);
-    view.addEventListener("pointerup", onUp);
-    view.addEventListener("pointercancel", onUp);
-    view.addEventListener("wheel", onWheel, { passive: false });
-
-    // it only runs while it's on screen
-    const seen = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      update();
-    });
-    seen.observe(view);
-    const resized = new ResizeObserver(measure);
-    resized.observe(view);
-    measure();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(holdTimer);
-      run?.cancel();
-      updateRef.current = null;
-      seen.disconnect();
-      resized.disconnect();
-      view.removeEventListener("pointerdown", onDown);
-      view.removeEventListener("pointermove", onMove);
-      view.removeEventListener("pointerup", onUp);
-      view.removeEventListener("pointercancel", onUp);
-      view.removeEventListener("wheel", onWheel);
-    };
-  }, []);
-
+// One review: five gold stars, the pull quote in the logo's face, the
+// review, and who wrote it on a gold hexagon with their initials, the
+// project and the city. `compact` (the phone's rows) is smaller, and cuts a
+// long review to five lines so the rows stay short.
+function Review({ review, compact }) {
+  const { pull, text, name, area, project } = review;
   return (
-    <section id="reviews" className={`${SECTION} ${LIGHT} overflow-hidden`}>
-      <div ref={headRef} className={CONTAINER}>
-        <Reveal>
-          <SectionLabel number="04" tone="light">
-            In their words
-          </SectionLabel>
-        </Reveal>
-        <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
-          Reviews from <br />
-          the homes we&apos;ve built.
-        </Reveal>
+    <figure className={`relative w-full h-full bg-white ${compact ? "p-5" : "p-6"} ${CHAMFER}`}>
+      {/* a gold edge along the cut corner */}
+      <span aria-hidden="true" className="absolute top-0 left-[calc(100%-18px)] w-[25px] h-[1.5px] bg-third origin-left rotate-45" />
+      <Stars className="text-[15px]" />
+      <blockquote className="mt-4">
+        <p className={`font-display uppercase ${compact ? "text-[20px]" : "text-[23px]"} leading-[1.02] tracking-[0.01em] text-neutral-950`}>{pull}</p>
+        <p className={`mt-3 leading-relaxed text-black/60 ${compact ? "text-[14px] line-clamp-5" : "text-[14.5px]"}`}>{text}</p>
+      </blockquote>
+      <figcaption className={`${compact ? "mt-4" : "mt-5"} flex items-center gap-3 border-t border-black/10 pt-4`}>
+        <span aria-hidden="true" className="relative grid place-items-center w-9 h-[41px] shrink-0 text-third">
+          <svg viewBox="0 0 40 46" className="absolute inset-0 w-full h-full">
+            <polygon points={HEX} fill="none" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
+          <span className="relative font-script text-[11px] font-bold text-neutral-950">{initials(name)}</span>
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[14.5px] font-semibold text-neutral-950">{name}</span>
+          <span className="block font-script text-[10.5px] uppercase tracking-[0.16em] text-black/45">
+            {project} · {area}
+          </span>
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
+// A run of reviews, written out twice and moved by a CSS animation one copy's
+// length and back to the start, so it never ends; the compositor runs it, so
+// it stays smooth on a phone. The space after each review is its own padding,
+// so a copy is exactly half the run. `run` is the keyframes (globals.css),
+// `time` how long one copy takes.
+function Run({ reviews, run, time, compact, className }) {
+  return (
+    <div style={{ "--run": run, "--time": `${time}s` }} className={`review-run ${className}`}>
+      {[0, 1].map((copy) =>
+        reviews.map((review) => (
+          <div key={`${copy}-${review.name}`} aria-hidden={copy === 1 || undefined} className="review-item">
+            <Review review={review} compact={compact} />
+          </div>
+        )),
+      )}
+    </div>
+  );
+}
+
+// What clients say, on white: the heading, a line, and the rating on Google
+// with links to the reviews, all under the heading (11-10, the user asked),
+// then a black canvas across the whole width with the white reviews moving
+// inside it (the user asked for that too), several in view at once (HB Links shows one at a
+// time): three columns drifting up and down at their own pace on a wide
+// screen, fading into the black at the top and bottom, and two rows sliding
+// opposite ways on a phone, running off the screen's edges. Nothing to press and no stopping on hover, as with the film
+// strip this replaced (the user's call). Reduce Motion runs it at half speed.
+//
+// The reviews and the rating are placeholders (data/testimonials.js).
+export default function Testimonials({ number = "04" }) {
+  const { rating, count, readAll, profile } = REVIEWS_SUMMARY;
+  const shift = (k) => [...TESTIMONIALS.slice(k), ...TESTIMONIALS.slice(0, k)];
+  const link =
+    "group inline-flex items-center gap-1 text-[14.5px] font-semibold text-neutral-950 underline decoration-third decoration-2 underline-offset-[5px] hover:text-black/60 transition-colors duration-200";
+  return (
+    <section id="testimonials" className={`${SECTION} ${LIGHT} overflow-hidden`}>
+      <div className={CONTAINER}>
+        <div className="max-w-2xl">
+          <Reveal>
+            <SectionLabel number={number} tone="light">
+              What clients say
+            </SectionLabel>
+          </Reveal>
+          <Reveal as="h2" delay={0.05} className={`mt-5 ${H2}`}>
+            Built for homeowners, <br />
+            in their own words.
+          </Reveal>
+          <Reveal as="p" delay={0.1} className={`mt-5 ${LEDE.light} max-w-xl`}>
+            From the first site visit to the final walkthrough, here&apos;s what building with us is like, from the people
+            we&apos;ve built for.
+          </Reveal>
+
+          {/* the rating, on Google, and the way to the reviews */}
+          <Reveal delay={0.15} className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-5">
+            <div className="flex items-center gap-3.5 pointer-events-none">
+              <span className="grid place-items-center w-12 h-12 shrink-0 rounded-full border border-black/10 bg-white">
+                <FcGoogle aria-hidden="true" className="text-[26px]" />
+              </span>
+              <span>
+                <span className="flex items-center gap-2.5">
+                  {rating ? <span className="font-display text-[30px] leading-none tracking-[0.02em] text-neutral-950">{rating.toFixed(1)}</span> : null}
+                  <Stars className="text-[16px]" />
+                </span>
+                <span className="block mt-1 text-[13.5px] text-black/55">
+                  {count ? `${count} reviews on Google` : "Reviews on Google"}
+                </span>
+              </span>
+            </div>
+            <span aria-hidden="true" className="max-550:hidden h-11 w-px bg-black/10" />
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <a href={readAll} target="_blank" rel="noopener noreferrer" className={link}>
+                Read all reviews
+                <TbArrowUpRight aria-hidden="true" className="text-third" />
+              </a>
+              <a href={profile} target="_blank" rel="noopener noreferrer" className={link}>
+                See us on Google
+                <TbArrowUpRight aria-hidden="true" className="text-third" />
+              </a>
+            </div>
+          </Reveal>
+        </div>
       </div>
 
-      <Reveal delay={0.1} className="mt-10 1080:mt-12 bg-[#0a0a0a] text-neutral-50">
-        <div ref={viewRef} className="overflow-hidden touch-pan-y select-none cursor-grab active:cursor-grabbing">
-          <div ref={trackRef} className="relative flex w-max py-8 will-change-transform">
-            <span aria-hidden="true" className="film-holes absolute inset-x-0 top-3 h-3 pointer-events-none" />
-            <span aria-hidden="true" className="film-holes absolute inset-x-0 bottom-3 h-3 pointer-events-none" />
-            {Array.from({ length: COPIES }, (_, copy) => (
-              <ol
-                key={copy}
-                aria-label={copy === 0 ? "Reviews" : undefined}
-                aria-hidden={copy > 0 ? true : undefined}
-                className="flex"
-              >
-                {TESTIMONIALS.map((review, i) => (
-                  <Frame key={review.name} review={review} index={i} />
-                ))}
-              </ol>
-            ))}
+      {/* the black canvas the reviews move in, edge to edge */}
+      <Reveal delay={0.1} className="relative mt-12 1080:mt-14 overflow-hidden bg-[#0a0a0a] pointer-events-none">
+        <span aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(233,166,72,0.1),transparent_70%)]" />
+        {/* columns on a wide screen, as wide as the page's content */}
+        <div className={`${CONTAINER} max-700:hidden`}>
+          <div className="relative h-[640px] grid grid-cols-2 1080:grid-cols-3 gap-4 [mask-image:linear-gradient(to_bottom,transparent,#000_14%,#000_86%,transparent)]">
+            <Run reviews={TESTIMONIALS} run="review-up" time={46} className="flex flex-col [&>.review-item]:pb-4" />
+            <Run reviews={shift(2)} run="review-down" time={54} className="flex flex-col [&>.review-item]:pb-4" />
+            <Run reviews={shift(4)} run="review-up" time={50} className="max-1080:hidden flex flex-col [&>.review-item]:pb-4" />
           </div>
+        </div>
+        {/* rows on a phone, across the whole width */}
+        <div className="700:hidden relative grid gap-3 py-6">
+          <Run reviews={TESTIMONIALS} run="review-left" time={46} compact className="flex w-max [&>.review-item]:w-[284px] [&>.review-item]:pr-3" />
+          <Run reviews={shift(2)} run="review-right" time={52} compact className="flex w-max [&>.review-item]:w-[284px] [&>.review-item]:pr-3" />
         </div>
       </Reveal>
     </section>

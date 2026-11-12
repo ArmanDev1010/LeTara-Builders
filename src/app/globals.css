@@ -150,20 +150,137 @@
   padding-top: 0;
 }
 
-/* Sprocket holes along a strip of film (the homepage testimonials): white
-   rounded squares every 26px, punched through to the white section behind. */
-.film-holes {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='12'%3E%3Crect x='7' width='12' height='12' rx='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: 26px 12px;
+/* The tighter spacing sections had before 11-10 (80px, 112px from 1080px),
+   kept where the user asked (11-10): above the first section after a hero,
+   and around a section with a background of its own (`.section-dark`, black
+   on the white page: the contact form, the service pages' areas), on its
+   own padding and on the sides of its neighbours that face it. Everywhere
+   else sections take SECTION's roomier padding (components/Home/parts.jsx). */
+:root {
+  --section-pad-tight: 5rem;
+}
+@media (min-width: 1080px) {
+  :root {
+    --section-pad-tight: 7rem;
+  }
+}
+#hero + section,
+.section-dark,
+.section-dark + section {
+  padding-top: var(--section-pad-tight);
+}
+.section-dark,
+section:has(+ .section-dark) {
+  padding-bottom: var(--section-pad-tight);
 }
 
-/* A frame of that film: a whole number of holes wide, so the reel is too and
-   the holes line up again when the running film wraps around. Browsers
-   without round() get the plain width. */
-.film-frame {
-  width: min(84vw, 442px);
-  width: min(round(84vw, 26px), 442px);
+/* The homepage's wall of reviews (components/Home/Testimonials): each run is
+   written out twice and moves one copy's length (half the run), then starts
+   over where it began, so it never ends. `--run` names the direction and
+   `--time` how long one copy takes. A CSS animation of transform only, so
+   the compositor runs it and it stays smooth on a phone. With "reduce
+   motion" it runs at half speed: calmer, but still moving (the user's
+   iPhone has it on, and a still wall looked broken on HB Links). */
+.review-run {
+  animation: var(--run) var(--time) linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .review-run {
+    animation-duration: calc(var(--time) * 2);
+  }
+}
+@keyframes review-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+@keyframes review-down {
+  from {
+    transform: translate3d(0, -50%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes review-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@keyframes review-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* The phone menu's dropdowns (components/Navigation/MobileMenu): as one opens
+   (its height opening on the element itself), its rows fade and rise in one
+   after another; as it closes they fade out together, quickly. With "reduce
+   motion" they only fade, still one after another. */
+.menu-drop li,
+.menu-drop .menu-drop-more {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.menu-drop[data-open] li,
+.menu-drop[data-open] .menu-drop-more {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.45s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0.06s;
+}
+.menu-drop[data-open] li:nth-child(2) { transition-delay: 0.11s; }
+.menu-drop[data-open] li:nth-child(3) { transition-delay: 0.16s; }
+.menu-drop[data-open] li:nth-child(4) { transition-delay: 0.21s; }
+.menu-drop[data-open] li:nth-child(5) { transition-delay: 0.26s; }
+.menu-drop[data-open] li:nth-child(6) { transition-delay: 0.31s; }
+.menu-drop[data-open] li:nth-child(7) { transition-delay: 0.36s; }
+.menu-drop[data-open] li:nth-child(8) { transition-delay: 0.41s; }
+.menu-drop[data-open] li:nth-child(n + 9) { transition-delay: 0.46s; }
+.menu-drop[data-open] .menu-drop-more { transition-delay: 0.5s; }
+@media (prefers-reduced-motion: reduce) {
+  .menu-drop li,
+  .menu-drop .menu-drop-more {
+    transform: none;
+  }
+}
+
+/* The projects page's cards (components/Projects/ProjectsBrowser): they rise
+   in as the filters change. Transform and opacity only; with "reduce
+   motion" they only fade. */
+.project-in {
+  animation: project-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes project-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-in {
+    animation-name: project-fade;
+  }
+}
+@keyframes project-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 /* "Reduce motion" turns smooth scrolling into a plain jump. */

@@ -1,0 +1,11 @@
+title: "Second-story addition"
+services:
+  - home-additions
+location:
+  discriminant: burbank
+status: finished
+summary: "A second story with two bedrooms and a bath over a single-story house, the yard kept as it was."
+description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nThe family needed more bedrooms without giving up the yard. We checked the foundation and the zoning first, then designed the second story to match the house below."
+gallery: []
+featured: false
+sample: true

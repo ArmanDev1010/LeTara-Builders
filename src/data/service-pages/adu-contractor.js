@@ -159,6 +159,7 @@ const aduContractor = {
   ],
 
   related: [
+    { slug: "new-construction", note: "Building a new main house too? The ADU can be designed and built with it." },
     { slug: "home-additions", note: "Not sure whether to build an ADU or add on to the house? We'll look at both on the same visit." },
     { slug: "outdoor-living", note: "Finish the yard around the new unit with a patio or pergola while the crew is already there." },
     { slug: "home-remodeling", note: "Updating the main house too? It can be remodeled while the ADU goes up." },

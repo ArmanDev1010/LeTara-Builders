@@ -8,7 +8,7 @@ import { MotionConfig } from "framer-motion";
 // promise this ("turning off or toning down"). What carries meaning plays a
 // calmer version instead of nothing, because the user's own iPhone has
 // Reduce Motion on: the homepage intro (Hero/HeroIntro), the hero timelapse
-// (HeroBuildSequence) and the testimonials film (Home/Testimonials, at half
+// (HeroBuildSequence) and the testimonials wall (Home/Testimonials, at half
 // speed). The scroll reveals (Home/Reveal) and the page transition's line
 // are CSS and tone themselves down.
 export default function MotionPreferences({ children }) {

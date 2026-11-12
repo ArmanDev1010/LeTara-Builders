@@ -147,6 +147,7 @@ const homeAdditions = {
   ],
 
   related: [
+    { slug: "new-construction", note: "If the house needs more than an addition can give, building new may be the better route." },
     { slug: "adu-contractor", note: "If the new space is for a parent, a grown child or a tenant, an ADU gives them their own front door." },
     { slug: "home-remodeling", note: "Opening up the house to meet the addition? The rooms around it can be remodeled at the same time." },
     { slug: "outdoor-living", note: "Adding on at the back? Plan the patio or deck the new rooms open onto at the same time." },

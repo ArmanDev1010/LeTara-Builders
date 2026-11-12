@@ -24,19 +24,20 @@ export default function Home() {
               Design-Build Contractor <br /> in <span className="italic">Los Angeles.</span>
             </>
           }
-          lede="One team from the first sketch to the final walkthrough: ADUs, home additions, full-scale remodels and outdoor living spaces."
+          lede="One team from the first sketch to the final walkthrough: new construction, home additions, ADUs, remodels and outdoor living spaces."
         />
       </HeroIntro>
 
-      {/* the rest of the story, in the order the sections read best: who,
-          what, how, who says so, where, what else, then the form to close */}
+      {/* the rest of the story, in the user's order (11-10): who, what, how,
+          who says so, then the form, where we build (on white, after the black
+          form) and the questions last */}
       <About />
       <Services />
       <Process />
       <Testimonials />
-      <ServiceAreas />
-      <FAQ />
       <Contact />
+      <ServiceAreas tone="light" />
+      <FAQ />
     </main>
   );
 }

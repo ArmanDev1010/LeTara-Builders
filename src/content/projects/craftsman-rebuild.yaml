@@ -1,0 +1,11 @@
+title: "Craftsman rebuild"
+services:
+  - new-construction
+location:
+  discriminant: los-angeles
+status: in-progress
+summary: "A new Craftsman-style home in place of a house that had reached the end of its life."
+description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nThe old house came down and a new two-story home is going up on the same lot, designed to its zoning."
+gallery: []
+featured: false
+sample: true

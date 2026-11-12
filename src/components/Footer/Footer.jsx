@@ -11,6 +11,7 @@ const EXPLORE = [
   { label: "Services", href: "/#services" },
   { label: "How we work", href: "/#process" },
   { label: "Service Areas", href: "/#service-areas" },
+  { label: "Projects", href: "/projects" },
   { label: "FAQ", href: "/#faq" },
   { label: "Get a free quote", href: "/#contact" },
 ];
@@ -121,11 +122,12 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-black/10 flex flex-col 1080:flex-row 1080:items-center 1080:justify-between gap-5 text-black/50">
+        {/* centered under each other on a phone (the user asked), in a row from 1080px */}
+        <div className="mt-10 pt-6 border-t border-black/10 flex flex-col items-center text-center 1080:flex-row 1080:items-center 1080:justify-between 1080:text-left gap-5 text-black/50">
           <p className="font-script text-[11px] uppercase tracking-[0.16em] pointer-events-none">
             © {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px]">
             {LEGAL.map(({ label, href }) => (
               <li key={href}>
                 <Link href={href} className="hover:text-black transition-colors duration-200">

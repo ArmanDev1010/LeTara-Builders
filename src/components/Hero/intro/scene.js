@@ -24,7 +24,7 @@
 // as fractions of the screen: `copyTop` (where the copy starts), `copyRight`
 // and `titleRight` (how far right its text and its headline reach), and
 // `navZoom` (how much the navbar has grown on a big screen). `calm` is the
-// Reduce Motion version: the camera holds still, the pieces start a little
+// Reduce Motion version: the camera circles without pushing in, the pieces start a little
 // closer together, nothing flashes. `idle` (seconds)
 // keeps the dust drifting and the pool shimmering once the scene has
 // finished. `lite` (phones and tablets) draws the light shafts smaller and in
@@ -260,6 +260,10 @@ const dreamCorners = (t, calm) => PIECES.flatMap((q) => edges(moved(q.box, offse
 // ---- drawing order -----------------------------------------------------------
 // Far to near, for boxes that don't overlap: wherever two are apart along an
 // axis and the camera is past one of them on it, that one is the nearer.
+// When two axes disagree (apart along x and along z, say, with the camera
+// on the near side of each on one of them), neither can hide the other, so
+// the pair sets no order: forcing one made loops on the area pages' home
+// (11-12), and the loop's fallback drew a roof over the wing in front of it.
 // Pairs that can't be told apart this way keep their distance order.
 export function drawOrder(list, eye) {
   const n = list.length;
@@ -268,16 +272,19 @@ export function drawOrder(list, eye) {
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const A = list[i], B = list[j];
+      let near = -1, clash = false;
       for (let k = 0; k < 3; k++) {
-        let near = -1;
-        if (A.max[k] <= B.min[k] + 1e-6) near = eye[k] > B.min[k] ? j : eye[k] < A.max[k] ? i : -1;
-        else if (B.max[k] <= A.min[k] + 1e-6) near = eye[k] > A.min[k] ? i : eye[k] < B.max[k] ? j : -1;
-        if (near < 0) continue;
-        const far = near === i ? j : i;
-        after[far].push(near);
-        indegree[near]++;
-        break;
+        let v = -1;
+        if (A.max[k] <= B.min[k] + 1e-6) v = eye[k] > B.min[k] ? j : eye[k] < A.max[k] ? i : -1;
+        else if (B.max[k] <= A.min[k] + 1e-6) v = eye[k] > A.min[k] ? i : eye[k] < B.max[k] ? j : -1;
+        if (v < 0) continue;
+        if (near >= 0 && v !== near) clash = true;
+        near = v;
       }
+      if (near < 0 || clash) continue;
+      const far = near === i ? j : i;
+      after[far].push(near);
+      indegree[near]++;
     }
   }
   const dist = list.map((b) => {
@@ -305,16 +312,16 @@ export function drawOrder(list, eye) {
 // ---- camera ----------------------------------------------------------------
 // It circles the house, looking at the middle of it from DIST feet: from its
 // left (the pergola) round to its right (the ADU), a little lower as it
-// goes, already moving at the first scroll (`orbitEase`). With `calm` it
-// holds one angle. The view is fitted into the room the copy leaves (see
+// goes, already moving at the first scroll (`orbitEase`), with Reduce Motion
+// on too (`calm`). The view is fitted into the room the copy leaves (see
 // room), the same size all the way round, and pushes in a little as the
 // scene plays (not with `calm`). In DREAM it also takes in the pieces where
-// they hang, closing in as they land.
+// they hang, closing in as they land (not with `calm`: no zoom).
 const TARGET = [2, 7, -2];
 const DIST = 135;
 const ORBIT = {
-  desktop: { yaw: [-38, 20], pitch: [17, 11], calm: [-10, 14] },
-  portrait: { yaw: [-30, 14], pitch: [24, 18], calm: [-8, 21] },
+  desktop: { yaw: [-38, 20], pitch: [17, 11] },
+  portrait: { yaw: [-30, 14], pitch: [24, 18] },
 };
 const PUSH_IN = 0.06;
 
@@ -385,8 +392,20 @@ const EXTENT = (() => {
   const out = {};
   for (const [key, orbit] of Object.entries(ORBIT)) {
     const e = [Infinity, Infinity, -Infinity, -Infinity];
-    const views = [...Array.from({ length: 25 }, (_, i) => angles(orbit, i / 24)), orbit.calm];
+    const views = Array.from({ length: 25 }, (_, i) => angles(orbit, i / 24));
     for (const [yaw, pitch] of views) extentOf(view(yaw, pitch).project, pts, e);
+    out[key] = e;
+  }
+  return out;
+})();
+// With `calm`, the house and the pieces where they start, from every angle,
+// so the camera can circle without the view zooming as they land.
+const CALM_EXTENT = (() => {
+  const pts = dreamCorners(0, true);
+  const out = {};
+  for (const [key, orbit] of Object.entries(ORBIT)) {
+    const e = [...EXTENT[key]];
+    for (let i = 0; i <= 24; i++) extentOf(view(...angles(orbit, i / 24)).project, pts, e);
     out[key] = e;
   }
   return out;
@@ -461,13 +480,15 @@ function headlineTop(ctx, { top, size, line }, fonts) {
 function camera(width, height, portrait, t, calm, box) {
   const orbit = ORBIT[portrait ? "portrait" : "desktop"];
   const k = orbitEase(clamp(t / T.settle));
-  const [yaw, pitch] = calm ? orbit.calm : angles(orbit, k);
+  // it circles with Reduce Motion on too (the user's iPhone has it on, and a
+  // still camera read as nothing happening), with no push-in or zoom
+  const [yaw, pitch] = angles(orbit, k);
   const { eye, project } = view(yaw, pitch);
   // the house, and in DREAM the pieces where they hang (with `calm`, where
-  // they start, so it doesn't zoom)
+  // they start, from every angle, so it doesn't zoom)
   const whole = EXTENT[portrait ? "portrait" : "desktop"];
   const e = calm
-    ? extentOf(project, dreamCorners(0, true), [...whole])
+    ? CALM_EXTENT[portrait ? "portrait" : "desktop"]
     : apart(t) > 0
       ? extentOf(project, dreamCorners(t, false), [...whole])
       : whole;

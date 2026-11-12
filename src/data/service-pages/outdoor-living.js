@@ -161,6 +161,7 @@ const outdoorLiving = {
   ],
 
   related: [
+    { slug: "new-construction", note: "Building a new home? Design the yard with it from the start." },
     { slug: "home-remodeling", note: "Opening the kitchen to the yard? A remodel and an outdoor kitchen can be planned as one." },
     { slug: "adu-contractor", note: "Building an ADU out back? We can design the yard around it." },
     { slug: "home-additions", note: "A new family room or kitchen addition can open straight onto the patio we build." },
