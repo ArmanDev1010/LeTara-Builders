@@ -1,0 +1,24 @@
+title: ADU Build In Los Angeles
+services:
+  - adu-contractor
+  - new-construction
+  - home-remodeling
+location:
+  discriminant: los-angeles
+status: finished
+year: 2026
+summary: >-
+  This is a sample project, a placeholder while the site is built. It's hidden
+  once the site launches; replace it with a real project in the projects editor.
+description: >-
+  The homeowners wanted a place for a parent to live close by. We designed a
+  one-bedroom ADU that fits the lot's setbacks, took it through the permits and
+  built it, with its utilities run from the main house.
+cover: /images/projects/adu-build-in-los-angeles/cover.avif
+gallery:
+  - image: /images/projects/adu-build-in-los-angeles/gallery/0/image.avif
+  - image: /images/projects/adu-build-in-los-angeles/gallery/1/image.avif
+  - image: /images/projects/adu-build-in-los-angeles/gallery/2/image.avif
+  - image: /images/projects/adu-build-in-los-angeles/gallery/3/image.jpg
+featured: true
+sample: false

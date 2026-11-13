@@ -1,11 +1,20 @@
-title: "Backyard ADU"
+title: Backyard ADU
 services:
   - adu-contractor
 location:
   discriminant: glendale
 status: finished
-summary: "A detached ADU in the backyard, with its own entrance, kitchen and bath, built behind the main house."
-description: "This is a sample project, a placeholder while the site is built. It's hidden once the site launches; replace it with a real project in the projects editor.\n\nThe homeowners wanted a place for a parent to live close by. We designed a one-bedroom ADU that fits the lot's setbacks, took it through the permits and built it, with its utilities run from the main house."
+summary: >-
+  A detached ADU in the backyard, with its own entrance, kitchen and bath, built
+  behind the main house.
+description: >-
+  This is a sample project, a placeholder while the site is built. It's hidden
+  once the site launches; replace it with a real project in the projects editor.
+
+
+  The homeowners wanted a place for a parent to live close by. We designed a
+  one-bedroom ADU that fits the lot's setbacks, took it through the permits and
+  built it, with its utilities run from the main house.
 gallery: []
-featured: true
+featured: false
 sample: true
