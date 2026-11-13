@@ -29,9 +29,15 @@ export default function ProjectsPage({ projects }) {
 
   return (
     <main>
-      <section id="hero" className="relative overflow-hidden bg-[#030303] text-neutral-50">
+      {/* One screen tall, never more (the user, 11-12): the screen's height
+          through --svh (StableViewport), at least 560px, the words centred
+          below the navbar and a size smaller on short windows (`short:`, as
+          the quote dialog) so they always fit. wide-zoom is on the words
+          only, never on the screen-sized box (see "Big screens"). */}
+      <section id="hero" className="relative flex flex-col justify-center h-[calc(100*var(--svh))] min-h-[560px] overflow-hidden bg-[#030303] text-neutral-50">
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_15%_0%,rgba(233,166,72,0.16),transparent_70%)]" />
-        <div className={`${CONTAINER} wide-zoom relative pt-36 pb-16 700:pt-44 700:pb-20 1080:pt-48 1080:pb-24`}>
+        <div className={`${CONTAINER} relative pt-24 pb-10 700:pt-28 700:pb-12`}>
+          <div className="wide-zoom">
           <nav aria-label="Breadcrumb" className="font-script text-[11px] uppercase tracking-[0.2em] text-white/50">
             <Link href="/" className="hover:text-third transition-colors duration-200">
               Home
@@ -41,7 +47,7 @@ export default function ProjectsPage({ projects }) {
             </span>
             <span className="text-third pointer-events-none">Projects</span>
           </nav>
-          <h1 className="mt-6 font-display uppercase leading-[0.92] tracking-[0.01em] text-[48px] 400:text-[56px] 700:text-[76px] 1080:text-[92px] 1440:text-[104px] pointer-events-none">
+          <h1 className="mt-6 font-display uppercase leading-[0.92] tracking-[0.01em] text-[48px] 400:text-[56px] 700:text-[76px] 1080:text-[92px] 1440:text-[104px] short:700:text-[64px] short:1080:text-[76px] short:1440:text-[80px] pointer-events-none">
             Our projects <br />
             across <span className="italic whitespace-nowrap">Los Angeles.</span>
           </h1>
@@ -51,10 +57,10 @@ export default function ProjectsPage({ projects }) {
               : "Our projects are on their way to this page: new homes, additions, ADUs, remodels and outdoor living spaces we've designed and built."}
           </p>
           {projects.length > 0 && (
-            <dl className="mt-12 700:mt-16 grid grid-cols-3 max-w-2xl border-t border-white/10 pointer-events-none">
+            <dl className="mt-12 700:mt-16 short:700:mt-10 grid grid-cols-3 max-w-2xl border-t border-white/10 pointer-events-none">
               {stats.map(([value, label], i) => (
-                <div key={label} className={`pt-6 ${i ? "pl-5 700:pl-8 border-l border-white/10" : ""}`}>
-                  <dd className="font-display leading-none text-[48px] 700:text-[72px] text-transparent [-webkit-text-stroke:1.5px_rgba(233,166,72,0.85)]">
+                <div key={label} className={`pt-6 short:700:pt-5 ${i ? "pl-5 700:pl-8 border-l border-white/10" : ""}`}>
+                  <dd className="font-display leading-none text-[48px] 700:text-[72px] short:700:text-[56px] text-transparent [-webkit-text-stroke:1.5px_rgba(233,166,72,0.85)]">
                     {String(value).padStart(2, "0")}
                   </dd>
                   <dt className="mt-3 font-script text-[11px] uppercase tracking-[0.2em] text-white/55">{label}</dt>
@@ -62,6 +68,7 @@ export default function ProjectsPage({ projects }) {
               ))}
             </dl>
           )}
+          </div>
         </div>
       </section>
 

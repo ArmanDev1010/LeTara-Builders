@@ -56,7 +56,8 @@
 /* Windows short for the quote dialog (a laptop, once the browser's bars take
    their share): its spacing tightens, so the tallest step, the visit
    calendar, fits without scrolling wherever it can (the user asked to see
-   the whole step). Only the dialog and its form use it. */
+   the whole step). The dialog and its form use it, and the projects page's
+   hero, a size smaller so it fits one screen (11-12). */
 @custom-variant short {
   @media (max-height: 760px) {
     @slot;

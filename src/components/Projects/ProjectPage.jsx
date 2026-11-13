@@ -23,15 +23,18 @@ export default function ProjectPage({ project, more }) {
 
   return (
     <main>
-      {/* the hero; its height follows the screen through --svh (StableViewport) */}
-      <section id="hero" className="relative h-[calc(78*var(--svh))] min-h-[520px] max-h-[900px] overflow-hidden bg-[#030303] text-neutral-50">
+      {/* the hero; its height follows the screen through --svh (StableViewport).
+          wide-zoom is on the words only, never on the screen-sized box: on
+          a big screen it would grow past the photo (see "Big screens") */}
+      <section id="hero" className="relative flex flex-col justify-end h-[calc(78*var(--svh))] min-h-[520px] max-h-[900px] overflow-hidden bg-[#030303] text-neutral-50">
         {project.cover ? (
           <Image src={project.cover} alt={`${project.title}${project.city ? `, ${project.city}` : ""}`} fill priority sizes="100vw" className="object-cover" />
         ) : (
           <PhotoStandIn icon={services[0]?.icon} />
         )}
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30" />
-        <div className={`${CONTAINER} wide-zoom relative h-full flex flex-col justify-end pb-12 700:pb-16`}>
+        <div className={`${CONTAINER} relative pb-12 700:pb-16`}>
+          <div className="wide-zoom">
           <nav aria-label="Breadcrumb" className="font-script text-[11px] uppercase tracking-[0.2em] text-white/60">
             <Link href="/" className="hover:text-third transition-colors duration-200">
               Home
@@ -67,6 +70,7 @@ export default function ProjectPage({ project, more }) {
               ))}
             </ul>
           )}
+          </div>
         </div>
       </section>
 
