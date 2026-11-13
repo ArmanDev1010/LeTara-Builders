@@ -2,12 +2,14 @@ import { collection, config, fields } from "@keystatic/core";
 import { SERVICE_AREAS } from "@/data/areas";
 import { SERVICES } from "@/data/services";
 
-// The projects editor (Keystatic): a form at /keystatic for adding a project
-// without touching code. Each project is saved as one file in
-// src/content/projects (<slug>.yaml) and its photos in
-// public/images/projects/<slug>/; the site reads them (lib/projects.js) and
-// builds the projects page, each project's page, and the projects sections
-// on the service and area pages that match it.
+// The site's editor (Keystatic): forms at /keystatic for adding projects and
+// reviews without touching code.
+//   Projects: one file each in src/content/projects (<slug>.yaml), photos in
+//     public/images/projects/<slug>/; the site reads them (lib/projects.js)
+//     and builds the projects page, each project's page, and the projects
+//     sections on the service and area pages that match it.
+//   Reviews: one file each in src/content/reviews (<slug>.yaml); the
+//     homepage's reviews section reads them (lib/reviews.js).
 //
 // The choices come from the site's own lists, so they always match it: the
 // services from data/services.js, the cities from data/areas.js (plus
@@ -95,6 +97,50 @@ export default config({
         sample: fields.checkbox({
           label: "Sample (made up)",
           description: "A placeholder used while building the site, marked \"Sample\" on it and hidden once the site launches. Delete the samples when the real projects are in.",
+          defaultValue: false,
+        }),
+      },
+    }),
+    reviews: collection({
+      label: "Reviews",
+      slugField: "name",
+      path: "src/content/reviews/*",
+      format: { data: "yaml" },
+      columns: ["name"],
+      schema: {
+        name: fields.slug({
+          name: {
+            label: "Client's name",
+            description: "As they're happy to have it shown, e.g. \"Daniel R.\" or \"Maria & Joe T.\".",
+          },
+          slug: { label: "File name", description: "Made from the name; it isn't shown on the site." },
+        }),
+        headline: fields.text({
+          label: "Headline",
+          description: "Optional. A short line from the review, in the client's own words, shown large at the top of the card, e.g. \"It came out exactly like the drawings.\"",
+          validation: { length: { max: 80 } },
+        }),
+        review: fields.text({
+          label: "Review",
+          description: "What they wrote, word for word.",
+          multiline: true,
+          validation: { length: { min: 1, max: 700 } },
+        }),
+        stars: fields.select({
+          label: "Stars",
+          options: ["5", "4", "3", "2", "1"].map((n) => ({ label: `${n} stars`, value: n })),
+          defaultValue: "5",
+        }),
+        service: fields.select({
+          label: "Project",
+          description: "Optional. What we built for them.",
+          options: [{ label: "Don't show", value: "" }, ...SERVICES.map(({ title, slug }) => ({ label: title, value: slug }))],
+          defaultValue: "",
+        }),
+        city: fields.text({ label: "City", description: "Optional. Where the project was, e.g. \"Granada Hills\"." }),
+        sample: fields.checkbox({
+          label: "Sample (made up)",
+          description: "A placeholder used while building the site. Samples show only until the first real review is added, and never once the site launches.",
           defaultValue: false,
         }),
       },

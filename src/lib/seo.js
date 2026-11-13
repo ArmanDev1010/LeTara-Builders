@@ -64,6 +64,14 @@ export function buildBusinessSchema() {
     logo: `${BASE_URL}/images/brand/letara-logo.png`,
     ...(phone && { telephone: phone.replace("tel:", "") }),
     ...(BUSINESS.email && { email: BUSINESS.email }),
+    ...(BUSINESS.hours && {
+      openingHoursSpecification: {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: BUSINESS.hours.days,
+        opens: BUSINESS.hours.opens,
+        closes: BUSINESS.hours.closes,
+      },
+    }),
     address: {
       "@type": "PostalAddress",
       addressLocality: BUSINESS.address.locality,

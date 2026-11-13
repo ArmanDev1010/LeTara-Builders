@@ -22,8 +22,8 @@ function LegalLink({ slug, children }) {
 // often, the cost, and how to stop. It registers as `smsConsent`; the API
 // route stamps the time and the lead notification says whether texting is
 // allowed. Keep the wording in step with the SMS Terms and the Privacy
-// Policy's text-message section (not built yet — the links below 404 until
-// they are) and with the A2P campaign registration.
+// Policy's text-message section (data/legal) and with the A2P campaign
+// registration.
 // `dark` sets the text for a dark background (the quote dialog).
 export function SmsConsent({ register, dark = false, className = "" }) {
   return (

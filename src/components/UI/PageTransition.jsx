@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import Logo from "@/components/UI/Logo";
+import { LEGAL_PAGES } from "@/data/legalPages";
 
 // Between pages, a gold line opens into the wall, like a projector's
 // shutter: a thin gold line (the site's gold rule) draws across the middle
@@ -23,9 +24,10 @@ import Logo from "@/components/UI/Logo";
 //
 // It takes over clicks on links to other pages of the site (any <a>, so
 // next/link everywhere): covers first, then navigates. New tabs, other
-// sites, files, links within the page, and Back/Forward are left alone. A
-// link to one of the homepage's sections (/#services) that this page also
-// has scrolls to this page's own instead: once there are service or area
+// sites, files, links within the page, Back/Forward, and links from one
+// legal page to another (their switcher; a quiet change, as on HB Links)
+// are left alone. A link to one of the homepage's sections (/#services)
+// that this page also has scrolls to this page's own instead: once there are service or area
 // pages with their own sections, "Services" on one stays on it. With
 // "reduce motion" on it plays the same, a quarter slower: the user's iPhone
 // has it on, and the fade it used to get there read as the lines missing.
@@ -39,6 +41,8 @@ const AFTER = 0.15; // the way back starts once the logo has faded
 const MIN_SHUT_MS = 250; // the wall stays shut at least this long, so the logo reads
 const IMAGE_WAIT_MS = 700; // the longest it waits for the new page's hero image
 const MAX_WAIT_MS = 10000; // opens anyway if the page never arrives
+
+const LEGAL_PATHS = new Set(LEGAL_PAGES.map(({ slug }) => `/${slug}`));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -97,6 +101,8 @@ export default function PageTransition() {
           return;
         }
       }
+      // from one legal page to another: next/link, no wall
+      if (LEGAL_PATHS.has(url.pathname) && LEGAL_PATHS.has(window.location.pathname)) return;
       // the same page (or a section of it): no wall
       if (url.pathname === window.location.pathname && url.search === window.location.search)
         return;

@@ -1,10 +1,10 @@
 import { BsInstagram } from "react-icons/bs";
-import { TbCertificate, TbMapPin, TbPhone } from "react-icons/tb";
+import { TbCertificate, TbClock, TbMail, TbMapPin, TbPhone } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
 import EstimateForm from "@/components/Quote/EstimateForm";
-import { BUSINESS, phoneDisplay, phoneHref } from "@/data/business";
+import { BUSINESS, emailHref, hoursDisplay, phoneDisplay, phoneHref } from "@/data/business";
 
 const instagramHandle = BUSINESS.instagram?.match(/instagram\.com\/([^/?]+)/)?.[1];
 
@@ -12,6 +12,8 @@ const instagramHandle = BUSINESS.instagram?.match(/instagram\.com\/([^/?]+)/)?.[
 // ones (null in data/business.js) are left out.
 const LINES = [
   phoneHref() && { icon: TbPhone, label: "Call", value: phoneDisplay(), href: phoneHref(), big: true },
+  BUSINESS.email && { icon: TbMail, label: "Email", value: BUSINESS.email, href: emailHref() },
+  BUSINESS.hours && { icon: TbClock, label: "Hours", value: hoursDisplay() },
   instagramHandle && { icon: BsInstagram, label: "Instagram", value: `@${instagramHandle}`, href: BUSINESS.instagram, external: true },
   { icon: TbMapPin, label: "Building across", value: "Los Angeles, CA" },
   BUSINESS.license && { icon: TbCertificate, label: "Licensed & insured", value: `CSLB #${BUSINESS.license}` },
@@ -30,7 +32,7 @@ function Line({ icon: Icon, label, value, href, big, external }) {
         <span className="block font-script text-[11px] uppercase tracking-[0.18em] text-white/45">{label}</span>
         <span
           className={`block mt-1 transition-colors duration-200 ${
-            big ? "font-display text-[30px] leading-none tracking-[0.02em]" : "text-[16px] font-medium"
+            big ? "font-display text-[30px] leading-none tracking-[0.02em]" : "text-[16px] font-medium break-words"
           } ${href ? "text-neutral-50 group-hover:text-third" : "text-neutral-50"}`}
         >
           {value}

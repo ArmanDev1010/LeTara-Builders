@@ -1,54 +1,14 @@
-// PLACEHOLDERS, written for the pitch (the user asked for dummy
-// testimonials): not real clients or real reviews. Replace them with real
-// ones, with the clients' permission, before launch, and never mark them up
-// as reviews (no Review or aggregateRating schema) until they're real.
-export const TESTIMONIALS = [
-  {
-    pull: "It came out exactly like the drawings.",
-    text: "We'd been told our lot was too tight for an ADU. They walked it with us, found a layout that worked and handled the plans and permits. What got built matches what we signed off on, down to the windows.",
-    name: "Daniel R.",
-    area: "Granada Hills",
-    project: "ADU",
-  },
-  {
-    pull: "Calm, clear and on top of every detail.",
-    text: "Adding a second story while we lived in the house sounded like a nightmare. Andranik's team kept us in the loop every week and left the site clean every day. The kids barely noticed the crew.",
-    name: "Maria & Joe T.",
-    area: "Porter Ranch",
-    project: "Home Addition",
-  },
-  {
-    pull: "Our kitchen finally works the way we cook.",
-    text: "They listened more than they talked at the first visit. The design came back with ideas we hadn't thought of, and the quote matched the plans line for line.",
-    name: "Karen S.",
-    area: "Studio City",
-    project: "Home Remodel",
-  },
-  {
-    pull: "The backyard is where we live now.",
-    text: "A pergola, an outdoor kitchen and a new patio. They coordinated all of it, from the gas line to the lighting, and finished when they said they would.",
-    name: "Arthur H.",
-    area: "Burbank",
-    project: "Outdoor Living",
-  },
-  {
-    pull: "One team, start to finish. No finger-pointing.",
-    text: "Having the same people design it and build it made all the difference. When something came up on site, it got solved that day instead of bouncing between offices.",
-    name: "Lilit A.",
-    area: "Glendale",
-    project: "ADU",
-  },
-];
-
-// The rating line over the reviews. PLACEHOLDER rating and count, standing
-// in for the design until Andranik's Google Business Profile gives the real
-// ones: replace both (or set them to null, which shows the line without
-// numbers) before launch. The links work now: a Google search for the
-// reviews, and the business on Google Maps; point them at the profile itself
-// once it's set up.
+// The reviews themselves are added in the editor (/keystatic → Reviews; see
+// lib/reviews.js). This is the line over them for a Google Business Profile:
+// the Google "G", the rating, the count, and links to the reviews and the
+// profile. LeTara has no profile yet (11-13), so it's all null and the line
+// isn't shown. Once the profile exists, fill in its link (`profile`), its
+// reviews link (`readAll`), and, from the profile itself, the rating and the
+// count (a null rating or count shows the line without that number). Never
+// put the rating in the structured data unless those reviews are on the page.
 export const REVIEWS_SUMMARY = {
-  rating: 5.0,
-  count: 12,
-  readAll: "https://www.google.com/search?q=LeTara+Builders+reviews",
-  profile: "https://www.google.com/maps/search/?api=1&query=LeTara+Builders",
+  rating: null,
+  count: null,
+  readAll: null,
+  profile: null,
 };

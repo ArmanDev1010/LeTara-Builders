@@ -2,7 +2,8 @@ import Link from "next/link";
 import { CONTAINER, HexDot } from "@/components/Home/parts";
 import QuoteButton from "@/components/Quote/QuoteButton";
 import Logo from "@/components/UI/Logo";
-import { BUSINESS, phoneDisplay, phoneHref } from "@/data/business";
+import { BUSINESS, emailHref, hoursDisplay, phoneDisplay, phoneHref } from "@/data/business";
+import { LEGAL_PAGES } from "@/data/legalPages";
 import { SERVICES } from "@/data/services";
 
 const EXPLORE = [
@@ -16,13 +17,8 @@ const EXPLORE = [
   { label: "Get a free quote", href: "/#contact" },
 ];
 
-// The same pages the forms' consent text links to (components/UI/
-// FormConsent); they 404 until the legal pages are built.
-const LEGAL = [
-  { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms of Service", href: "/terms-of-service" },
-  { label: "SMS Terms", href: "/sms-terms" },
-];
+// the legal pages (data/legalPages.js)
+const LEGAL = LEGAL_PAGES.map(({ label, slug }) => ({ label, href: `/${slug}` }));
 
 const heading = "font-script text-[11px] uppercase tracking-[0.2em] text-black/45 pointer-events-none";
 const link = "text-[15px] text-black/65 hover:text-black transition-colors duration-200";
@@ -90,6 +86,13 @@ export default function Footer() {
                   </a>
                 </li>
               )}
+              {BUSINESS.email && (
+                <li>
+                  <a href={emailHref()} className={`${link} break-words`}>
+                    {BUSINESS.email}
+                  </a>
+                </li>
+              )}
               {BUSINESS.instagram && (
                 <li>
                   <a href={BUSINESS.instagram} target="_blank" rel="noopener noreferrer" className={link}>
@@ -100,6 +103,7 @@ export default function Footer() {
               <li className="text-[15px] text-black/65 pointer-events-none">
                 Los Angeles, CA
               </li>
+              {BUSINESS.hours && <li className="text-[15px] text-black/65 pointer-events-none">{hoursDisplay()}</li>}
             </ul>
             <p className={`mt-9 ${heading}`}>Credentials</p>
             <ul className="mt-5 space-y-2 text-[14px] text-black/55 pointer-events-none">
@@ -122,8 +126,9 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* centered under each other on a phone (the user asked), in a row from 1080px */}
-        <div className="mt-10 pt-6 border-t border-black/10 flex flex-col items-center text-center 1080:flex-row 1080:items-center 1080:justify-between 1080:text-left gap-5 text-black/50">
+        {/* centered under each other on a phone (the user asked), in a row from
+            1280px: with five legal links, 1080px was too narrow for one line */}
+        <div className="mt-10 pt-6 border-t border-black/10 flex flex-col items-center text-center 1280:flex-row 1280:items-center 1280:justify-between 1280:text-left gap-5 text-black/50">
           <p className="font-script text-[11px] uppercase tracking-[0.16em] pointer-events-none">
             © {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
