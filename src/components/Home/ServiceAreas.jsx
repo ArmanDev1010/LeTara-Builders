@@ -25,9 +25,9 @@ const CARD_CROP = 140;
 // Where we build, laid out like HB Links' section (in LeTara's
 // own design): the heading and a line about it, the areas (data/areas.js,
 // placeholders for now) in a grid, then the map across the foot, under a
-// bar naming the city it shows. Los Angeles, the target city, leads, wide
+// bar naming the place it shows. Los Angeles County, the target, leads, wide
 // on a phone and on a wide screen. Pick a city and the map goes to it; it
-// opens on Los Angeles. A service page passes its own `number`, `heading`
+// opens on the county. A service page passes its own `number`, `heading`
 // (its lines) and `intro`.
 //
 // `tone="light"` puts the section on white (the homepage, 11-10: after the
@@ -50,19 +50,19 @@ const TONES = {
 };
 
 // `initial` names the area the map opens on (an area page's own); the bar
-// over the map links to the picked area's page, unless it's this page or Los
-// Angeles (whose page is the homepage).
+// over the map links to the picked area's page, unless it's this page or the
+// county (whose page is the homepage).
 export default function ServiceAreas({
   number = "06",
   tone = "dark",
   initial,
-  heading = ["Building across", "Los Angeles."],
+  heading = ["Building across", "Los Angeles County."],
   intro = "From the Valley to the hills around it. Pick a city to see it on the map, and if yours isn't here, ask: we may still build there.",
 }) {
   const [active, setActive] = useState(() => Math.max(0, SERVICE_AREAS.findIndex(({ name }) => name === initial)));
   const area = SERVICE_AREAS[active];
   const pathname = usePathname();
-  const pageLink = area.zoom !== 10 && area.href !== pathname;
+  const pageLink = !area.home && area.href !== pathname;
   const c = TONES[tone];
   return (
     <section id="service-areas" className={`${SECTION} ${c.section}`}>
@@ -121,7 +121,7 @@ export default function ServiceAreas({
                   <TbArrowRight aria-hidden="true" className="text-[13px] transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
               ) : (
-                <span className="max-700:hidden shrink-0 text-white/35">Los Angeles County</span>
+                !area.home && <span className="max-700:hidden shrink-0 text-white/35">Los Angeles County</span>
               )}
             </div>
             <div className="p-2">

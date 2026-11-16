@@ -7,10 +7,10 @@ import { ADDITION_PLANS } from "./plans";
 const homeAdditions = {
   slug: "home-additions",
   title: "Home Additions",
-  metaTitle: "Home Additions Contractor in Los Angeles",
+  metaTitle: "Home Additions Contractor in Los Angeles County",
   serviceType: "Home additions",
   description:
-    "Second stories, room additions and bump-outs in Los Angeles, designed, permitted and built by one licensed design-build team. Free on-site quote.",
+    "Second stories, room additions and bump-outs in Los Angeles County, designed, permitted and built by one licensed design-build team. Free on-site quote.",
   asset: "addition",
   assetLabel: "A second-story addition on a one-story house",
   hero: "More room without moving: a second story, a new wing, or a bigger kitchen or bedroom. We design the addition to look like it was always there, take it through permits and build it.",
@@ -106,16 +106,16 @@ const homeAdditions = {
   },
 
   areas: {
-    heading: ["Additions across", "Los Angeles."],
+    heading: ["Additions across", "Los Angeles County."],
     intro:
-      "We build additions throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
+      "We build additions throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
   },
 
   faqHeading: ["Addition questions,", "answered."],
   faqIntro: "What homeowners ask most before adding on. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does a home addition cost in Los Angeles?",
+      question: "How much does a home addition cost in Los Angeles County?",
       answer:
         "It depends on the size, whether it goes up or out, what the existing structure needs and the finishes. A second story usually costs more than the same room on the ground, because of the engineering and the work on the house below it. We price your addition after seeing the house. {{Get a free quote}}",
     },

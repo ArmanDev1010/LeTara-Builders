@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CONTAINER, HexDot } from "@/components/Home/parts";
 import QuoteButton from "@/components/Quote/QuoteButton";
 import Logo from "@/components/UI/Logo";
-import { BUSINESS, emailHref, hoursDisplay, phoneDisplay, phoneHref } from "@/data/business";
+import { BUSINESS, emailHref, phoneDisplay, phoneHref } from "@/data/business";
 import { LEGAL_PAGES } from "@/data/legalPages";
 import { SERVICES } from "@/data/services";
 
@@ -12,7 +12,6 @@ const EXPLORE = [
   { label: "Services", href: "/#services" },
   { label: "How we work", href: "/#process" },
   { label: "Service Areas", href: "/#service-areas" },
-  { label: "Projects", href: "/projects" },
   { label: "FAQ", href: "/#faq" },
   { label: "Get a free quote", href: "/#contact" },
 ];
@@ -101,9 +100,8 @@ export default function Footer() {
                 </li>
               )}
               <li className="text-[15px] text-black/65 pointer-events-none">
-                Los Angeles, CA
+                Los Angeles County, CA
               </li>
-              {BUSINESS.hours && <li className="text-[15px] text-black/65 pointer-events-none">{hoursDisplay()}</li>}
             </ul>
             <p className={`mt-9 ${heading}`}>Credentials</p>
             <ul className="mt-5 space-y-2 text-[14px] text-black/55 pointer-events-none">

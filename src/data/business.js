@@ -19,15 +19,10 @@ export const BUSINESS = {
   phone: "+1 (747) 677-1517", // confirmed by the user, 11-13
   // For now (the user, 11-13); they will confirm it with Andranik.
   email: "andranik@letarabuilders.com",
-  // Every day, 9 AM to 5 PM (the user, 11-13). Shown with the ways to reach
-  // us and in the schema (openingHoursSpecification); see hoursDisplay.
-  hours: {
-    days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    opens: "09:00",
-    closes: "17:00",
-  },
+  // No opening hours on the site or in the schema: Andranik asked for them
+  // to come off (11-16).
   // The SOS filing's principal office: in the schema's address only. The
-  // page names no office town, only Los Angeles, the target city (the
+  // page names no office town, only Los Angeles County, the target (the
   // user's call); whether to show a street address is still to decide.
   address: { locality: "North Hills", region: "CA", country: "US" },
   instagram: "https://www.instagram.com/letarabuilders/",
@@ -55,19 +50,6 @@ export function phoneDisplay(digits = BUSINESS.phone) {
 // "mailto:andranik@…", or null while there is no email
 export function emailHref(email = BUSINESS.email) {
   return email ? `mailto:${email}` : null;
-}
-
-// "09:00" -> "9 AM", "17:30" -> "5:30 PM"
-function clock(hhmm) {
-  const [h, m] = hhmm.split(":").map(Number);
-  return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "AM" : "PM"}`;
-}
-
-// { days: all seven, opens: "09:00", closes: "17:00" } -> "Every day, 9 AM – 5 PM"
-export function hoursDisplay(hours = BUSINESS.hours) {
-  if (!hours) return null;
-  const days = hours.days.length === 7 ? "Every day" : hours.days.map((d) => d.slice(0, 3)).join(", ");
-  return `${days}, ${clock(hours.opens)} – ${clock(hours.closes)}`;
 }
 
 // "8180000000" -> "tel:+18180000000"

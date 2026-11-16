@@ -90,7 +90,7 @@ export function ServicesPanel({ onNavigate, onQuote }) {
 export function AreasPanel({ onNavigate }) {
   return (
     <div className="w-[410px] py-3">
-      <p className={`${label} px-6 pt-2 pb-3`}>Serving Los Angeles</p>
+      <p className={`${label} px-6 pt-2 pb-3`}>Serving Los Angeles County</p>
       <ul className="grid grid-cols-2 px-3">
         {SERVICE_AREAS.map(({ name, href }) => (
           <li key={name} className="first:col-span-2">

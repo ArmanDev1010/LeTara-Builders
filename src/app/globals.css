@@ -261,29 +261,6 @@ section:has(+ .section-dark) {
   }
 }
 
-/* The projects page's cards (components/Projects/ProjectsBrowser): they rise
-   in as the filters change. Transform and opacity only; with "reduce
-   motion" they only fade. */
-.project-in {
-  animation: project-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes project-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 14px, 0);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .project-in {
-    animation-name: project-fade;
-  }
-}
-@keyframes project-fade {
-  from {
-    opacity: 0;
-  }
-}
-
 /* The legal pages' text (components/Legal/LegalPage, data/legal): body text
    with room to read, typewriter subheadings, gold markers and underlines.
    Not clickable, its links excepted (the site's rule). */

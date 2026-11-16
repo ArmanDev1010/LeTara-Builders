@@ -11,7 +11,7 @@ import { buildBusinessSchema } from "@/lib/seo";
 // The website around a page: the navbar, the footer, the quote dialog and
 // thank-you (mounted once here), the page transition, the business schema.
 // Used by the site's layout (app/(site)/layout.js) and the 404 page
-// (app/not-found.js), which sits outside it; the projects editor
+// (app/not-found.js), which sits outside it; the reviews editor
 // (app/keystatic) has none of it.
 export default function SiteShell({ children }) {
   return (

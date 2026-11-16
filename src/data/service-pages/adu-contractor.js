@@ -8,10 +8,10 @@ import { ADU_PLANS } from "./plans";
 const aduContractor = {
   slug: "adu-contractor",
   title: "ADU Contractor",
-  metaTitle: "ADU Contractor in Los Angeles, CA",
+  metaTitle: "ADU Contractor in Los Angeles County",
   serviceType: "Accessory dwelling unit construction",
   description:
-    "Detached, attached and junior ADUs in Los Angeles, designed, permitted and built by one licensed design-build team. Free on-site quote.",
+    "Detached, attached and junior ADUs in Los Angeles County, designed, permitted and built by one licensed design-build team. Free on-site quote.",
   asset: "adu",
   assetLabel: "A modern backyard ADU",
   hero: "A second home on your lot: detached, attached, or made from the garage or a part of the house you already have. We find what your lot allows, design it, take it through permits and build it, as one team.",
@@ -72,7 +72,7 @@ const aduContractor = {
     label: "ADU types",
     heading: ["Which ADU", "fits your lot?"],
     intro:
-      "Most single-family lots in Los Angeles can take an ADU. Which kind comes down to the room you have, what's already standing and how the space will be used.",
+      "Most single-family lots in Los Angeles County can take an ADU. Which kind comes down to the room you have, what's already standing and how the space will be used.",
     items: [
       {
         title: "Detached ADU",
@@ -118,16 +118,16 @@ const aduContractor = {
   },
 
   areas: {
-    heading: ["ADUs across", "Los Angeles."],
+    heading: ["ADUs across", "Los Angeles County."],
     intro:
-      "We build ADUs throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
+      "We build ADUs throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
   },
 
   faqHeading: ["ADU questions,", "answered."],
   faqIntro: "What homeowners ask most before building an ADU. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does an ADU cost in Los Angeles?",
+      question: "How much does an ADU cost in Los Angeles County?",
       answer:
         "It depends on the kind of ADU, its size, the lot and the finishes. A garage conversion or a junior ADU usually costs the least, since the structure is already there; a detached ADU costs the most, with a new foundation and utilities run across the yard. We price your ADU after seeing the lot, not per square foot over the phone. {{Get a free quote}}",
     },

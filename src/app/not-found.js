@@ -5,7 +5,7 @@ import { CONTAINER } from "@/components/Home/parts";
 
 export const metadata = { title: "Page not found" };
 
-// Any address that isn't a page (and an unknown project, area or service),
+// Any address that isn't a page (and an unknown area or service),
 // inside the site's navbar and footer: it sits above the site's layout, so
 // it brings them itself (UI/SiteShell). Kept small until HB Links' 404 page
 // is ported in LeTara's look (CLAUDE.md).
@@ -22,15 +22,12 @@ export default function NotFound() {
               isn&apos;t here.
             </h1>
             <p className="mt-6 max-w-xl text-[16px] 700:text-[18px] leading-relaxed text-white/65 pointer-events-none">
-              The address may be mistyped, or the page has moved. Start from the homepage, see our projects, or tell us what you&apos;re planning.
+              The address may be mistyped, or the page has moved. Start from the homepage, or tell us what you&apos;re planning.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
               <QuoteButton />
               <Link href="/" className="uppercase text-[12px] font-semibold tracking-[0.14em] border-b border-third pb-1 hover:text-third transition-colors duration-200">
                 Homepage
-              </Link>
-              <Link href="/projects" className="uppercase text-[12px] font-semibold tracking-[0.14em] border-b border-third pb-1 hover:text-third transition-colors duration-200">
-                Our projects
               </Link>
             </div>
           </div>

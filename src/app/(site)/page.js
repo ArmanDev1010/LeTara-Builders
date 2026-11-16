@@ -21,7 +21,7 @@ export default function Home() {
         <HeroCopy
           title={
             <>
-              Design-Build Contractor <br /> in <span className="italic">Los Angeles.</span>
+              Design-Build Contractor <br /> in <span className="italic">Los Angeles County.</span>
             </>
           }
           lede="One team from the first sketch to the final walkthrough: new construction, home additions, ADUs, remodels and outdoor living spaces."

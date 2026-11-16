@@ -64,14 +64,6 @@ export function buildBusinessSchema() {
     logo: `${BASE_URL}/images/brand/letara-logo.png`,
     ...(phone && { telephone: phone.replace("tel:", "") }),
     ...(BUSINESS.email && { email: BUSINESS.email }),
-    ...(BUSINESS.hours && {
-      openingHoursSpecification: {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: BUSINESS.hours.days,
-        opens: BUSINESS.hours.opens,
-        closes: BUSINESS.hours.closes,
-      },
-    }),
     address: {
       "@type": "PostalAddress",
       addressLocality: BUSINESS.address.locality,
@@ -79,7 +71,7 @@ export function buildBusinessSchema() {
       addressCountry: BUSINESS.address.country,
     },
     // the target city (the page names no office town; the user's call)
-    areaServed: { "@type": "City", name: "Los Angeles" },
+    areaServed: { "@type": "AdministrativeArea", name: "Los Angeles County, CA" },
     founder: { "@type": "Person", name: BUSINESS.founder.name },
     sameAs: [BUSINESS.instagram],
   };
@@ -130,7 +122,7 @@ function provider() {
   };
 }
 
-// A service page's Service, provided by LeTara, in the target city.
+// A service page's Service, provided by LeTara, in the target area (the county).
 export function buildServiceSchema(page) {
   return {
     "@context": "https://schema.org",
@@ -140,7 +132,7 @@ export function buildServiceSchema(page) {
     description: page.description,
     url: `${BASE_URL}${page.href}`,
     provider: provider(),
-    areaServed: { "@type": "City", name: "Los Angeles" },
+    areaServed: { "@type": "AdministrativeArea", name: "Los Angeles County, CA" },
   };
 }
 

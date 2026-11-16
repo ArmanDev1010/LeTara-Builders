@@ -5,10 +5,10 @@ import { BUSINESS, phoneDisplay, phoneHref } from "@/data/business";
 // The copy over a drawn hero (the homepage's and a service page's), laid out
 // like HB Links' hero: on a service page the trail back (`crumbs`, each
 // { label, href }, the page itself last), the title over two lines (`title`),
-// the credentials (ending with the page's `place`: Los Angeles, or an area
+// the credentials (ending with the page's `place`: Los Angeles County, or an area
 // page's area), a line about the work (`lede`), and the buttons: the quote
 // request first, then the phone, stacked full width on a phone.
-export default function HeroCopy({ crumbs, title, lede, place = "Los Angeles" }) {
+export default function HeroCopy({ crumbs, title, lede, place = "Los Angeles County" }) {
   const phone = phoneHref();
   return (
     <div className="max-w-4xl">

@@ -21,7 +21,7 @@ export const metadata = {
   metadataBase: new URL(BASE_URL),
   ...buildPageMetadata({ description: BUSINESS.description, path: null }),
   title: {
-    default: `${BUSINESS.name} | Design-Build Contractor in Los Angeles`,
+    default: `${BUSINESS.name} | Design-Build Contractor in Los Angeles County`,
     template: `%s | ${BUSINESS.name}`,
   },
   authors: [{ name: BUSINESS.name }],
@@ -32,7 +32,7 @@ export const metadata = {
 };
 
 // The page itself, for everything: the site (app/(site)/layout.js adds its
-// navbar, footer, quote dialog and page transition) and the projects editor
+// navbar, footer, quote dialog and page transition) and the reviews editor
 // (app/keystatic), which has none of them.
 export default function RootLayout({ children }) {
   return (

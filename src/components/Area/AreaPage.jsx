@@ -5,9 +5,7 @@ import Contact from "@/components/Home/Contact";
 import FAQ from "@/components/Home/FAQ";
 import Process from "@/components/Home/Process";
 import ServiceAreas from "@/components/Home/ServiceAreas";
-import ProjectsSection from "@/components/Projects/ProjectsSection";
 import { PROPERTY } from "@/data/area-pages";
-import { getProjects, projectsForArea } from "@/lib/projects";
 import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 
 // An area page (data/area-pages), served at /design-build-contractor-<slug>,
@@ -38,12 +36,9 @@ import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 // we cover", tiles of the area's neighborhoods and its neighbors; then
 // "Building in <area>", written local descriptions per service. The user
 // scrapped the slot until they decide what goes there.)
-export default async function AreaPage({ page }) {
+export default function AreaPage({ page }) {
   const { name } = page;
-  // the area's projects (from the projects editor), after How we work, only
-  // when it has some (11-12)
-  const projects = projectsForArea(await getProjects(), page.slug);
-  const order = ["build", "process", projects.length && "projects", "quote", "faq", "areas"].filter(Boolean);
+  const order = ["build", "process", "quote", "faq", "areas"];
   const number = (id) => String(order.indexOf(id) + 1).padStart(2, "0");
   const schemas = [
     buildAreaSchema(page),
@@ -78,13 +73,6 @@ export default async function AreaPage({ page }) {
 
       <AreaBuild number={number("build")} heading={["What we build", `in ${name}.`]} intro={page.services} items={PROPERTY} />
       <Process number={number("process")} intro={`How a project in ${name} goes with us, from the first call to the final walkthrough.`} />
-      <ProjectsSection
-        number={number("projects")}
-        heading={["Projects", `in ${name}.`]}
-        intro={`What we've built in ${name}. Open one to see it.`}
-        projects={projects}
-        more={`/projects?city=${page.slug}`}
-      />
       <Contact
         number={number("quote")}
         heading={["Building in", `${name}?`]}
