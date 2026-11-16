@@ -1,21 +1,22 @@
 import { BUSINESS } from "@/data/business";
+import { answerLines } from "@/data/projectDetails";
 import { visitSentence } from "@/lib/visitTimes";
 
 // Off while the site is being built: a request is checked as usual, then
 // logged to the server's console instead of sent anywhere, and the visitor
-// sees the thank-you (a picked time shows as booked). The visit calendar shows
+// sees the thank-you (a picked time shows as booked). The calendar shows
 // sample openings unless GoHighLevel is connected (app/api/availability).
 // Turn it on, with GoHighLevel connected (lib/ghl.js), once leads should
 // actually reach Andranik.
 export const DELIVER = false;
 
-// How far ahead a picked visit time may be; anything outside it is treated as
+// How far ahead a picked call time may be; anything outside it is treated as
 // "call me to set a time".
 const MAX_AHEAD_DAYS = 120;
 
 const ISO_SLOT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?([+-]\d{2}:\d{2}|Z)$/;
 
-// The visit time the form sent, if it's a real, upcoming one; otherwise null.
+// The call time the form sent, if it's a real, upcoming one; otherwise null.
 export function validSlot(slot) {
   if (typeof slot !== "string" || !ISO_SLOT.test(slot)) return null;
   const ms = new Date(slot).getTime();
@@ -28,10 +29,12 @@ export const e164 = (phone) => `+1${String(phone ?? "").replace(/\D/g, "").slice
 
 const collapse = (value) => String(value ?? "").replace(/\s+/g, " ").trim();
 
-// What happened with the site visit, in a line. `booked` is true when it's on
-// the calendar, false when booking it failed, and null when nothing tried to
-// book it (delivery off, or the email fallback).
-export function visitStatus(slot, booked = null) {
+// What happened with the free phone consultation, in a line (11-16: Andranik
+// calls first, then sets a site visit; the form used to book the visit).
+// `booked` is true when it's on the calendar, false when booking it failed,
+// and null when nothing tried to book it (delivery off, or the email
+// fallback).
+export function callStatus(slot, booked = null) {
   if (!slot) return "Asked us to call to set a time";
   const when = `${visitSentence(slot)} PT`;
   if (booked === true) return `Booked for ${when}`;
@@ -46,10 +49,9 @@ const line = (label, value) => {
 };
 
 // The plain-text summary of a request: the note on the contact in
-// GoHighLevel, and what's logged while delivery is off. Optional fields are
-// left out entirely when blank. The texts line is the record of whether this
-// lead agreed to texts on the website, and when.
-export function buildLeadText({ name, phone, mail, address, service, message, smsConsentAt, slot, booked = null }) {
+// GoHighLevel, and what's logged while delivery is off. The texts line is the
+// record of whether this lead agreed to texts on the website, and when.
+export function buildLeadText({ name, phone, mail, address, service, smsConsentAt, slot, booked = null }) {
   return [
     `New ${BUSINESS.name} website request`,
     line("Name", name),
@@ -60,8 +62,26 @@ export function buildLeadText({ name, phone, mail, address, service, message, sm
     line("Email", mail),
     line("Property", address),
     line("Project", service),
-    `Site visit: ${visitStatus(slot, booked)}`,
-    line("Details", message),
+    `Phone consultation: ${callStatus(slot, booked)}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+// The second note, from the form's optional last step: the answers picked,
+// the visitor's own words, and the files (links to them in GoHighLevel's
+// media storage, or the names of any that couldn't be saved). Null when
+// there's nothing in it.
+export function buildDetailsText({ service, answers, message, files = [], failed = [] }) {
+  const lines = answerLines(service, answers);
+  const words = String(message ?? "").trim();
+  if (!lines.length && !words && !files.length && !failed.length) return null;
+  return [
+    "More about the project (from the website form)",
+    ...lines,
+    words && `In their words: ${words}`,
+    files.length && ["Files they attached:", ...files.map(({ name, url }) => `- ${name}: ${url}`)].join("\n"),
+    failed.length && `Files that didn't come through (ask them to send these): ${failed.join(", ")}`,
   ]
     .filter(Boolean)
     .join("\n");

@@ -33,7 +33,8 @@ const termsOfService = {
           <p>
             The Site describes what we build: new homes, home additions, ADUs, remodels, outdoor living spaces and
             commercial build-outs. Asking
-            for a quote, booking a site visit, getting a quote or talking with us about a project doesn&rsquo;t create a
+            for a quote, booking a phone consultation or a site visit, getting a quote or talking with us about a project
+            doesn&rsquo;t create a
             contract, and doesn&rsquo;t commit you or us to anything.
           </p>
           <p>
@@ -59,19 +60,20 @@ const termsOfService = {
       ),
     },
     {
-      id: "requests-and-site-visits",
-      heading: "Requests and site visits",
+      id: "requests-and-appointments",
+      heading: "Requests and appointments",
       body: (
         <>
-          <p>When you send us a request or book a site visit through the Site, you agree to:</p>
+          <p>When you send us a request or book a phone consultation through the Site, you agree to:</p>
           <ul>
             <li>give accurate information, with a phone number and email address that are yours or that you may use;</li>
-            <li>ask only about property you own or are allowed to act for; and</li>
+            <li>ask only about property you own or are allowed to act for;</li>
+            <li>attach only photos, plans or files you have the right to share with us; and</li>
             <li>not send a request for someone else without their permission.</li>
           </ul>
           <p>
-            A site visit you book holds that time on our calendar. If we need to move it, we&rsquo;ll contact you to find
-            another time, and you can ask us to move or cancel it the same way.
+            A phone consultation or site visit you book holds that time on our calendar. If we need to move it,
+            we&rsquo;ll contact you to find another time, and you can ask us to move or cancel it the same way.
           </p>
           <p>
             By sending a request, you agree that we may call or email you about it. We text you only if you agree to it,

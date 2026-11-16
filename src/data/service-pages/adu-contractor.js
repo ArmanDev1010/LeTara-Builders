@@ -11,7 +11,7 @@ const aduContractor = {
   metaTitle: "ADU Contractor in Los Angeles County",
   serviceType: "Accessory dwelling unit construction",
   description:
-    "Detached, attached and junior ADUs in Los Angeles County, designed, permitted and built by one licensed design-build team. Free on-site quote.",
+    "Detached, attached and junior ADUs in Los Angeles County, designed, permitted and built by one licensed design-build team. Free consultation.",
   asset: "adu",
   assetLabel: "A modern backyard ADU",
   hero: "A second home on your lot: detached, attached, or made from the garage or a part of the house you already have. We find what your lot allows, design it, take it through permits and build it, as one team.",
@@ -60,7 +60,7 @@ const aduContractor = {
     heading: ["Five steps,", "every ADU."],
     intro: "How an ADU goes with us, from the first call to move-in day.",
     steps: [
-      "Tell us about the lot and who the ADU is for, and pick a time for us to come and see it.",
+      "Tell us about the lot and who the ADU is for, and pick a time for a free phone consultation.",
       "We walk the property, measure it and check it against the ADU rules, so you know what fits before paying for plans.",
       "We draw the unit, refine it with you, and take the plans through engineering and the city's plan check.",
       "A clear price for the ADU as designed, with the utilities and site work in it, before construction starts.",
@@ -167,7 +167,7 @@ const aduContractor = {
 
   quote: {
     heading: ["Ready to plan", "your ADU?"],
-    intro: "A few quick questions, about a minute, and you pick a time for us to come see the lot.",
+    intro: "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
   },
 };
 

@@ -3,22 +3,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useModal } from "@/context/ModalContext";
 
-// `extraData` is sent along with the form's own fields (the estimate form's
-// answers, which aren't inputs); `onSuccess` runs after a successful send.
-// `thanksFor(result)` adds to what the thank-you is told, from the API's
-// reply (whether the visit was booked).
-export function useContactForm({ defaultValues, extraData, thanksFor, onSuccess } = {}) {
-  const { openThanks } = useModal();
+// The quote form's fields (react-hook-form) and its send to /api/contact.
+// `extraData` is sent along with the fields (the answers that aren't inputs:
+// the project, the call time); `onSent(result, data)` runs once it's in,
+// with the API's reply ({ booked, ref }). Since 11-16 the form sends at its
+// contact step and carries on to an optional last step, so the thank-you is
+// the form's to open, not this hook's.
+export function useContactForm({ defaultValues, extraData, onSent } = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({ defaultValues });
-  const {
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = form;
+  const { handleSubmit } = form;
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -32,10 +28,7 @@ export function useContactForm({ defaultValues, extraData, thanksFor, onSuccess 
 
       if (res.ok) {
         const result = await res.json().catch(() => ({}));
-        const thanks = { name: data.name ?? "", ...thanksFor?.(result) };
-        reset();
-        onSuccess?.();
-        openThanks(thanks);
+        onSent?.(result, data);
       } else if (res.status === 400) {
         // turned away (something missing): say what
         const { error } = await res.json().catch(() => ({}));
@@ -53,21 +46,12 @@ export function useContactForm({ defaultValues, extraData, thanksFor, onSuccess 
 
   const onInvalid = (formErrors) => {
     const firstError = Object.values(formErrors)[0];
-    toast.error(
-      firstError?.message || "Please fill out all required fields correctly.",
-    );
+    toast.error(firstError?.message || "Please fill out all required fields correctly.");
   };
-
-  const fieldStyle = (clean) => ({
-    borderBottom: errors[clean]
-      ? "1px solid red"
-      : "1px solid hsla(0, 0%, 83.9%, .3)",
-  });
 
   return {
     ...form,
     isSubmitting,
     handleFormSubmit: handleSubmit(onSubmit, onInvalid),
-    fieldStyle,
   };
 }

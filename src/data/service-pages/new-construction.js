@@ -61,7 +61,7 @@ const newConstruction = {
     heading: ["Five steps,", "every new home."],
     intro: "How a new home goes with us, from the first call to the keys.",
     steps: [
-      "Tell us about the lot and the home you have in mind, and pick a time for us to come and see it.",
+      "Tell us about the lot and the home you have in mind, and pick a time for a free phone consultation.",
       "We walk the lot, look at its slope, access and utilities, and talk through what you want to build.",
       "We design the house with you, then take it through engineering, the energy code and the city's plan check.",
       "A clear price for the home as designed, site work and utilities included, before construction starts.",
@@ -157,7 +157,7 @@ const newConstruction = {
 
   quote: {
     heading: ["Ready to build", "something new?"],
-    intro: "A few quick questions, about a minute, and you pick a time for us to come see the lot.",
+    intro: "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
   },
 };
 

@@ -136,7 +136,7 @@ export default async function Testimonials({ number = "04" }) {
             in their own words.
           </Reveal>
           <Reveal as="p" delay={0.1} className={`mt-5 ${LEDE.light} max-w-xl`}>
-            From the first site visit to the final walkthrough, here&apos;s what building with us is like, from the people
+            From the first call to the final walkthrough, here&apos;s what building with us is like, from the people
             we&apos;ve built for.
           </Reveal>
 

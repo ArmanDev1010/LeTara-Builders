@@ -61,7 +61,7 @@ function Line({ icon: Icon, label, value, href, big, external }) {
 export default function Contact({
   number = "05",
   heading = ["Tell us what", "you're planning."],
-  intro = "A few quick questions, about a minute, and you pick a time for us to come see the property.",
+  intro = "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
 }) {
   return (
     <section id="contact" className={`${SECTION} section-dark overflow-hidden bg-[#070605] text-neutral-50`}>

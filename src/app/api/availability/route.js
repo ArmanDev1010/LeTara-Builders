@@ -35,7 +35,7 @@ export async function GET() {
     }
     return reply({ available: true, timezone: VISIT_TIMEZONE, days: cache.days });
   } catch (error) {
-    console.error("Couldn't load site-visit times:", error);
+    console.error("Couldn't load the consultation times:", error);
     return reply({ available: false });
   }
 }

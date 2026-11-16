@@ -15,7 +15,7 @@ const outdoorLiving = {
   metaTitle: "Outdoor Living Contractor in Los Angeles County",
   serviceType: "Outdoor living construction",
   description:
-    "Pergolas, patio covers, outdoor kitchens, decks and patios in Los Angeles County, designed, permitted and built by one licensed team. Free on-site quote.",
+    "Pergolas, patio covers, outdoor kitchens, decks and patios in Los Angeles County, designed, permitted and built by one licensed team. Free consultation.",
   asset: "outdoor",
   assetLabel: "A patio under a louvered pergola, with an outdoor kitchen and a fire pit",
   hero: "Pergolas, patio covers, outdoor kitchens, decks and patios: the yard made into rooms you'll use most of the year. Designed with the house, permitted and built by one team.",
@@ -118,7 +118,7 @@ const outdoorLiving = {
     heading: ["Five steps,", "every outdoor build."],
     intro: "How an outdoor project goes with us, from the first call to the first evening out.",
     steps: [
-      "Tell us how you'd like to use the yard, and pick a time for us to come and see it.",
+      "Tell us how you'd like to use the yard, and pick a time for a free phone consultation.",
       "We walk the yard, note its sun, slope and access, and talk through where each space should go.",
       "We design the spaces, choose materials with you, and get permits for the structures and lines that need them.",
       "A clear price for the outdoor spaces as designed, structures, utilities and hardscape included.",
@@ -176,7 +176,7 @@ const outdoorLiving = {
 
   quote: {
     heading: ["Ready to use", "your yard?"],
-    intro: "A few quick questions, about a minute, and you pick a time for us to come see the yard.",
+    intro: "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
   },
 };
 

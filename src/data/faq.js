@@ -9,7 +9,7 @@ export const FAQS = [
   {
     question: "What does design-build mean?",
     answer:
-      "One company designs your project, takes it through permits and builds it, under a single contract. You have one team to talk to from the first site visit to the final walkthrough, and nothing gets lost between the drawings and the job site.",
+      "One company designs your project, takes it through permits and builds it, under a single contract. You have one team to talk to from the first call to the final walkthrough, and nothing gets lost between the drawings and the job site.",
   },
   {
     question: "Are you licensed and insured?",

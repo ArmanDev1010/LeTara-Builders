@@ -27,7 +27,8 @@ const smsTerms = {
           </p>
           <p>
             We send text messages about your quote request and your project: answers to your questions, scheduling and
-            reminders for your site visit and other appointments, updates while we build, and customer support. We
+            reminders for your phone consultation, site visit and other appointments, updates while we build, and customer
+            support. We
             don&rsquo;t send advertising texts.
           </p>
         </>

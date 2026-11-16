@@ -17,14 +17,23 @@ export const PROJECT_OPTIONS = [
 
 // `label` names the step in its progress tile under the question, one short
 // word so five tiles fit a phone; `optional` adds a light "(optional)" after
-// the question. The visit step books the site visit on Andranik's
-// GoHighLevel calendar (components/Quote/VisitStep).
+// the question; `lede` is a line under it. The call step books the free
+// phone consultation on Andranik's GoHighLevel calendar
+// (components/Quote/VisitStep): he calls first, then sets a site visit
+// (11-16; the form used to book the site visit). The contact step sends the
+// request, so the lead is in before the optional last step (Andranik's
+// request, 11-16), whose questions are in data/projectDetails.js.
 export const ESTIMATE_STEPS = [
   { id: "project", label: "What", question: "What are you planning?", options: PROJECT_OPTIONS },
   { id: "location", label: "Where", question: "Where's the property?" },
-  { id: "visit", label: "When", question: "When can we come see it?" },
+  {
+    id: "call",
+    label: "When",
+    question: "When can we call you?",
+    lede: "A free phone consultation with Andy. If your project's a fit, we set a free site visit after.",
+  },
   { id: "contact", label: "Who", question: "How can we reach you?" },
-  { id: "details", label: "Notes", question: "Anything else we should know?", optional: true },
+  { id: "details", label: "More", question: "Tell us more", optional: true },
 ];
 
 export const findProject = (title) => PROJECT_OPTIONS.find((option) => option.title === title) ?? null;

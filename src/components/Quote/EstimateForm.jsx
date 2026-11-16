@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { TbArrowLeft, TbArrowRight, TbCheck, TbPhone } from "react-icons/tb";
 
+import DetailsStep from "@/components/Quote/DetailsStep";
 import VisitStep from "@/components/Quote/VisitStep";
 import ArrowButton from "@/components/UI/ArrowButton";
 import { FormLegalNote, SmsConsent } from "@/components/UI/FormConsent";
+import { useModal } from "@/context/ModalContext";
 import { useContactForm } from "@/hooks/useContactForm";
 import { forgetVisitSlots, loadVisitSlots } from "@/hooks/useVisitSlots";
 import { EMAIL_PATTERN, STREET_PATTERN, ZIP_PATTERN, isCaliforniaZip } from "@/lib/fields";
@@ -24,10 +26,14 @@ const ADVANCE_DELAY = 260;
 // clear of the floating navbar (as the sections' scroll-mt-24).
 const PAGE_NAV_CLEAR = 96;
 
-// `visit`: the picked slot (an ISO time), "call" for "call me to set a
-// time", or null before the step's answered.
+// `call`: the picked slot for the phone consultation (an ISO time), "later"
+// for "call me to set a time", or null before the step's answered.
 // The address and contact steps are form fields instead (react-hook-form).
-const EMPTY_ANSWERS = { project: null, visit: null };
+const EMPTY_ANSWERS = { project: null, call: null };
+
+// The step after the request is sent (the contact step sends it): from there
+// the earlier steps can't be changed.
+const DETAILS = 4;
 
 // Each field step's fields, checked before moving on from it.
 const STEP_FIELDS = { location: ["street", "city", "zip"], contact: ["name", "phone", "mail"] };
@@ -63,12 +69,12 @@ function OptionCard({ option, selected, onSelect }) {
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`relative w-full flex items-center gap-4 border px-4 py-4 550:px-5 text-left transition-colors duration-200 cursor-pointer ${
+      className={`relative w-full flex items-center gap-4 border px-4 py-4 short:py-2.5 550:px-5 text-left transition-colors duration-200 cursor-pointer ${
         selected ? "border-third bg-third/[0.08]" : "border-white/12 bg-white/[0.02] hover:border-white/35"
       }`}
     >
       <span
-        className={`grid place-items-center w-11 h-11 shrink-0 border text-[22px] transition-colors duration-200 ${
+        className={`grid place-items-center w-11 h-11 short:w-9 short:h-9 shrink-0 border text-[22px] short:text-[19px] transition-colors duration-200 ${
           selected ? "border-third/50 text-third" : "border-white/15 text-white/70"
         }`}
       >
@@ -101,8 +107,10 @@ function Field({ label, error, className = "", children }) {
 }
 
 // A step of fields with a Continue button: Enter in any field continues too,
-// and `onContinue` checks the fields before moving on.
-function StepForm({ onContinue, children }) {
+// and `onContinue` checks the fields before moving on. `submit` names the
+// button instead, `busy` disables it while it sends, and `after` goes
+// under it.
+function StepForm({ onContinue, submit = "Continue", busy = false, after, children }) {
   return (
     <form
       onSubmit={(event) => {
@@ -112,9 +120,10 @@ function StepForm({ onContinue, children }) {
       noValidate
     >
       {children}
-      <ArrowButton type="submit" className="mt-6">
-        Continue
+      <ArrowButton type="submit" disabled={busy} className="mt-6 max-550:w-full">
+        {submit}
       </ArrowButton>
+      {after}
     </form>
   );
 }
@@ -174,12 +183,16 @@ function LocationStep({ form, onContinue }) {
 
 // Name, phone and email, all required, with the optional text opt-in under
 // them: three across where there's room, else the name above phone and
-// email. Continue checks them before moving on; the request itself is sent
-// from the last step. The phone shapes itself into (747) 777-7777 as it's
-// typed (lib/phone, as on HB Links).
-function ContactStep({ form, onContinue }) {
+// email. Its button sends the request (Andranik, 11-16: the lead is in
+// GoHighLevel before the optional last step). The phone shapes itself into
+// (747) 777-7777 as it's typed (lib/phone, as on HB Links). `lt_check` is a
+// field people never see or reach: only a bot fills it in, and the API
+// route quietly drops those requests (there's no CAPTCHA).
+function ContactStep({ form }) {
   const {
     register,
+    handleFormSubmit,
+    isSubmitting,
     formState: { errors },
   } = form;
   const phoneField = register("phone", {
@@ -187,7 +200,12 @@ function ContactStep({ form, onContinue }) {
     pattern: { value: PHONE_PATTERN, message: "Please enter a 10-digit phone number." },
   });
   return (
-    <StepForm onContinue={onContinue}>
+    <StepForm
+      onContinue={handleFormSubmit}
+      submit={isSubmitting ? "Sending…" : "Send my request"}
+      busy={isSubmitting}
+      after={<FormLegalNote dark className="mt-4" />}
+    >
       <div className="grid grid-cols-1 @min-[520px]:grid-cols-2 @min-[760px]:grid-cols-3 gap-x-4 gap-y-5">
         <Field label="Name" error={errors.name} className="@min-[520px]:col-span-2 @min-[760px]:col-span-1">
           <input
@@ -227,40 +245,18 @@ function ContactStep({ form, onContinue }) {
         </Field>
       </div>
       <SmsConsent register={register} dark className="mt-5" />
+      <div aria-hidden="true" className="sr-only">
+        <input type="text" tabIndex={-1} autoComplete="off" {...register("lt_check")} />
+      </div>
     </StepForm>
   );
 }
 
-// The optional message, and the button that sends the request. `lt_check`
-// is a field people never see or reach: only a bot fills it in, and the API
-// route quietly drops those requests (there's no CAPTCHA).
-function DetailsStep({ form }) {
-  const { register, handleFormSubmit, isSubmitting } = form;
-  return (
-    <form onSubmit={handleFormSubmit} noValidate>
-      <textarea
-        {...register("message")}
-        aria-label="Anything else we should know? (optional)"
-        rows={4}
-        placeholder="Lot size, budget, timing, ideas you have in mind: whatever helps."
-        className="w-full bg-white/[0.04] border border-white/12 px-4 py-3 text-[16px] leading-relaxed text-neutral-50 outline-none resize-none placeholder:text-white/30 focus:border-third transition-colors duration-200"
-      />
-      <div aria-hidden="true" className="sr-only">
-        <input type="text" tabIndex={-1} autoComplete="off" {...register("lt_check")} />
-      </div>
-      <ArrowButton type="submit" disabled={isSubmitting} className="mt-5 w-full @min-[480px]:w-auto">
-        {isSubmitting ? "Sending…" : "Request my free quote"}
-      </ArrowButton>
-      <FormLegalNote dark className="mt-4" />
-    </form>
-  );
-}
-
-// The visit's answer in its tile, on two lines (day, then time) so the time
+// The call's answer in its tile, on two lines (day, then time) so the time
 // is never cut off: "11/12 / 10:30a" in a narrow tile, "Tue, Nov 12 /
 // 10:30 AM" where there's room.
 function VisitTileValue({ visit }) {
-  if (visit === "call") {
+  if (visit === "later") {
     return (
       <>
         <span className="@min-[480px]:hidden">Call me</span>
@@ -290,20 +286,20 @@ function VisitTileValue({ visit }) {
 // form is also in the homepage's narrower contact column. Narrow, the answers
 // truncate (a tap still opens the step), the check sits on the tile's top
 // edge, and "Optional" is a dash.
-function StepTiles({ values, step, reached, onJump }) {
+function StepTiles({ values, step, reached, locked, onJump }) {
   return (
-    <ol aria-label="Your request" className="@container mt-5 short:mt-4 grid grid-cols-5 gap-1.5 550:gap-2">
+    <ol aria-label="Your request" className="@container mt-5 short:mt-3 grid grid-cols-5 gap-1.5 550:gap-2">
       {ESTIMATE_STEPS.map((s, i) => {
         const value = values[s.id];
         const current = i === step;
         const done = !current && i < reached && (Boolean(value) || s.optional);
-        const twoLines = s.id === "visit" && value;
+        const twoLines = s.id === "call" && value;
         return (
           <li key={s.id} className="min-w-0">
             <button
               type="button"
               onClick={() => onJump(i)}
-              disabled={i > reached || current}
+              disabled={i > reached || i < locked || current}
               aria-current={current ? "step" : undefined}
               className={`group relative flex flex-col justify-start w-full h-full text-left border px-1.5 @min-[400px]:px-2 @min-[480px]:px-3.5 pt-3 pb-2.5 transition-colors duration-300 disabled:cursor-default enabled:cursor-pointer ${
                 current
@@ -419,19 +415,25 @@ function TalkStrip() {
   );
 }
 
-// The five-step quote request (what, where, when, who, anything else), the
+// The five-step quote request (what, where, when, who, then more), the
 // same mechanics as HB Links' estimate form in LeTara's dress: each question
 // is a "scene", a pick moves straight on, and the tiles under the question
-// fill in with the answers as they come. "When" books the site visit on
-// Andranik's GoHighLevel calendar; its times start loading as soon as a
-// project is picked. Steps and options live in data/estimate.js. The quote
-// dialog and the homepage's contact section both use it; the section sets
-// `talk={false}`, its phone number already being beside it.
+// fill in with the answers as they come. "When" books the free phone
+// consultation on Andranik's GoHighLevel calendar; its times start loading as
+// soon as a project is picked. "Who" sends the request, so the lead is in
+// even if the visitor stops there (Andranik, 11-16); "Tell us more" then adds
+// answers, words and files to it (Quote/DetailsStep), or is skipped, and the
+// thank-you opens. Steps and options live in data/estimate.js and
+// data/projectDetails.js. The quote dialog and the homepage's contact
+// section both use it; the section sets `talk={false}`, its phone number
+// already being beside it.
 export default function EstimateForm({ talk = true }) {
+  const { openThanks } = useModal();
   const [step, setStep] = useState(0);
   const [reached, setReached] = useState(0); // the furthest step reached
   const [direction, setDirection] = useState(1);
   const [answers, setAnswers] = useState(EMPTY_ANSWERS);
+  const [sent, setSent] = useState(null); // the API's reply once the request is in: { ref, booked }
   const cardRef = useRef(null);
   const advanceTimer = useRef(null);
   const hasMoved = useRef(false);
@@ -448,26 +450,33 @@ export default function EstimateForm({ talk = true }) {
     setReached((r) => Math.max(r, index));
   };
 
-  const slot = answers.visit && answers.visit !== "call" ? answers.visit : null;
+  const slot = answers.call && answers.call !== "later" ? answers.call : null;
   const form = useContactForm({
     extraData: { service: answers.project, slot },
-    // the thank-you names the visit when it made it onto the calendar
-    thanksFor: (result) => ({ visit: slot ? { slot, booked: Boolean(result?.booked) } : null }),
-    onSuccess: () => {
-      forgetVisitSlots();
-      setAnswers(EMPTY_ANSWERS);
-      setReached(0);
-      goTo(0);
+    onSent: (result) => {
+      setSent({ ref: result?.ref ?? null, booked: Boolean(result?.booked) });
+      goTo(DETAILS);
     },
   });
+  // the last step done or skipped: the thank-you (naming the call when it made
+  // it onto the calendar), and the form starts over
+  const finish = () => {
+    openThanks({ name: form.getValues("name") ?? "", visit: slot ? { slot, booked: Boolean(sent?.booked) } : null });
+    form.reset();
+    forgetVisitSlots();
+    setAnswers(EMPTY_ANSWERS);
+    setSent(null);
+    setReached(0);
+    goTo(0);
+  };
   const watched = (field) => (form.watch(field) ?? "").trim().replace(/\s+/g, " ");
-  const [name, phone, message] = [watched("name"), watched("phone"), watched("message")];
+  const [name, phone] = [watched("name"), watched("phone")];
   const values = {
     project: project?.title,
     location: [watched("street"), watched("city")].filter(Boolean).join(", "),
-    visit: answers.visit ? <VisitTileValue visit={answers.visit} /> : null,
+    call: answers.call ? <VisitTileValue visit={answers.call} /> : null,
     contact: [name, phone].filter(Boolean).join(" · "),
-    details: message,
+    details: null,
   };
 
   // a pick (a project, a visit time) shows, then moves on
@@ -487,7 +496,8 @@ export default function EstimateForm({ talk = true }) {
     const fields = STEP_FIELDS[current.id];
     if (!fields || (await form.trigger(fields))) goTo(index);
   };
-  const jump = (index) => (index < step ? goTo(index) : goForward(index));
+  // once the request is sent, the steps before it stay as they were
+  const jump = (index) => (sent ? undefined : index < step ? goTo(index) : goForward(index));
 
   useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
@@ -529,29 +539,29 @@ export default function EstimateForm({ talk = true }) {
     );
   } else if (current.id === "location") {
     body = <LocationStep form={form} onContinue={() => goForward(step + 1)} />;
-  } else if (current.id === "visit") {
+  } else if (current.id === "call") {
     body = (
       <VisitStep
-        value={answers.visit}
-        onPick={(visit) => pickAndAdvance("visit", visit)}
-        onCall={() => pickAndAdvance("visit", "call")}
+        value={answers.call}
+        onPick={(call) => pickAndAdvance("call", call)}
+        onCall={() => pickAndAdvance("call", "later")}
       />
     );
   } else if (current.id === "contact") {
-    body = <ContactStep form={form} onContinue={() => goForward(step + 1)} />;
+    body = <ContactStep form={form} />;
   } else {
-    body = <DetailsStep form={form} />;
+    body = sent && <DetailsStep project={answers.project} slot={slot} sent={sent} onDone={finish} />;
   }
 
   // the picking steps' footer: Continue once answered (to move on again
   // after coming back), a hint on the project step before that
-  const picked = current.id === "project" ? answers.project : current.id === "visit" ? answers.visit : undefined;
+  const picked = current.id === "project" ? answers.project : current.id === "call" ? answers.call : undefined;
 
   // the answers so far as text, for "Your picks" on a phone
   const picks = [
     project?.title,
     values.location,
-    answers.visit && (answers.visit === "call" ? "We'll call to set a time" : `${visitDay(answers.visit)}, ${visitTime(answers.visit)}`),
+    answers.call && (answers.call === "later" ? "We'll call to set a time" : `${visitDay(answers.call)}, ${visitTime(answers.call)}`),
     name,
   ]
     .map((value, index) => ({ value, index }))
@@ -561,7 +571,7 @@ export default function EstimateForm({ talk = true }) {
   // change; on a phone only as tall as the step, as HB Links' is.
   return (
     <div ref={cardRef} className="flex flex-col 550:min-h-[min(560px,82dvh)]">
-      <YourPicks picks={picks} step={step} onJump={jump} />
+      <YourPicks picks={sent ? [] : picks} step={step} onJump={jump} />
       <div className="flex-1 flex flex-col">
         <div className="flex-1 min-w-0 px-5 550:px-8 1080:px-10 pt-5 550:pt-8 short:pt-5 pb-5 550:pb-6 short:pb-4 flex flex-col">
           <div className="pointer-events-none">
@@ -581,6 +591,8 @@ export default function EstimateForm({ talk = true }) {
                 {current.optional && <span className="text-white/35"> (optional)</span>}
               </motion.h2>
             </AnimatePresence>
+            {/* a line under the question; on a short window it gives its room to the step */}
+            {current.lede && <p className="short:hidden mt-2 text-[14px] 550:text-[15px] leading-snug text-white/55">{current.lede}</p>}
             {/* on a phone, a progress line in place of the tiles */}
             <div
               role="progressbar"
@@ -597,11 +609,13 @@ export default function EstimateForm({ talk = true }) {
             </div>
           </div>
           <div className="max-550:hidden">
-            <StepTiles values={values} step={step} reached={reached} onJump={jump} />
+            <StepTiles values={values} step={step} reached={reached} locked={sent ? DETAILS : 0} onJump={jump} />
           </div>
 
-          {/* @container: the steps lay themselves out by this column's width */}
-          <div className="@container pt-6 pb-6 short:pt-4 short:pb-4 overflow-hidden">
+          {/* @container: the steps lay themselves out by this column's width.
+              Clipped sideways for the slide (clip, not hidden, so the last
+              step's buttons can stick to the dialog's foot) */}
+          <div className="@container pt-6 pb-6 short:pt-4 short:pb-4 overflow-x-clip">
             <AnimatePresence mode="wait" initial={false} custom={direction}>
               <motion.div
                 key={current.id}
@@ -618,7 +632,7 @@ export default function EstimateForm({ talk = true }) {
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-4 font-script text-[12px] uppercase tracking-[0.12em]">
-            {step > 0 ? (
+            {step > 0 && !sent ? (
               <button
                 type="button"
                 onClick={() => goTo(step - 1)}

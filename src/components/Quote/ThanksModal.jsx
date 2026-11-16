@@ -85,17 +85,15 @@ function StepTracker() {
   );
 }
 
-// What happens next with the site visit: booked on the calendar (`visit.booked`),
+// What happens next with the free phone consultation (11-16: Andranik calls
+// first, then sets a site visit): booked on the calendar (`visit.booked`),
 // picked but not booked (taken in the meantime, or the calendar didn't
 // answer), or no time picked ("call me").
-function nextVisitText(visit) {
-  if (visit?.booked) {
-    return "Andy comes out to the property, walks it with you, takes measurements and looks at what's there, so the design and your quote start from the real thing.";
-  }
-  const then =
-    "Then we come out, walk the property with you, take measurements and look at what's there, so the design and your quote start from the real thing.";
-  if (visit) return `We couldn't hold that time on the calendar, so Andy will call the number you gave us to set one that works. ${then}`;
-  return `Andy will call the number you gave us to set a time that works for you. ${then}`;
+function nextCallText(visit) {
+  const talk = "you talk through the project, the property and your budget, and if it's a fit, Andy sets a free site visit.";
+  if (visit?.booked) return `Andy calls you at the number you gave us. On the call ${talk}`;
+  if (visit) return `We couldn't hold that time on the calendar, so Andy will call the number you gave us to set one that works. Then ${talk}`;
+  return `Andy will call the number you gave us to set a time that works for you. Then ${talk}`;
 }
 
 // Opens in place of the quote request once it's sent (openThanks in
@@ -136,7 +134,7 @@ export default function ThanksModal({ name, visit, onClose }) {
             Thanks{first ? `, ${first}` : ""}.
           </h2>
           <p className="mt-4 text-[15.5px] 700:text-[17px] leading-relaxed text-black/55 pointer-events-none">
-            {booked ? "Your site visit is on the calendar." : `Step ${DONE} of ${STEPS.length} is done.`} Here&apos;s
+            {booked ? "Your phone consultation is on the calendar." : `Step ${DONE} of ${STEPS.length} is done.`} Here&apos;s
             how the rest goes.
           </p>
         </div>
@@ -167,7 +165,7 @@ export default function ThanksModal({ name, visit, onClose }) {
                 <span className="font-script text-[11px] uppercase tracking-[0.14em] text-black/45">Pacific time</span>
               </p>
             )}
-            <p className="mt-3 text-[15px] 700:text-[16px] leading-relaxed text-black/65">{nextVisitText(visit)}</p>
+            <p className="mt-3 text-[15px] 700:text-[16px] leading-relaxed text-black/65">{nextCallText(visit)}</p>
           </motion.div>
         </div>
 

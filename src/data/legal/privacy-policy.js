@@ -30,14 +30,15 @@ const privacyPolicy = {
       body: (
         <>
           <h3>What you tell us</h3>
-          <p>When you ask for a quote or book a site visit through the Site, we collect:</p>
+          <p>When you ask for a quote or book a phone consultation through the Site, we collect:</p>
           <ul>
             <li>
               <strong>Your contact details:</strong> your name, phone number and email address.
             </li>
             <li>
               <strong>Your project:</strong> the kind of project, the property&rsquo;s address, the day and time you pick
-              for a site visit, and anything else you write to us.
+              for a phone consultation, and, if you choose to add them, your answers about the project (such as its
+              timing, budget and size), anything else you write to us, and the photos, plans or other files you attach.
             </li>
             <li>
               <strong>Your text-message choice:</strong> whether you agreed to receive texts from us, and when.
@@ -64,7 +65,7 @@ const privacyPolicy = {
         <>
           <p>We use your information to:</p>
           <ul>
-            <li>answer your request, schedule and confirm your site visit, and prepare your quote;</li>
+            <li>answer your request, schedule and confirm your phone consultation and site visit, and prepare your quote;</li>
             <li>reach you by phone or email about your request, and by text if you agreed to texts;</li>
             <li>design, permit, build and bill your project if you hire us, and look after it afterward;</li>
             <li>keep the Site working, and protect it from spam, fraud and abuse;</li>
@@ -82,7 +83,7 @@ const privacyPolicy = {
           <p>
             We text you only if you agree to it: by ticking the text-message box on our quote form, by asking us to text
             you, by saying yes when we ask, or by texting us first. We use your mobile number for messages about your
-            request and your project, such as scheduling your site visit, reminders, and updates while we build. How
+            request and your project, such as scheduling your consultation and site visit, reminders, and updates while we build. How
             often we text depends on your project, and message and data rates may apply. Reply STOP to any message to
             stop, or HELP for help. Our <DocLink slug="sms-terms">SMS Terms</DocLink> have the details.
           </p>
@@ -106,7 +107,8 @@ const privacyPolicy = {
           <ul>
             <li>
               <strong>With the companies that help us run our business and the Site:</strong> our website host, our
-              customer management and scheduling provider, our email provider, and our phone and text messaging provider.
+              customer management and scheduling provider (which also stores the files you attach), our email provider, and
+              our phone and text messaging provider.
               They may use it only to provide their services to us.
             </li>
             <li>

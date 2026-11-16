@@ -10,7 +10,7 @@ export const LEGAL_PAGES = [
   {
     label: "Privacy Policy",
     slug: "privacy-policy",
-    updated: "2026-11-13",
+    updated: "2026-11-16",
     description:
       "What LeTara Builders collects through letarabuilders.com and when you contact us, how we use and share it, and the choices you have.",
   },
@@ -24,7 +24,7 @@ export const LEGAL_PAGES = [
   {
     label: "SMS Terms",
     slug: "sms-terms",
-    updated: "2026-11-13",
+    updated: "2026-11-16",
     description:
       "How LeTara Builders' text messages work: what we send, how often, what it costs, and how to stop them (reply STOP) or get help (reply HELP).",
   },

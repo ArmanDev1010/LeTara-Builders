@@ -12,7 +12,7 @@ const homeRemodeling = {
   metaTitle: "Home Remodeling Contractor in Los Angeles County",
   serviceType: "Home remodeling",
   description:
-    "Kitchen, bathroom and whole-house remodels in Los Angeles County, designed, permitted and built by one licensed design-build team. Free on-site quote.",
+    "Kitchen, bathroom and whole-house remodels in Los Angeles County, designed, permitted and built by one licensed design-build team. Free consultation.",
   asset: "remodel",
   assetLabel: "A remodeled kitchen with an island and pendant lights",
   hero: "Kitchens, bathrooms or the whole house: walls moved, layouts reworked and every finish chosen with you. One team designs the remodel, handles the permits and builds it.",
@@ -98,7 +98,7 @@ const homeRemodeling = {
     heading: ["Five steps,", "every remodel."],
     intro: "How a remodel goes with us, one room or the whole house, from the first call to the reveal.",
     steps: [
-      "Tell us which rooms you want to change and what isn't working in them, and pick a time for us to come by.",
+      "Tell us which rooms you want to change and what isn't working in them, and pick a time for a free phone consultation.",
       "We look at the rooms, the structure behind them and the plumbing and wiring, and talk through what you'd like.",
       "We draw the new layout, choose finishes and fixtures with you, and get permits where the work needs them.",
       "A clear price for the remodel as designed and selected, before any demolition starts.",
@@ -156,7 +156,7 @@ const homeRemodeling = {
 
   quote: {
     heading: ["Ready to remodel", "your home?"],
-    intro: "A few quick questions, about a minute, and you pick a time for us to come see the house.",
+    intro: "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
   },
 };
 

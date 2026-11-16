@@ -75,7 +75,7 @@ export default function AreaPage({ page }) {
       <Contact
         number={number("quote")}
         heading={["Building in", `${name}?`]}
-        intro="A few quick questions, about a minute, and you pick a time for us to come see the property."
+        intro="A few quick questions, about a minute, and you pick a time for a free phone consultation."
       />
       <FAQ
         number={number("faq")}

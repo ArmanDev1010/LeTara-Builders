@@ -99,7 +99,7 @@ function MonthGrid({ year, month, days, today, selected, onPick }) {
             onClick={() => onPick(key)}
             aria-pressed={open ? picked : undefined}
             aria-label={`${dayTitle(key)}${open ? `, ${open} open ${open === 1 ? "time" : "times"}` : ", no open times"}`}
-            className={`relative h-10 short:h-9 border text-[14px] font-semibold tabular-nums transition-colors duration-200 ${focusRing} ${
+            className={`relative h-10 short:h-8 border text-[14px] font-semibold tabular-nums transition-colors duration-200 ${focusRing} ${
               picked
                 ? "border-third bg-third text-neutral-950"
                 : open
@@ -118,13 +118,14 @@ function MonthGrid({ year, month, days, today, selected, onPick }) {
   );
 }
 
-// The site-visit step of the quote request: a month on the left and the
+// The phone-consultation step of the quote request (it booked the site
+// visit until 11-16: Andranik calls first): a month on the left and the
 // picked day's open times on the right, with the time-zone note and "call me
 // instead" at that column's foot (all stacked on a phone), from Andranik's
 // GoHighLevel calendar (hooks/useVisitSlots). A time moves straight on, like
 // a project pick. Times are Los Angeles time, wherever the visitor is.
 // "Call me instead" skips it, and so does the note shown when there are no
-// times to offer. `value` is the picked slot, "call", or null.
+// times to offer. `value` is the picked slot, "later" (call me to set a time), or null.
 export default function VisitStep({ value, onPick, onCall }) {
   const { status, days } = useVisitSlots();
   const [chosenDay, setChosenDay] = useState(null);
@@ -135,7 +136,7 @@ export default function VisitStep({ value, onPick, onCall }) {
   if (status !== "ready") return <Unavailable failed={status === "error"} onCall={onCall} />;
 
   const openDays = Object.keys(days).sort();
-  const pickedDay = value && value !== "call" ? laDayKey(new Date(value)) : null;
+  const pickedDay = value && value !== "later" ? laDayKey(new Date(value)) : null;
   const day = [chosenDay, pickedDay, openDays[0]].find((key) => key && days[key]);
   const today = laDayKey();
   const first = Math.min(monthOf(today), monthOf(openDays[0]));
@@ -197,7 +198,7 @@ export default function VisitStep({ value, onPick, onCall }) {
                     type="button"
                     onClick={() => onPick(slot)}
                     aria-pressed={picked}
-                    className={`w-full h-11 @min-[560px]:h-10 short:h-9 border px-1 text-[14px] font-semibold tabular-nums whitespace-nowrap transition-colors duration-200 cursor-pointer ${focusRing} ${
+                    className={`w-full h-11 @min-[560px]:h-10 short:h-8 border px-1 text-[14px] font-semibold tabular-nums whitespace-nowrap transition-colors duration-200 cursor-pointer ${focusRing} ${
                       picked
                         ? "border-third bg-third text-neutral-950"
                         : "border-white/15 bg-white/[0.02] text-neutral-50 hover:border-third hover:text-third"
@@ -211,22 +212,22 @@ export default function VisitStep({ value, onPick, onCall }) {
           </motion.ul>
 
           {/* at the column's foot beside the month (at least a gap below the times) */}
-          <div aria-hidden="true" className="flex-1 min-h-6" />
-          <div className="pt-4 border-t border-white/10 flex flex-col items-start gap-2.5">
+          <div aria-hidden="true" className="flex-1 min-h-6 short:min-h-3" />
+          <div className="pt-4 short:pt-3 border-t border-white/10 flex flex-col items-start gap-2.5 short:gap-2">
             <p className="font-script text-[11px] uppercase tracking-[0.14em] text-white/40 pointer-events-none">
               Times are Los Angeles (Pacific) time
             </p>
             <button
               type="button"
               onClick={onCall}
-              aria-pressed={value === "call"}
+              aria-pressed={value === "later"}
               className={`inline-flex items-center gap-1.5 text-[13.5px] underline underline-offset-4 transition-colors duration-200 cursor-pointer ${focusRing} ${
-                value === "call"
+                value === "later"
                   ? "text-third decoration-third/50"
                   : "text-white/60 decoration-white/25 hover:text-third hover:decoration-third/50"
               }`}
             >
-              {value === "call" ? (
+              {value === "later" ? (
                 <>
                   <TbCheck aria-hidden="true" /> We&apos;ll call you to set a time
                 </>

@@ -2,23 +2,29 @@ import { BUSINESS } from "@/data/business";
 import { buildLeadText, e164 } from "@/lib/leads";
 import { VISIT_TIMEZONE, groupByDay } from "@/lib/visitTimes";
 
-// Andranik runs his business on GoHighLevel (Vista Pergolas' site and
-// calendar are built there), so the website's leads and site visits go
-// straight into his account through its API (v2, "LeadConnector"): each
-// request becomes a contact with a note, and a picked time becomes an
-// appointment on his site-visit calendar.
+// Andranik runs his business on GoHighLevel (LeTara has its own sub-account,
+// apart from Vista Pergolas'), so the website's leads go straight into it
+// through its API (v2, "LeadConnector"): each request becomes a contact, an
+// opportunity in his sales pipeline's first stage, a free phone consultation
+// on his calendar when a time was picked, and a note; the form's optional
+// last step adds a second note and the files the visitor attached.
 //
 // Server-side secrets, from .env.local locally and the host's Environment
 // Variables in production. Never hardcoded, and never NEXT_PUBLIC_:
 //
 //   GHL_TOKEN        a Private Integration token made in the LeTara
 //                    sub-account (Settings → Private Integrations), with the
-//                    scopes contacts.write, calendars.readonly and
-//                    calendars/events.write
+//                    scopes contacts.write, calendars.readonly,
+//                    calendars/events.write, opportunities.readonly,
+//                    opportunities.write and medias.write
 //   GHL_LOCATION_ID  that sub-account's ID (in the dashboard's web address,
 //                    after /location/)
-//   GHL_CALENDAR_ID  the site-visit calendar's ID (`npm run ghl-check`
-//                    lists them and tests the connection)
+//   GHL_CALENDAR_ID  the phone-consultation calendar's ID
+//   GHL_PIPELINE_ID  the pipeline a new lead goes in ("2 - Sales Pipeline")
+//   GHL_STAGE_ID     its first stage ("Lead")
+//
+// `npm run ghl-check` lists the calendars, pipelines and stages, with their
+// IDs, and tests the connection.
 
 const API = "https://services.leadconnectorhq.com";
 const TIMEOUT_MS = 8000;
@@ -26,16 +32,19 @@ const TIMEOUT_MS = 8000;
 // Each part of the API names the version it speaks.
 const CONTACTS = "2021-07-28";
 const CALENDARS = "2021-04-15";
+const OPPORTUNITIES = "2021-07-28";
+const MEDIAS = "2021-07-28";
 
 // The free-slots call takes at most 31 days at a time.
 const SLOT_WINDOW_DAYS = 30;
 
 export const isGhlConfigured = () => Boolean(process.env.GHL_TOKEN && process.env.GHL_LOCATION_ID);
 export const isCalendarConfigured = () => isGhlConfigured() && Boolean(process.env.GHL_CALENDAR_ID);
+const isPipelineConfigured = () => Boolean(process.env.GHL_PIPELINE_ID && process.env.GHL_STAGE_ID);
 
 // One API call. Throws on anything but success; the error carries the status
-// and GoHighLevel's message, never the token.
-async function ghl(path, { method = "GET", version, query, body } = {}) {
+// and GoHighLevel's message, never the token. `form` sends multipart (a file).
+async function ghl(path, { method = "GET", version, query, body, form, timeout = TIMEOUT_MS } = {}) {
   const url = new URL(path, API);
   for (const [key, value] of Object.entries(query ?? {})) url.searchParams.set(key, value);
   const res = await fetch(url, {
@@ -46,8 +55,8 @@ async function ghl(path, { method = "GET", version, query, body } = {}) {
       Accept: "application/json",
       ...(body ? { "Content-Type": "application/json" } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    body: form ?? (body ? JSON.stringify(body) : undefined),
+    signal: AbortSignal.timeout(timeout),
     cache: "no-store",
   });
   const data = await res.json().catch(() => null);
@@ -61,7 +70,7 @@ async function ghl(path, { method = "GET", version, query, body } = {}) {
 
 // The calendar's open times over the next `days` days, sorted into Los
 // Angeles days: { "2026-11-12": [slot, …] }. GoHighLevel applies the
-// calendar's own settings (open hours, buffers, notice, visits per day).
+// calendar's own settings (open hours, buffers, notice, calls per day).
 export async function getFreeSlots(days = 60) {
   const now = Date.now();
   const windows = [];
@@ -112,21 +121,58 @@ async function upsertContact({ name, phone, mail, street, city, zip }) {
   return id;
 }
 
+// Puts the lead in Andranik's sales pipeline, in its first stage, named the
+// way his own are ("Naira Abgaryan - Outdoor Kitchen"). If this contact
+// already has an open opportunity in that very stage (the same visitor
+// sending the form twice), that one stands and no second is made. Andranik
+// keeps lost deals in a "Lost" stage still marked open, so an older deal
+// doesn't count: a returning client gets a new lead. Never throws: a
+// missing opportunity doesn't stop the lead.
+async function addOpportunity(contactId, { name, service }) {
+  if (!isPipelineConfigured()) return false;
+  const { GHL_PIPELINE_ID: pipelineId, GHL_STAGE_ID: stageId, GHL_LOCATION_ID: locationId } = process.env;
+  try {
+    const found = await ghl("/opportunities/search", {
+      version: OPPORTUNITIES,
+      query: { location_id: locationId, contact_id: contactId, pipeline_id: pipelineId, pipeline_stage_id: stageId, status: "open" },
+    });
+    if (found?.opportunities?.some((o) => o.pipelineStageId === stageId)) return true;
+    await ghl("/opportunities/", {
+      method: "POST",
+      version: OPPORTUNITIES,
+      body: {
+        locationId,
+        pipelineId,
+        pipelineStageId: stageId,
+        contactId,
+        name: `${name} - ${service && service !== "Not Sure Yet" ? service : "Website request"}`,
+        status: "open",
+        source: `${BUSINESS.name} website`,
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("GoHighLevel opportunity failed:", error);
+    return false;
+  }
+}
+
 // Tags Andranik can filter by or start workflows from.
 function tagsFor({ service, smsConsentAt }, booked) {
   return [
     "website lead",
     service && `project: ${service.toLowerCase()}`,
-    booked && "site visit booked",
+    booked && "phone consultation booked",
     smsConsentAt && "sms opt-in",
   ].filter(Boolean);
 }
 
-// Books the visit. Never throws: whether it worked comes back as `booked`, so
-// the lead goes through either way. GoHighLevel checks the time is still free
-// (two people can pick the same one) and runs the calendar's own automations,
-// such as confirmations and reminders (toNotify).
-async function bookVisit(contactId, { name, address, service, slot }) {
+// Books the free phone consultation. Never throws: whether it worked comes
+// back as `booked`, so the lead goes through either way. GoHighLevel checks
+// the time is still free (two people can pick the same one) and runs the
+// calendar's own automations, such as confirmations and reminders
+// (toNotify). The call's "where" is the number to call.
+async function bookCall(contactId, { name, phone, service, slot }) {
   try {
     await ghl("/calendars/events/appointments", {
       method: "POST",
@@ -136,9 +182,11 @@ async function bookVisit(contactId, { name, address, service, slot }) {
         locationId: process.env.GHL_LOCATION_ID,
         contactId,
         startTime: slot,
-        title: `Site visit: ${name}${service ? ` (${service})` : ""}`,
+        title: `Phone consultation: ${name}${service ? ` (${service})` : ""}`,
         appointmentStatus: "confirmed",
-        ...(address ? { address, meetingLocationType: "custom", overrideLocationConfig: true } : {}),
+        address: `Call ${phone}`,
+        meetingLocationType: "custom",
+        overrideLocationConfig: true,
         toNotify: true,
       },
     });
@@ -149,28 +197,41 @@ async function bookVisit(contactId, { name, address, service, slot }) {
   }
 }
 
+// A note on the contact. Throws if it didn't go in.
+export const addNote = (contactId, text) =>
+  ghl(`/contacts/${contactId}/notes`, { method: "POST", version: CONTACTS, body: { body: text } });
+
+export const addTags = (contactId, tags) =>
+  ghl(`/contacts/${contactId}/tags`, { method: "POST", version: CONTACTS, body: { tags } });
+
+// A file the visitor attached, into the sub-account's media storage, named
+// after the lead so Andranik can find it there too. Returns its address,
+// which goes in the details note. Throws if it didn't go in.
+export async function uploadFile(file, { name }) {
+  const form = new FormData();
+  form.append("file", file, file.name);
+  form.append("hosted", "false");
+  form.append("name", `${name} - ${file.name}`.slice(0, 120));
+  const data = await ghl("/medias/upload-file", { method: "POST", version: MEDIAS, form, timeout: 30000 });
+  if (!data?.url) throw new Error(`GoHighLevel upload returned no address: ${JSON.stringify(data)?.slice(0, 300)}`);
+  return data.url;
+}
+
 // Sends a request to GoHighLevel: the contact first (if that fails, this
-// throws and the API route falls back to email), then the visit, then the
-// note and tags. `incomplete` means the note or tags didn't go in, so the
-// route emails the request as well.
+// throws and the API route falls back to email), then the opportunity and
+// the call, then the note and tags. `incomplete` means the note or tags
+// didn't go in, so the route emails the request as well. The contact's ID
+// comes back for the form's second part (lib/leadRef).
 export async function deliverToGhl(lead) {
   const contactId = await upsertContact(lead);
-  const booked = lead.slot && isCalendarConfigured() ? await bookVisit(contactId, lead) : null;
-
-  const extras = await Promise.allSettled([
-    ghl(`/contacts/${contactId}/notes`, {
-      method: "POST",
-      version: CONTACTS,
-      body: { body: buildLeadText({ ...lead, booked }) },
-    }),
-    ghl(`/contacts/${contactId}/tags`, {
-      method: "POST",
-      version: CONTACTS,
-      body: { tags: tagsFor(lead, booked) },
-    }),
+  const [, booked] = await Promise.all([
+    addOpportunity(contactId, lead),
+    lead.slot && isCalendarConfigured() ? bookCall(contactId, lead) : null,
   ]);
+
+  const extras = await Promise.allSettled([addNote(contactId, buildLeadText({ ...lead, booked })), addTags(contactId, tagsFor(lead, booked))]);
   const failed = extras.filter((result) => result.status === "rejected");
   failed.forEach((result) => console.error("GoHighLevel note/tags failed:", result.reason));
 
-  return { booked: booked === true, incomplete: failed.length > 0 };
+  return { contactId, booked: booked === true, incomplete: failed.length > 0 };
 }
