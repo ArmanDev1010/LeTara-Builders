@@ -23,8 +23,8 @@ const mapSrc = ({ name, zoom }) =>
 const CARD_CROP = 140;
 
 // Where we build, laid out like HB Links' section (in LeTara's
-// own design): the heading and a line about it, the areas (data/areas.js,
-// placeholders for now) in a grid, then the map across the foot, under a
+// own design): the heading and a line about it, the areas (data/areas.js)
+// in a grid, then the map across the foot, under a
 // bar naming the place it shows. Los Angeles County, the target, leads, wide
 // on a phone and on a wide screen. Pick a city and the map goes to it; it
 // opens on the county. A service page passes its own `number`, `heading`

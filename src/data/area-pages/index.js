@@ -19,8 +19,8 @@ import vanNuys from "./van-nuys";
 // review), and the similarity between pages is measured, not guessed. No
 // prices, durations or guarantees.
 //
-// The areas themselves are placeholders until Andranik confirms where he
-// works. Keep next.config.mjs' AREA_SLUGS in step when adding one.
+// The areas were approved by Andranik (11-17). Keep next.config.mjs'
+// AREA_SLUGS in step when adding one.
 const PAGES = [
   northHills,
   granadaHills,

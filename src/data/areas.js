@@ -6,9 +6,9 @@ import { areaPageHref } from "@/lib/routes";
 // first and wide everywhere it's listed, as on HB Links, and its map shows
 // the whole county (`zoom`); its page is the homepage (`home`). Every
 // other area has a page of its own (data/area-pages) at
-// /design-build-contractor-<slug>. The rest are placeholders in the Valley
-// until Andranik confirms where he works; deliberately not HB Links' list
-// (see CLAUDE.md).
+// /design-build-contractor-<slug>. The rest, in and around the Valley, were
+// approved by Andranik (11-17); deliberately not HB Links' list (see
+// CLAUDE.md).
 export const SERVICE_AREAS = [
   { name: "Los Angeles County", zoom: 9, home: true },
   { name: "North Hills" },
