@@ -168,7 +168,7 @@ export default function About() {
           <Reveal delay={0.1}>
             <p className={LEDE.light}>
               LeTara Builders is a licensed general contractor in Los Angeles County, building new homes, home
-              additions, ADUs, remodels and outdoor living spaces. Every project is design-build: careful
+              additions, ADUs, remodels, outdoor living spaces and commercial build-outs. Every project is design-build: careful
               planning, clear communication and precise execution, from one team.
             </p>
             <p className={`mt-4 ${LEDE.light}`}>

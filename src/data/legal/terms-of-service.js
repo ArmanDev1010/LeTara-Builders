@@ -31,7 +31,8 @@ const termsOfService = {
       body: (
         <>
           <p>
-            The Site describes what we build: new homes, home additions, ADUs, remodels and outdoor living spaces. Asking
+            The Site describes what we build: new homes, home additions, ADUs, remodels, outdoor living spaces and
+            commercial build-outs. Asking
             for a quote, booking a site visit, getting a quote or talking with us about a project doesn&rsquo;t create a
             contract, and doesn&rsquo;t commit you or us to anything.
           </p>

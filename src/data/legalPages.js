@@ -17,7 +17,7 @@ export const LEGAL_PAGES = [
   {
     label: "Terms of Service",
     slug: "terms-of-service",
-    updated: "2026-11-13",
+    updated: "2026-11-16",
     description:
       "The terms for using letarabuilders.com, the website of LeTara Builders, Inc., a licensed California general contractor.",
   },

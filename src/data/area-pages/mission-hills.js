@@ -8,7 +8,7 @@ const missionHills = {
     "Design-build contractor in Mission Hills, Los Angeles: new homes, additions, ADUs, remodels and outdoor living, permitted with LADBS and built by one licensed team.",
   hero: "New homes, additions, ADUs and remodels in Mission Hills, designed, permitted with the City of Los Angeles and built by one licensed team.",
   services:
-    "New homes, room to grow and updates for mid-century houses: every kind of project on one home. Point at one to find it in the drawing.",
+    "New homes, room to grow and updates for mid-century houses, designed and built by one team.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain

@@ -1,11 +1,10 @@
-import AreaBuild from "@/components/Area/AreaBuild";
+import AreaServices from "@/components/Area/AreaServices";
 import HeroCopy from "@/components/Hero/HeroCopy";
 import ServiceHero from "@/components/Hero/ServiceHero";
 import Contact from "@/components/Home/Contact";
 import FAQ from "@/components/Home/FAQ";
 import Process from "@/components/Home/Process";
 import ServiceAreas from "@/components/Home/ServiceAreas";
-import { PROPERTY } from "@/data/area-pages";
 import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 
 // An area page (data/area-pages), served at /design-build-contractor-<slug>,
@@ -16,9 +15,9 @@ import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 //   the turntable hero: one Craftsman home with every service on its lot,
 //     coming together, the area's name in outline behind it
 //     (Hero/ServiceHero, the `property` asset);
-//   What we build: the same home as a line drawing with a cutaway over the
-//     rooms inside, beside a dark card per service, each lighting its part
-//     of the home and opening its page (Area/AreaBuild);
+//   What we build: a dark card per service, the lead one large, each
+//     opening its page (Area/AreaServices: the homepage's bento until 11-16,
+//     when the two swapped and the homepage took the drawing of the home);
 //   How we work: the homepage's five steps;
 //   the quote form (the homepage's);
 //   the area's own questions (the homepage's FAQ);
@@ -38,7 +37,7 @@ import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 // scrapped the slot until they decide what goes there.)
 export default function AreaPage({ page }) {
   const { name } = page;
-  const order = ["build", "process", "quote", "faq", "areas"];
+  const order = ["services", "process", "quote", "faq", "areas"];
   const number = (id) => String(order.indexOf(id) + 1).padStart(2, "0");
   const schemas = [
     buildAreaSchema(page),
@@ -71,7 +70,7 @@ export default function AreaPage({ page }) {
         />
       </ServiceHero>
 
-      <AreaBuild number={number("build")} heading={["What we build", `in ${name}.`]} intro={page.services} items={PROPERTY} />
+      <AreaServices number={number("services")} heading={["What we build", `in ${name}.`]} intro={page.services} />
       <Process number={number("process")} intro={`How a project in ${name} goes with us, from the first call to the final walkthrough.`} />
       <Contact
         number={number("quote")}

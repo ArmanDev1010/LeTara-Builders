@@ -24,7 +24,7 @@ export default function Home() {
               Design-Build Contractor <br /> in <span className="italic">Los Angeles County.</span>
             </>
           }
-          lede="One team from the first sketch to the final walkthrough: new construction, home additions, ADUs, remodels and outdoor living spaces."
+          lede="One team from the first sketch to the final walkthrough: new construction, home additions, ADUs, remodels, outdoor living spaces and commercial build-outs."
         />
       </HeroIntro>
 

@@ -1,6 +1,6 @@
 // The service pages' slugs (data/service-pages). Only these have a page at
 // /<slug>-los-angeles; keep the list in step with that folder.
-const SERVICE_SLUGS = "new-construction|home-additions|adu-contractor|home-remodeling|outdoor-living";
+const SERVICE_SLUGS = "new-construction|home-additions|adu-contractor|home-remodeling|outdoor-living|commercial-construction";
 // The area pages' slugs (data/area-pages). Only these have a page at
 // /design-build-contractor-<slug>; keep the list in step with that folder.
 const AREA_SLUGS = "north-hills|granada-hills|porter-ranch|mission-hills|van-nuys|studio-city|burbank|glendale";

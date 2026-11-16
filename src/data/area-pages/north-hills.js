@@ -8,7 +8,7 @@ const northHills = {
     "Design-build contractor in North Hills, Los Angeles: new homes, additions, ADUs, remodels and outdoor living, designed, permitted with LADBS and built by one licensed team.",
   hero: "New homes, additions, ADUs and remodels in North Hills: designed, taken through the City of Los Angeles' permits and built by one licensed team.",
   services:
-    "From a new house on the lot to a pergola out back, every kind of project on one home. Point at one to find it in the drawing.",
+    "From a new house on the lot to a pergola out back, every kind of project, designed and built by one team.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain
@@ -43,9 +43,9 @@ const northHills = {
         "The City of Los Angeles Department of Building and Safety (LADBS). North Hills is a neighborhood of the City of Los Angeles, not a city of its own, so the city's codes apply. We prepare the plans and handle the permit as part of the job.",
     },
     {
-      question: "Can I add a second story to my single-story house?",
+      question: "Can I add on to my single-story house?",
       answer:
-        "Often, yes, if the zoning, the height limit and the existing foundation allow it. We look at all three on the site visit, before anything is designed.",
+        "Often, yes. Many North Hills lots have room at the back or side for a ground-floor addition: a family room, a bigger kitchen or a primary suite. The lot's setbacks and the zone's limits decide how far it can go, and we check them before anything is designed.",
     },
     {
       question: "Can I build an ADU and a junior ADU on the same lot?",

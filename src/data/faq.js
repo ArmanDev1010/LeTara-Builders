@@ -43,6 +43,11 @@ export const FAQS = [
       "Across Los Angeles County, from the San Fernando Valley to the city and beyond. If your city isn't in our list of service areas, ask: we may still build there.",
   },
   {
+    question: "Do you take on commercial projects?",
+    answer:
+      "Yes: build-outs, tenant improvements and renovations for offices, shops, restaurants and cafés, designed around how the business runs and built by the same team.",
+  },
+  {
     question: "Do you build pergolas and outdoor living spaces?",
     answer:
       "Yes: pergolas, patios, outdoor kitchens and the rest of the backyard, designed to go with the house.",

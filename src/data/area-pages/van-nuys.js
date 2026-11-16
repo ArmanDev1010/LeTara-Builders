@@ -9,7 +9,7 @@ const vanNuys = {
     "Design-build contractor in Van Nuys: new homes, rebuilds, additions, ADUs, remodels and outdoor living, permitted with LADBS and built by one licensed team.",
   hero: "Design-build in Van Nuys: new homes, additions, ADUs, remodels and outdoor living, by one licensed team that handles the permits too.",
   services:
-    "New, added on or made over: every kind of project on one home, for Van Nuys houses and lots. Point at one to find it in the drawing.",
+    "New, added on or made over: every kind of project, for Van Nuys homes and businesses.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain
@@ -49,9 +49,9 @@ const vanNuys = {
         "It depends on the house's condition, what the lot allows and what you want from it. We look at both options on the site visit and tell you plainly which makes more sense.",
     },
     {
-      question: "Do you build second-story additions in Van Nuys?",
+      question: "Do you build home additions in Van Nuys?",
       answer:
-        "Yes, where the zoning and the existing structure allow it. A second story often needs new foundation work below, which we check before design.",
+        "Yes: rooms added at the back or side of the house, primary suites and bump-outs on the ground floor, where the zoning and the lot allow it. We check the setbacks and where the addition ties into the house before design.",
     },
     {
       question: "Do I have to go to the permit office myself?",

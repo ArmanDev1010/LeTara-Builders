@@ -1,36 +1,38 @@
 import { ADDITION_PLANS } from "./plans";
 
-// The home additions page, /home-additions-los-angeles. What its answers
-// say about permits, zoning limits and property tax is the City of Los
-// Angeles' or California's (Prop 13 reassesses new construction only). No
-// prices or durations of LeTara's own until Andranik confirms them.
+// The home additions page, /home-additions-los-angeles, centered on
+// additions on the ground floor (Andranik, 11-16; it used to lead with a
+// second story): a new wing at the back or side, a bump-out. What its
+// answers say about permits, zoning limits and property tax is the City of
+// Los Angeles' or California's (Prop 13 reassesses new construction only).
+// No prices or durations of LeTara's own until Andranik confirms them.
 const homeAdditions = {
   slug: "home-additions",
   title: "Home Additions",
   metaTitle: "Home Additions Contractor in Los Angeles County",
   serviceType: "Home additions",
   description:
-    "Second stories, room additions and bump-outs in Los Angeles County, designed, permitted and built by one licensed design-build team. Free on-site quote.",
+    "Ground-floor additions in Los Angeles County: rear and side wings, primary suites and bump-outs, designed, permitted and built by one licensed design-build team.",
   asset: "addition",
-  assetLabel: "A second-story addition on a one-story house",
-  hero: "More room without moving: a second story, a new wing, or a bigger kitchen or bedroom. We design the addition to look like it was always there, take it through permits and build it.",
+  assetLabel: "A one-story addition on the side of a one-story house",
+  hero: "More room on one level: a new wing at the back or side of the house, a primary suite, a bigger kitchen or family room. We design the addition to look like it was always there, take it through permits and build it.",
 
   // the layers of the build, as numbered on the exploded drawing (`layer`:
   // its part in Hero/studio/assets.js; none for one the drawing can't show)
   layers: {
     heading: ["Your addition,", "layer by layer."],
     intro:
-      "One contract covers every layer of it, from the house it stands on to the last piece of trim. Point at a layer to see it in the drawing.",
+      "One contract covers every layer of it, from the footings to the last piece of trim. Point at a layer to see it in the drawing.",
     items: [
       {
         layer: "house",
-        title: "The house below",
-        text: "An engineer checks the existing foundation and walls, and we reinforce whatever the new floor needs.",
+        title: "Where it joins",
+        text: "The existing house where the addition meets it: the wall opened into the new rooms, and the roof and walls tied in.",
       },
       {
-        layer: "floor",
-        title: "New floor",
-        text: "Floor framing tied into the existing walls, sheathed and leveled for the rooms above.",
+        layer: "foundation",
+        title: "Foundation",
+        text: "New footings and a slab or raised floor, to the engineer's plans, set level with the floors of the house.",
       },
       {
         layer: "walls",
@@ -39,8 +41,8 @@ const homeAdditions = {
       },
       {
         layer: "windows",
-        title: "Windows",
-        text: "Windows sized for the new rooms and lined up with the house's own.",
+        title: "Windows & doors",
+        text: "Windows sized for the new rooms and lined up with the house's own, and doors out to the yard if you want them.",
       },
       {
         layer: "roof",
@@ -50,33 +52,33 @@ const homeAdditions = {
       {
         layer: "inside",
         title: "Inside",
-        text: "Stairs, wiring, plumbing, heating and cooling carried up, then floors, walls and trim.",
+        text: "Wiring, plumbing, heating and cooling carried over from the house, then floors, walls and trim.",
       },
     ],
   },
 
   types: {
     label: "Ways to add on",
-    heading: ["Up, out,", "or a little of both?"],
-    intro: "Which way to grow depends on the yard you want to keep, what your zone allows and what the house can carry.",
+    heading: ["Back, side,", "or just a few feet?"],
+    intro: "Where the house can grow depends on the yard you want to keep, the lot's setbacks and what your zone allows.",
     items: [
       {
-        title: "Second story",
-        text: "A new floor on top of the house: room for bedrooms and a bathroom without giving up any of the yard.",
-        plan: ADDITION_PLANS.second,
+        title: "Rear addition",
+        text: "A new wing at the back of the house, opening onto the yard: a family room, a bigger kitchen or a primary suite.",
+        plan: ADDITION_PLANS.rear,
         facts: [
-          { label: "Footprint", value: "Stays the same" },
-          { label: "Yard", value: "Kept" },
-          { label: "Structure", value: "House below checked" },
+          { label: "Footprint", value: "Grows into the yard" },
+          { label: "Street view", value: "Unchanged" },
+          { label: "Structure", value: "New foundation" },
         ],
       },
       {
-        title: "Ground-floor addition",
-        text: "A new wing at the back or side of the house, for a bigger kitchen, a family room or a primary suite on one level.",
-        plan: ADDITION_PLANS.ground,
+        title: "Side addition",
+        text: "A wing on the side of the house where the lot is wide enough: bedrooms or a bigger living area on the same level.",
+        plan: ADDITION_PLANS.side,
         facts: [
-          { label: "Footprint", value: "Grows" },
-          { label: "Yard", value: "Some of it" },
+          { label: "Footprint", value: "Grows to the side" },
+          { label: "Setbacks", value: "Side yard checked" },
           { label: "Structure", value: "New foundation" },
         ],
       },
@@ -95,10 +97,10 @@ const homeAdditions = {
 
   process: {
     heading: ["Five steps,", "every addition."],
-    intro: "How an addition goes with us, up or out, from the first call to the new room.",
+    intro: "How an addition goes with us, from the first call to the new room.",
     steps: [
-      "Tell us what the house is missing, a bedroom, a bigger kitchen or a second floor, and pick a time for us to see it.",
-      "We measure the house, look at its structure and check what your zone lets you add, before anything is drawn.",
+      "Tell us what the house is missing, a bedroom, a bigger kitchen or a family room, and pick a time for a free phone consultation.",
+      "We measure the house and the lot, look at where the addition ties in and check what your zone lets you add, before anything is drawn.",
       "We design the addition to match the house, refine it with you, and take it through engineering and plan check.",
       "A clear price for the addition as designed, including the work where it joins the existing house.",
       "We build it, tie it in, keep you posted as it goes, and walk it with you at the final inspection.",
@@ -117,12 +119,12 @@ const homeAdditions = {
     {
       question: "How much does a home addition cost in Los Angeles County?",
       answer:
-        "It depends on the size, whether it goes up or out, what the existing structure needs and the finishes. A second story usually costs more than the same room on the ground, because of the engineering and the work on the house below it. We price your addition after seeing the house. {{Get a free quote}}",
+        "It depends on the size, the foundation, how the new roof ties into the old one, the work where the addition joins the house, and the finishes. We price your addition after seeing the house. {{Get a free quote}}",
     },
     {
       question: "Can we live in the house during an addition?",
       answer:
-        "Often, yes, especially with a ground-floor addition, where most of the work stays outside the existing rooms until the two are joined. A second story is more disruptive, and some families move out for part of it. We talk it through on the site visit.",
+        "Often, yes. With a ground-floor addition most of the work stays outside the existing rooms until the two are joined. We talk it through when we see the house.",
     },
     {
       question: "Do I need a permit for a home addition?",
@@ -130,14 +132,14 @@ const homeAdditions = {
         "Yes. Every addition needs a building permit, with plans and structural engineering. We prepare them and take them through the city's plan check as part of the job.",
     },
     {
-      question: "Should I add a second story or build out?",
+      question: "How far can my house grow on the lot?",
       answer:
-        "Building up keeps your yard and often suits a smaller lot; building out avoids work on the existing roof and structure and keeps everything on one level. Your lot's setbacks, height limit and floor-area cap often decide it, and we check those first.",
+        "Your lot's setbacks, how much of it buildings may cover and your zone's cap on floor area decide how far an addition can go at the back or side; easements and utility lines can too. We check them first, before anything is drawn.",
     },
     {
       question: "Will the addition match the rest of my house?",
       answer:
-        "That's what the design is for: the roofline, windows, siding or stucco and interior finishes are planned to match, so the addition reads as part of the house.",
+        "That's what the design is for: the roofline, windows, siding or stucco, floor levels and interior finishes are planned to match, so the addition reads as part of the house.",
     },
     {
       question: "Will an addition raise my property taxes?",
@@ -155,7 +157,7 @@ const homeAdditions = {
 
   quote: {
     heading: ["Ready to add", "more room?"],
-    intro: "A few quick questions, about a minute, and you pick a time for us to come see the house.",
+    intro: "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
   },
 };
 

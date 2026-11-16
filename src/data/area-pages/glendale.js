@@ -11,7 +11,7 @@ const glendale = {
     "Design-build contractor in Glendale: new homes, additions, ADUs, remodels and outdoor living, taken through Glendale's design review and permits by one licensed team.",
   hero: "New homes, additions, ADUs, remodels and outdoor living in Glendale, designed to the city's own rules and built by one licensed team.",
   services:
-    "Every kind of project on one home, designed for Glendale's review and built to its code. Point at one to find it in the drawing.",
+    "Every kind of project, from a new home to a café's build-out, designed for Glendale's review and built to its code.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain
@@ -36,9 +36,9 @@ const glendale = {
 
   faqs: [
     {
-      question: "Does a second-story addition in Glendale need design review?",
+      question: "Does a home addition in Glendale need design review?",
       answer:
-        "Yes. Second-story additions to single-family homes go through the city's design review, decided by staff or by the Design Review Board depending on the project, before building plan check. We prepare the drawings and take them through.",
+        "It can. Glendale reviews the design of some additions to single-family homes, second stories among them, by staff or by the Design Review Board, before building plan check. We check what yours needs, prepare the drawings and take them through.",
     },
     {
       question: "Who issues building permits in Glendale?",

@@ -11,7 +11,7 @@ const studioCity = {
     "Design-build contractor in Studio City: new homes, additions, remodels, ADUs and outdoor living, in the flats and the hills, designed and built by one licensed team.",
   hero: "New homes, additions, remodels, ADUs and outdoor living in Studio City, from the flats to the hills, designed and built by one licensed team.",
   services:
-    "From remodels in the flats to new homes in the hills, every kind of project on one home. Point at one to find it in the drawing.",
+    "From remodels in the flats to new homes in the hills, every kind of project, designed and built by one team.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain

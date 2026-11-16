@@ -1,5 +1,6 @@
 import { SERVICES } from "@/data/services";
 import aduContractor from "./adu-contractor";
+import commercialConstruction from "./commercial-construction";
 import homeAdditions from "./home-additions";
 import homeRemodeling from "./home-remodeling";
 import newConstruction from "./new-construction";
@@ -8,14 +9,14 @@ import outdoorLiving from "./outdoor-living";
 // One page per service (data/services.js), served at /<slug>-los-angeles
 // and rendered by components/Service/ServicePage. Each file holds the
 // page's words: its search title (`metaTitle`; the layout adds
-// " | LeTara Builders") apart from its H1 (`title`), the hero's `focus` (a
-// key of FOCUS in Hero/intro/scene.js) and line, then each section's
+// " | LeTara Builders") apart from its H1 (`title`), the hero's `asset` (a
+// key of ASSETS in Hero/studio/assets.js) and line, then each section's
 // content. The service's menu name, icon and address come from
 // data/services.js, so the two can't disagree; `related` names the other
 // services by slug, each with a line on why it goes with this one.
 //
 // Keep next.config.mjs' SERVICE_SLUGS in step when adding one.
-const PAGES = [newConstruction, homeAdditions, aduContractor, homeRemodeling, outdoorLiving];
+const PAGES = [newConstruction, homeAdditions, aduContractor, homeRemodeling, outdoorLiving, commercialConstruction];
 
 export const SERVICE_PAGES = PAGES.map((page) => {
   const service = SERVICES.find((s) => s.slug === page.slug);

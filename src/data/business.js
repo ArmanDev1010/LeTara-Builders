@@ -12,7 +12,7 @@ export const BUSINESS = {
   legalName: "LeTara Builders, Inc.", // CA Secretary of State entity #6532559
   tagline: "Dream. Design. Build.",
   description:
-    "Licensed and insured design-build general contractor for new construction, home additions, ADUs, remodels and outdoor living spaces.",
+    "Licensed and insured design-build general contractor for new construction, home additions, ADUs, remodels, outdoor living spaces and commercial build-outs.",
   license: 1147978,
   // Written once as digits; the printed number and the tel: link are both
   // made from it (see phoneDisplay / phoneHref).

@@ -1,7 +1,6 @@
 // The small drawings in the service pages' type switcher
 // (components/Service/Types), on a 240 x 160 sheet: what each type adds, in
-// gold, on a lot seen from above, a house seen from the side, or a floor
-// plan. Not to scale (the 4 ft setbacks are marked, not measured); they show
+// gold, on a lot seen from above or a floor plan. Not to scale (the 4 ft setbacks are marked, not measured); they show
 // where things go, not how big they are.
 
 const STREET = { t: "text", x: 120, y: 155, label: "STREET" };
@@ -60,27 +59,30 @@ export const ADU_PLANS = {
   ],
 };
 
-const SIDE = { t: "text", x: 32, y: 18, label: "SIDE VIEW" };
-const GROUND = { t: "ground", y: 138 };
-
+// home additions, on the ground floor (Andranik, 11-16): the lot from
+// above, the house by the street and the addition in gold
 export const ADDITION_PLANS = {
-  second: [
-    SIDE,
-    GROUND,
-    { t: "house", x: 50, y: 96, w: 140, h: 42, label: "HOUSE" },
-    { t: "new", x: 62, y: 56, w: 116, h: 40, label: "NEW FLOOR" },
+  rear: [
+    LOT,
+    { t: "house", x: 50, y: 88, w: 128, h: 44, label: "HOUSE" },
+    { t: "new", x: 86, y: 50, w: 68, h: 38, label: "ADDITION" },
+    { t: "text", x: 120, y: 32, label: "YARD" },
+    STREET,
   ],
-  ground: [
-    SIDE,
-    GROUND,
-    { t: "house", x: 34, y: 96, w: 124, h: 42, label: "HOUSE" },
-    { t: "new", x: 158, y: 104, w: 58, h: 34, label: "ADDITION" },
+  side: [
+    LOT,
+    { t: "house", x: 38, y: 88, w: 112, h: 44, label: "HOUSE" },
+    { t: "new", x: 150, y: 96, w: 50, h: 36, label: "ADDITION" },
+    { t: "dim", x1: 200, y1: 114, x2: 224, y2: 114, label: "SETBACK" },
+    { t: "text", x: 110, y: 50, label: "YARD" },
+    STREET,
   ],
   bumpout: [
-    SIDE,
-    GROUND,
-    { t: "house", x: 40, y: 92, w: 152, h: 46, label: "HOUSE" },
-    { t: "new", x: 192, y: 108, w: 24, h: 30, label: "BUMP", label2: "OUT" },
+    LOT,
+    { t: "house", x: 46, y: 80, w: 148, h: 52, label: "HOUSE" },
+    { t: "new", x: 98, y: 62, w: 44, h: 18, label: "BUMP-OUT" },
+    { t: "text", x: 120, y: 38, label: "YARD" },
+    STREET,
   ],
 };
 
@@ -100,6 +102,37 @@ export const REMODEL_PLANS = {
   kitchen: rooms(["kitchen"]),
   bathroom: rooms(["bath"]),
   whole: rooms(ROOMS.map(({ id }) => id)),
+};
+
+// a commercial space's floor plan, the storefront along the bottom, the
+// part each kind of build-out is about in gold
+const FRONT = { t: "text", x: 120, y: 155, label: "STOREFRONT" };
+const PLAN = { t: "text", x: 40, y: 12, label: "FLOOR PLAN" };
+const space = (rooms) => [PLAN, ...rooms.map((room) => ({ t: "room", ...room })), FRONT];
+export const COMMERCIAL_PLANS = {
+  tenant: space([
+    { x: 30, y: 18, w: 120, h: 122, label: "YOUR SPACE", on: true },
+    { x: 150, y: 18, w: 60, h: 62, label: "OFFICE", on: true },
+    { x: 150, y: 80, w: 60, h: 60, label: "RESTROOM", on: true },
+  ]),
+  restaurant: space([
+    { x: 30, y: 18, w: 108, h: 54, label: "KITCHEN", on: true },
+    { x: 138, y: 18, w: 40, h: 54, label: "STORAGE" },
+    { x: 178, y: 18, w: 32, h: 54, label: "WC" },
+    { x: 30, y: 72, w: 180, h: 68, label: "DINING", on: true },
+  ]),
+  office: space([
+    { x: 30, y: 18, w: 60, h: 56, label: "OFFICE", on: true },
+    { x: 90, y: 18, w: 60, h: 56, label: "OFFICE", on: true },
+    { x: 150, y: 18, w: 60, h: 56, label: "MEETING", on: true },
+    { x: 30, y: 74, w: 120, h: 66, label: "OPEN WORK", on: true },
+    { x: 150, y: 74, w: 60, h: 66, label: "RECEPTION" },
+  ]),
+  retail: space([
+    { x: 30, y: 18, w: 120, h: 40, label: "STOCKROOM" },
+    { x: 150, y: 18, w: 60, h: 40, label: "RESTROOM" },
+    { x: 30, y: 58, w: 180, h: 82, label: "SALES FLOOR", on: true },
+  ]),
 };
 
 // one backyard from above, the part each project builds in gold

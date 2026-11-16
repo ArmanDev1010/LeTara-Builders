@@ -11,7 +11,7 @@ const granadaHills = {
     "Design-build contractor in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from Eichlers to foothill lots, designed and built by one licensed team.",
   hero: "Design-build in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from the flats to the foothills, by one licensed team.",
   services:
-    "From Eichler remodels to new homes in the foothills, every kind of project on one home. Point at one to find it in the drawing.",
+    "From Eichler remodels to new homes in the foothills, every kind of project, designed and built by one team.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain

@@ -10,7 +10,7 @@ const burbank = {
     "Design-build contractor in Burbank: new homes, additions, ADUs, remodels and outdoor living, permitted with the City of Burbank and built by one licensed team.",
   hero: "Design-build in Burbank: new homes, additions, ADUs, remodels and outdoor living, permitted with the City of Burbank and built by one licensed team.",
   services:
-    "Every kind of project on one home, drawn to the City of Burbank's code and planned with its utility. Point at one to find it in the drawing.",
+    "New homes, additions, ADUs, remodels and outdoor living, drawn to the City of Burbank's code and planned with its utility.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain
@@ -50,9 +50,9 @@ const burbank = {
         "Yes: detached and attached ADUs, junior ADUs and garage conversions. State ADU law applies in Burbank alongside the city's own rules.",
     },
     {
-      question: "Can you add a second story to a Burbank home?",
+      question: "Can you add on to a Burbank home?",
       answer:
-        "Where Burbank's zoning and the existing structure allow it, yes. We check the height and setback rules for your lot and the foundation on the site visit.",
+        "Where Burbank's zoning and the lot allow it, yes: a new wing at the back or side, a primary suite or a bump-out on the ground floor. Burbank's own zoning sets the setbacks and how much of the lot can be built on; we check them for your lot before design.",
     },
     {
       question: "Is my Burbank home in a fire zone?",

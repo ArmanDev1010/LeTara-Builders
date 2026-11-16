@@ -10,7 +10,7 @@ const porterRanch = {
     "Design-build contractor in Porter Ranch: additions, remodels, ADUs, new homes and outdoor living for hillside lots, permitted with LADBS and built by one licensed team.",
   hero: "Additions, remodels, ADUs and outdoor living in Porter Ranch: designed for hillside lots, permitted with the City of Los Angeles and built by one team.",
   services:
-    "From second stories to an outdoor kitchen with a view, every kind of project on one home. Point at one to find it in the drawing.",
+    "From a new wing to an outdoor kitchen with a view, every kind of project, designed for hillside lots.",
 
   // Parked, not shown (11-12): the "Building in <area>" section was
   // scrapped until the user decides what goes after the quote form. Plain
