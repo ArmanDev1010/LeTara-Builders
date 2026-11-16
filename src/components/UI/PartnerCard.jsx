@@ -1,14 +1,16 @@
 import { TbArrowUpRight } from "react-icons/tb";
 import { HexDot } from "@/components/Home/parts";
 import { BUSINESS } from "@/data/business";
+import VistaLogo from "@/components/UI/VistaLogo";
 
 // A cut corner, top right, as on the services' cards.
 const CHAMFER = "[clip-path:polygon(0_0,calc(100%-22px)_0,100%_22px,100%_100%,0_100%)]";
 
 // LeTara's partner for patio covers and awnings, Vista Pergolas (Andranik,
 // 11-16; data/business.js): a dark card on white, cut at the corner like the
-// services' cards, with what Vista offers and a link to its site (a new
-// tab). At the foot of the homepage's services, and in its own section on
+// services' cards: its logo (a link to its site, 11-16: the user asked for
+// the logo in place of the name), what Vista offers and a button to its site
+// (both a new tab). At the foot of the homepage's services, and in its own section on
 // the outdoor living page. `as` is the title's element (h3, under the
 // section's h2).
 export default function PartnerCard({ className = "", as: Title = "h3" }) {
@@ -24,9 +26,23 @@ export default function PartnerCard({ className = "", as: Title = "h3" }) {
       <div className="relative grid gap-7 p-6 700:p-8 1080:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_auto] 1080:items-center 1080:gap-10">
         <div className="pointer-events-none">
           <p className="font-script text-[11px] uppercase tracking-[0.2em] text-third">Our partner</p>
-          <Title className="mt-2 font-display uppercase leading-[0.95] tracking-[0.01em] text-[30px] 700:text-[36px]">
-            Patio covers &amp; awnings <br />
-            by {partner.name}
+          {/* its logo, a link to its site */}
+          <a
+            href={partner.url}
+            target="_blank"
+            rel="noopener"
+            className="group/logo pointer-events-auto mt-4 inline-flex items-start gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-third"
+          >
+            <VistaLogo className="h-12 700:h-14 w-auto text-white" />
+            <TbArrowUpRight
+              aria-hidden="true"
+              className="text-[18px] text-white/40 transition-[color,transform] duration-200 group-hover/logo:text-third group-hover/logo:[transform:translate(2px,-2px)]"
+            />
+            <span className="sr-only">{partner.name} (opens in a new tab)</span>
+          </a>
+          <Title className="mt-4 font-display uppercase leading-[0.95] tracking-[0.01em] text-[30px] 700:text-[36px]">
+            Patio covers &amp; awnings
+            <span className="sr-only"> by {partner.name}</span>
           </Title>
           <p className="mt-3 max-w-md text-[14.5px] leading-relaxed text-white/60">
             {partner.name} designs and builds aluminum patio covers and retractable awnings for homes and businesses. It

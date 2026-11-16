@@ -97,8 +97,8 @@ function Run({ reviews, run, time, repeat = 1, compact, className }) {
   );
 }
 
-// What clients say, on white: the heading and a line (and, once LeTara has a
-// Google Business Profile, its rating and links, data/testimonials.js), then
+// What clients say, on white: the heading and a line, the rating on Google
+// and links to the reviews (data/testimonials.js), then
 // a black canvas across the whole width with the white reviews inside it
 // (the user asked for that too), several in view at once (HB Links shows
 // one at a time). With enough reviews (MOVING_COLUMNS) they move: three
@@ -113,7 +113,10 @@ export default async function Testimonials({ number = "04" }) {
   const reviews = await getReviews();
   if (!reviews.length) return null;
   const n = reviews.length;
-  const { rating, count, readAll, profile } = REVIEWS_SUMMARY;
+  const { readAll, profile } = REVIEWS_SUMMARY;
+  // Google's numbers once they're filled in; until then the reviews' own
+  const rating = REVIEWS_SUMMARY.rating ?? reviews.reduce((sum, review) => sum + review.stars, 0) / n;
+  const count = REVIEWS_SUMMARY.count ?? n;
   const shift = (k) => [...reviews.slice(k % n), ...reviews.slice(0, k % n)];
   const moving = n >= MOVING_COLUMNS;
   const rows = n === 1 ? 0 : n >= TWO_ROWS ? 2 : 1;
@@ -140,7 +143,7 @@ export default async function Testimonials({ number = "04" }) {
             we&apos;ve built for.
           </Reveal>
 
-          {/* the rating on Google and the way to the reviews, once there's a profile */}
+          {/* the rating on Google and the way to the reviews */}
           {profile && (
             <Reveal delay={0.15} className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-5">
               <div className="flex items-center gap-3.5 pointer-events-none">
