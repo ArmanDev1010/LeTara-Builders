@@ -29,6 +29,11 @@ const HOLD = 0.15;
 // or above it, never under it. Phones held sideways get the finished scene
 // as a still; Reduce Motion plays a calmer version (see `calm` in scene.js)
 // that follows the scroll exactly instead of gliding after it.
+//
+// /?look=blueprint shows the blueprint look instead (`look` in scene.js), a
+// demo for Andranik (11-16): read once the page is in the browser, and set on
+// the section (`data-look`) for its own background and the shade under the
+// copy.
 export default function HeroIntro({ children }) {
   const trackRef = useRef(null);
   const panelRef = useRef(null);
@@ -47,6 +52,8 @@ export default function HeroIntro({ children }) {
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
     let { arrived } = arrivalRef.current;
+    const look = new URLSearchParams(window.location.search).get("look") === "blueprint" ? "blueprint" : "render";
+    trackRef.current.dataset.look = look;
 
     const still = window.matchMedia(STILL_QUERY);
     const calm = window.matchMedia(CALM_QUERY);
@@ -61,6 +68,7 @@ export default function HeroIntro({ children }) {
         still: still.matches,
         calm: calm.matches,
         arrived,
+        look,
       });
       arrived = false;
     };
@@ -81,7 +89,7 @@ export default function HeroIntro({ children }) {
     <section
       ref={trackRef}
       id="hero"
-      className="relative h-[calc(475*var(--vh))] intro-still:h-auto bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.26),rgba(196,92,16,0.08)_45%,transparent_75%)] portrait:bg-[radial-gradient(ellipse_80%_35%_at_100%_25%,rgba(255,170,58,0.28),rgba(196,92,16,0.08)_45%,transparent_75%)] text-neutral-50"
+      className="group relative h-[calc(475*var(--vh))] intro-still:h-auto bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.26),rgba(196,92,16,0.08)_45%,transparent_75%)] portrait:bg-[radial-gradient(ellipse_80%_35%_at_100%_25%,rgba(255,170,58,0.28),rgba(196,92,16,0.08)_45%,transparent_75%)] data-[look=blueprint]:bg-[#04122b] data-[look=blueprint]:bg-none data-[look=blueprint]:portrait:bg-none text-neutral-50"
     >
       <div
         ref={panelRef}
@@ -95,7 +103,7 @@ export default function HeroIntro({ children }) {
         />
         {/* shade under the copy; on a wide screen it eases off to the right,
             where the house can come down beside the copy */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-black/75 via-black/35 to-transparent 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-black/75 via-black/35 to-transparent group-data-[look=blueprint]:from-[#020a1c]/85 group-data-[look=blueprint]:via-[#020a1c]/40 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
         <div
           ref={copyRef}
           className="wide-zoom relative z-20 900:pb-16 pb-20 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10"
@@ -109,7 +117,7 @@ export default function HeroIntro({ children }) {
 
 // Draws the scene for how far the hero has been scrolled through (or, when
 // `still`, its finished frame once). Returns a function that stops it.
-function playScene({ track, panel, canvas, copy, still, calm, arrived }) {
+function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
   const context = canvas.getContext("2d");
   const lite = window.matchMedia(LITE_QUERY).matches;
   const abort = new AbortController();
@@ -130,7 +138,7 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived }) {
     const key = [t.toFixed(4), size.width, size.height, size.dpr, copyTop, copyRight, titleRight, navZoom, navBottom, head?.top, idle.toFixed(3)].join(":");
     if (key === drawn) return;
     drawn = key;
-    drawScene(context, { ...size, t, calm, fonts, idle, lite });
+    drawScene(context, { ...size, t, calm, fonts, idle, lite, look });
     // the page transition waits for this before it opens (UI/PageTransition)
     canvas.dataset.drawn = "1";
   };
