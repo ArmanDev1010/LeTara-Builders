@@ -50,6 +50,6 @@ export const FAQS = [
   {
     question: "Do you build pergolas and outdoor living spaces?",
     answer:
-      "Yes: pergolas, patios, outdoor kitchens and the rest of the backyard, designed to go with the house.",
+      "Yes: pergolas, patios, outdoor kitchens and the rest of the backyard, designed to go with the house. For aluminum patio covers and retractable awnings, we work with our partner, Vista Pergolas.",
   },
 ];

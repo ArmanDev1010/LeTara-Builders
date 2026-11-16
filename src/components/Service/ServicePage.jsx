@@ -5,6 +5,7 @@ import FAQ from "@/components/Home/FAQ";
 import Process from "@/components/Home/Process";
 import ServiceAreas from "@/components/Home/ServiceAreas";
 import Layers from "@/components/Service/Layers";
+import Partner from "@/components/Service/Partner";
 import Posters from "@/components/Service/Posters";
 import Types from "@/components/Service/Types";
 import { buildBreadcrumbs, buildServiceSchema } from "@/lib/seo";
@@ -18,6 +19,8 @@ import { buildBreadcrumbs, buildServiceSchema } from "@/lib/seo";
 //   Layer by layer: what's included, on an exploded drawing of the same object;
 //   How we work: the homepage's five steps, worded for the service;
 //   the types, as a switcher with a small site plan of each;
+//   a partner, where the page has one (outdoor living: Vista Pergolas for
+//     patio covers and awnings, 11-16);
 //   the quote form (the homepage's);
 //   the questions (the homepage's FAQ, the service's own questions);
 //   Where we build (the homepage's map, the service's own heading);
@@ -29,7 +32,7 @@ import { buildBreadcrumbs, buildServiceSchema } from "@/lib/seo";
 // "Know before you build" was dropped. Mainly white, like the homepage: the
 // hero, the form and the areas are black. Scene numbers run in page order.
 export default function ServicePage({ page }) {
-  const order = ["layers", "process", page.types && "types", "quote", "faq", "areas", "posters"].filter(Boolean);
+  const order = ["layers", "process", page.types && "types", page.partner && "partner", "quote", "faq", "areas", "posters"].filter(Boolean);
   const number = (id) => String(order.indexOf(id) + 1).padStart(2, "0");
   const schemas = [
     buildServiceSchema(page),
@@ -64,6 +67,7 @@ export default function ServicePage({ page }) {
       <Layers number={number("layers")} asset={page.asset} {...page.layers} />
       <Process number={number("process")} {...page.process} />
       {page.types && <Types number={number("types")} {...page.types} />}
+      {page.partner && <Partner number={number("partner")} {...page.partner} />}
       <Contact number={number("quote")} {...page.quote} />
       <FAQ number={number("faq")} heading={page.faqHeading} intro={page.faqIntro} faqs={page.faqs} />
       <ServiceAreas number={number("areas")} {...page.areas} />

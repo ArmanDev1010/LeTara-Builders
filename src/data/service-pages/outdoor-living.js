@@ -1,9 +1,10 @@
 import { OUTDOOR_PLANS } from "./plans";
 
 // The outdoor living page, /outdoor-living-los-angeles: pergolas and patio
-// covers, outdoor kitchens, decks, patios and fire features. Its search
-// title leads with "Outdoor Living", not "Pergolas", on purpose: ask before
-// changing it. What
+// covers, outdoor kitchens, decks, patios and fire features, and Andranik's
+// Vista Pergolas as LeTara's partner for patio covers and awnings (11-16,
+// `partner`). Its search title leads with "Outdoor Living", not "Pergolas",
+// on purpose (Vista is the pergola specialist): ask before changing it. What
 // its answers say about permits is the building code's (covers, raised or
 // attached decks, gas, power and water) and the fire code's in the Very
 // High Fire Hazard Severity Zones. No prices or durations until Andranik
@@ -66,7 +67,7 @@ const outdoorLiving = {
     items: [
       {
         title: "Pergolas & patio covers",
-        text: "Shade over a patio or deck: an open pergola, a louvered roof, or a solid patio cover tied into the house.",
+        text: "Shade over a patio or deck: an open pergola, a louvered roof, or a solid patio cover tied into the house. Aluminum covers and awnings come from our partner, Vista Pergolas.",
         plan: OUTDOOR_PLANS.pergola,
         facts: [
           { label: "Gives you", value: "Shade and a ceiling" },
@@ -105,6 +106,12 @@ const outdoorLiving = {
         ],
       },
     ],
+  },
+
+  // our partner for patio covers and awnings (Service/Partner)
+  partner: {
+    heading: ["Shade overhead,", "from our partner."],
+    intro: "We plan the patio, the kitchen and the lighting; Vista Pergolas, our partner for aluminum patio covers and retractable awnings, designs and builds the cover over them.",
   },
 
   process: {

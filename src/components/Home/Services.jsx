@@ -9,6 +9,7 @@ import { drawDiagram } from "@/components/Hero/studio/studio";
 import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, LIGHT, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
+import PartnerCard from "@/components/UI/PartnerCard";
 import { SERVICES } from "@/data/services";
 
 const CUT_TIME = 1300; // ms the cutaway takes to open, once in view
@@ -31,9 +32,10 @@ const CHAMFER = "[clip-path:polygon(0_0,calc(100%-20px)_0,100%_20px,100%_100%,0_
 // and arrow box gold. Commercial has no part in the home: its card spans the
 // foot and lights only itself. As the drawing scrolls into view the cutaway
 // opens: the roof and walls over the rooms fade into their dashed outline (a
-// fade, so the same with Reduce Motion). (11-12: the user asked for the
-// drawing whole, not pulled apart, a little bigger, and the rooms shown
-// through a cut.)
+// fade, so the same with Reduce Motion). Under it all, LeTara's partner for
+// patio covers and awnings, Vista Pergolas (UI/PartnerCard; Andranik,
+// 11-16). (11-12: the user asked for the drawing whole, not pulled apart, a
+// little bigger, and the rooms shown through a cut.)
 const ON_THE_HOME = new Set(Object.keys(ASSETS.property.layers));
 const ITEMS = SERVICES.map(({ slug, title, home, href }) => ({ layer: slug, title, text: home, href, drawn: ON_THE_HOME.has(slug) }));
 
@@ -210,6 +212,10 @@ export default function Services({
             })}
           </ul>
         </div>
+
+        <Reveal delay={0.1} className="mt-12 1080:mt-16">
+          <PartnerCard />
+        </Reveal>
       </div>
     </section>
   );

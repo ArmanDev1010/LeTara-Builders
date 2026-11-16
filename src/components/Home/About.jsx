@@ -128,6 +128,30 @@ function Laurel({ top, main, bottom }) {
 // shows the statuette and the Academy's backdrop, the one exception to the
 // no-statuette rule (CLAUDE.md), at the user's request; confirm its rights
 // before launch.
+// A line of his titles, with Vista Pergolas' name linking to its site (a new
+// tab; Andranik's request, 11-16). The portrait lets no clicks through, so
+// the link takes them back.
+function PartnerName({ text }) {
+  const { partner } = BUSINESS;
+  const at = partner ? text.indexOf(partner.name) : -1;
+  if (at < 0) return text;
+  return (
+    <>
+      {text.slice(0, at)}
+      <a
+        href={partner.url}
+        target="_blank"
+        rel="noopener"
+        className="pointer-events-auto underline decoration-third/70 underline-offset-[3px] hover:text-third transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third"
+      >
+        {partner.name}
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+      {text.slice(at + partner.name.length)}
+    </>
+  );
+}
+
 export default function About() {
   return (
     <section id="about" className={`${SECTION} ${LIGHT}`}>
@@ -259,7 +283,9 @@ export default function About() {
                 </p>
                 <div className="mt-2 text-[12.5px] 1440:text-[13.5px] leading-snug text-white/75">
                   {founder.titles.map((title) => (
-                    <p key={title}>{title}</p>
+                    <p key={title}>
+                      <PartnerName text={title} />
+                    </p>
                   ))}
                 </div>
               </div>

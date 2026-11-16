@@ -26,6 +26,15 @@ export const BUSINESS = {
   // user's call); whether to show a street address is still to decide.
   address: { locality: "North Hills", region: "CA", country: "US" },
   instagram: "https://www.instagram.com/letarabuilders/",
+  // Andranik's other company, LeTara's partner for patio covers and awnings
+  // (Andranik, 11-16): a card on the homepage and on the outdoor living page
+  // (UI/PartnerCard), and a link on its name in the About portrait. What it
+  // offers is from its own site.
+  partner: {
+    name: "Vista Pergolas",
+    url: "https://vistapergolas.com",
+    offers: ["Louvered patio covers", "Solid-roof patio covers", "Lattice patio covers", "Retractable awnings"],
+  },
   founder: {
     name: "Andranik Taranyan",
     instagram: "https://www.instagram.com/andranikvfx/",
