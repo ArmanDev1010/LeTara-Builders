@@ -1,18 +1,25 @@
 // The reviews themselves are added in the editor (/keystatic → Reviews; see
-// lib/reviews.js). This is the line over them for LeTara's Google Business
-// Profile: the Google "G", the rating, the count, and links to the reviews
-// and the profile. The profile isn't set up yet, but the user wants the line
-// on the site already (11-16): until then the links are a Google search and
-// a Google Maps search for the name, and with no rating or count here the
-// line shows the reviews on the site (their average and how many).
+// lib/reviews.js). This is the line over them: with LeTara's Google Business
+// Profile, the Google "G", the rating, the count, and links to the reviews
+// and the profile; without one, the rating and the count of the reviews on
+// the site, with no Google name or links (Home/Testimonials).
 //
-// Once the profile exists: its link in `profile`, its reviews link in
-// `readAll`, and its own rating and count (they must match Google's at
-// launch). Never put the rating in the structured data unless those reviews
-// are on the page.
+// The profile isn't set up yet (11-17). Once it exists: its link in
+// `profile`, its reviews link in `readAll`, and its own rating and count
+// (they must match Google's). Never put the rating in the structured data
+// unless those reviews are on the page.
 export const REVIEWS_SUMMARY = {
   rating: null,
   count: null,
+  readAll: null,
+  profile: null,
+};
+
+// Until then the user wants the Google line seen on the unlisted site (11-16),
+// so before launch (LAUNCHED in lib/seo.js) it stands in with a Google search
+// and a Google Maps search for the name. Once the site is live, the line says
+// "on Google" only with the real profile above (11-17, the user agreed).
+export const PREVIEW_GOOGLE = {
   readAll: "https://www.google.com/search?q=LeTara+Builders+reviews",
   profile: "https://www.google.com/maps/search/?api=1&query=LeTara+Builders",
 };

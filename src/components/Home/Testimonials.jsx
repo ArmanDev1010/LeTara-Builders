@@ -3,8 +3,9 @@ import { TbArrowUpRight, TbStar, TbStarFilled } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
-import { REVIEWS_SUMMARY } from "@/data/testimonials";
+import { PREVIEW_GOOGLE, REVIEWS_SUMMARY } from "@/data/testimonials";
 import { getReviews } from "@/lib/reviews";
+import { LAUNCHED } from "@/lib/seo";
 
 // A cut corner, top right, as on the services cards (the navbar's points).
 const CHAMFER = "[clip-path:polygon(0_0,calc(100%-18px)_0,100%_18px,100%_100%,0_100%)]";
@@ -97,8 +98,9 @@ function Run({ reviews, run, time, repeat = 1, compact, className }) {
   );
 }
 
-// What clients say, on white: the heading and a line, the rating on Google
-// and links to the reviews (data/testimonials.js), then
+// What clients say, on white: the heading and a line, the rating (on Google
+// with links to the reviews once the profile exists; data/testimonials.js),
+// then
 // a black canvas across the whole width with the white reviews inside it
 // (the user asked for that too), several in view at once (HB Links shows
 // one at a time). With enough reviews (MOVING_COLUMNS) they move: three
@@ -113,10 +115,13 @@ export default async function Testimonials({ number = "04" }) {
   const reviews = await getReviews();
   if (!reviews.length) return null;
   const n = reviews.length;
-  const { readAll, profile } = REVIEWS_SUMMARY;
+  // Google's line with the real profile; before launch, its stand-in; live
+  // without a profile, the rating with no Google name or links
+  const google = REVIEWS_SUMMARY.profile ? REVIEWS_SUMMARY : LAUNCHED ? null : PREVIEW_GOOGLE;
   // Google's numbers once they're filled in; until then the reviews' own
-  const rating = REVIEWS_SUMMARY.rating ?? reviews.reduce((sum, review) => sum + review.stars, 0) / n;
-  const count = REVIEWS_SUMMARY.count ?? n;
+  const rating = (google && REVIEWS_SUMMARY.rating) || reviews.reduce((sum, review) => sum + review.stars, 0) / n;
+  const count = (google && REVIEWS_SUMMARY.count) || n;
+  const plural = count === 1 ? "" : "s";
   const shift = (k) => [...reviews.slice(k % n), ...reviews.slice(0, k % n)];
   const moving = n >= MOVING_COLUMNS;
   const rows = n === 1 ? 0 : n >= TWO_ROWS ? 2 : 1;
@@ -143,36 +148,45 @@ export default async function Testimonials({ number = "04" }) {
             we&apos;ve built for.
           </Reveal>
 
-          {/* the rating on Google and the way to the reviews */}
-          {profile && (
-            <Reveal delay={0.15} className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-5">
-              <div className="flex items-center gap-3.5 pointer-events-none">
+          {/* the rating, on Google with the way to the reviews */}
+          <Reveal delay={0.15} className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-5">
+            <div className="flex items-center gap-3.5 pointer-events-none">
+              {google && (
                 <span className="grid place-items-center w-12 h-12 shrink-0 rounded-full border border-black/10 bg-white">
                   <FcGoogle aria-hidden="true" className="text-[26px]" />
                 </span>
-                <span>
-                  <span className="flex items-center gap-2.5">
-                    {rating ? <span className="font-display text-[30px] leading-none tracking-[0.02em] text-neutral-950">{rating.toFixed(1)}</span> : null}
-                    <Stars className="text-[16px]" />
+              )}
+              <span>
+                <span className="flex items-center gap-2.5">
+                  <span className="font-display text-[30px] leading-none tracking-[0.02em] text-neutral-950">
+                    {rating.toFixed(1)}
+                    <span className="sr-only"> out of 5</span>
                   </span>
-                  <span className="block mt-1 text-[13.5px] text-black/55">{count ? `${count} reviews on Google` : "Reviews on Google"}</span>
+                  <Stars className="text-[16px]" />
                 </span>
-              </div>
-              <span aria-hidden="true" className="max-550:hidden h-11 w-px bg-black/10" />
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                {readAll && (
-                  <a href={readAll} target="_blank" rel="noopener noreferrer" className={link}>
-                    Read all reviews
+                <span className="block mt-1 text-[13.5px] text-black/55">
+                  {google ? `${count} review${plural} on Google` : `${count} client review${plural}`}
+                </span>
+              </span>
+            </div>
+            {google && (
+              <>
+                <span aria-hidden="true" className="max-550:hidden h-11 w-px bg-black/10" />
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                  {google.readAll && (
+                    <a href={google.readAll} target="_blank" rel="noopener noreferrer" className={link}>
+                      Read all reviews
+                      <TbArrowUpRight aria-hidden="true" className="text-third" />
+                    </a>
+                  )}
+                  <a href={google.profile} target="_blank" rel="noopener noreferrer" className={link}>
+                    See us on Google
                     <TbArrowUpRight aria-hidden="true" className="text-third" />
                   </a>
-                )}
-                <a href={profile} target="_blank" rel="noopener noreferrer" className={link}>
-                  See us on Google
-                  <TbArrowUpRight aria-hidden="true" className="text-third" />
-                </a>
-              </div>
-            </Reveal>
-          )}
+                </div>
+              </>
+            )}
+          </Reveal>
         </div>
       </div>
 
