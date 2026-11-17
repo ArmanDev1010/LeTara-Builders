@@ -129,8 +129,9 @@ function Laurel({ top, main, bottom }) {
 // no-statuette rule (CLAUDE.md), at the user's request; confirm its rights
 // before launch.
 // A line of his titles, with Vista Pergolas' name linking to its site (a new
-// tab; Andranik's request, 11-16). The portrait lets no clicks through, so
-// the link takes them back.
+// tab; Andranik's request, 11-16), underlined in Vista's green (11-17, the
+// user asked). The portrait lets no clicks through, so the link takes them
+// back.
 function PartnerName({ text }) {
   const { partner } = BUSINESS;
   const at = partner ? text.indexOf(partner.name) : -1;
@@ -142,7 +143,7 @@ function PartnerName({ text }) {
         href={partner.url}
         target="_blank"
         rel="noopener"
-        className="pointer-events-auto underline decoration-third/70 underline-offset-[3px] hover:text-third transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third"
+        className="pointer-events-auto underline decoration-vista decoration-[1.5px] underline-offset-[3px] hover:text-vista transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vista"
       >
         {partner.name}
         <span className="sr-only"> (opens in a new tab)</span>
@@ -156,7 +157,7 @@ export default function About() {
   return (
     <section id="about" className={`${SECTION} ${LIGHT}`}>
       <div
-        className={`${CONTAINER} grid gap-x-12 1440:gap-x-16 gap-y-8 grid-cols-1 [grid-template-areas:'head''portrait''creds''body'] 1080:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] 1080:grid-rows-[auto_auto_1fr] 1080:[grid-template-areas:'head_portrait''creds_portrait''body_portrait']`}
+        className={`${CONTAINER} grid gap-x-12 1440:gap-x-16 gap-y-8 grid-cols-1 [grid-template-areas:'head''portrait''creds''body'] 1080:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] 1280:grid-cols-[minmax(0,1fr)_420px] 1440:grid-cols-[minmax(0,1fr)_440px] 1080:grid-rows-[auto_auto_1fr] 1080:[grid-template-areas:'head_portrait''creds_portrait''body_portrait']`}
       >
         <div className="[grid-area:head]">
           <Reveal>
@@ -210,11 +211,15 @@ export default function About() {
 
         {/* a 2:3 crop on a phone (below the knees; the whole photo was taller
             than the screen), then 3:4 and 4:5 (to the knees); on a wide screen
-            as tall as the column beside it. Everything sits inside it. */}
+            exactly as tall as the column beside it, ending at its link (11-17,
+            the user asked; it ran 155px past it), and from 1280px 420/440px
+            wide with the photo a little higher in it, so the quote (18px
+            there) still sits under the statuette, on his dark suit.
+            Everything sits inside it. */}
         <Reveal
           as="figure"
           delay={0.1}
-          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[620px] 1280:min-h-[680px] 1440:min-h-[740px] pointer-events-none"
+          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[560px] pointer-events-none"
         >
           <div className="absolute inset-0 overflow-hidden bg-neutral-900">
             <Image
@@ -223,7 +228,7 @@ export default function About() {
               fill
               sizes="(min-width: 1080px) 40vw, 100vw"
               placeholder="blur"
-              className="object-cover object-[62%_6%]"
+              className="object-cover object-[62%_6%] 1280:object-[62%_18%]"
             />
             {/* dark only in the top left corner, under the label and the awards */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_50%_at_0%_0%,rgba(0,0,0,0.8),rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.32)_62%,rgba(0,0,0,0.1)_80%,transparent_92%)]" />
@@ -258,7 +263,7 @@ export default function About() {
                   so the words line up with his name, the last line gold), with
                   air between the lines and before his name */}
               <div className="mt-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.45),0_0_22px_rgba(0,0,0,0.4)]">
-                <blockquote className="max-w-[24em] font-quote uppercase text-[16px] 550:text-[20px] 1080:text-[19px] 1280:text-[21px] 1440:text-[22px] leading-[1.3] tracking-[0.02em]">
+                <blockquote className="max-w-[24em] font-quote uppercase text-[16px] 550:text-[20px] 1080:text-[18px] leading-[1.3] tracking-[0.02em]">
                   {QUOTE.lines.map((line, i) => (
                     <p key={line} className={`text-balance ${i ? "mt-4" : ""}`}>
                       {i === 0 && (
@@ -274,7 +279,7 @@ export default function About() {
                     <span aria-hidden="true">”</span>
                   </p>
                 </blockquote>
-                <p className="mt-10 550:mt-12 1440:mt-16 flex items-center gap-3">
+                <p className="mt-10 550:mt-12 1080:mt-10 flex items-center gap-3">
                   <span aria-hidden="true" className="h-px w-8 bg-third" />
                   <span className="font-display text-[26px] 1440:text-[30px] leading-none tracking-[0.03em]">{founder.name}</span>
                 </p>
