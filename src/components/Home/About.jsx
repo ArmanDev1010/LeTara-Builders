@@ -157,7 +157,7 @@ export default function About() {
   return (
     <section id="about" className={`${SECTION} ${LIGHT}`}>
       <div
-        className={`${CONTAINER} grid gap-x-12 1440:gap-x-16 gap-y-8 grid-cols-1 [grid-template-areas:'head''portrait''creds''body'] 1080:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] 1280:grid-cols-[minmax(0,1fr)_420px] 1440:grid-cols-[minmax(0,1fr)_440px] 1080:grid-rows-[auto_auto_1fr] 1080:[grid-template-areas:'head_portrait''creds_portrait''body_portrait']`}
+        className={`${CONTAINER} grid gap-x-12 1440:gap-x-16 gap-y-8 grid-cols-1 [grid-template-areas:'head''portrait''creds''body'] 1080:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] 1080:grid-rows-[auto_auto_1fr] 1080:[grid-template-areas:'head_portrait''creds_portrait''body_portrait']`}
       >
         <div className="[grid-area:head]">
           <Reveal>
@@ -211,15 +211,16 @@ export default function About() {
 
         {/* a 2:3 crop on a phone (below the knees; the whole photo was taller
             than the screen), then 3:4 and 4:5 (to the knees); on a wide screen
-            exactly as tall as the column beside it, ending at its link (11-17,
-            the user asked; it ran 155px past it), and from 1280px 420/440px
-            wide with the photo a little higher in it, so the quote (18px
-            there) still sits under the statuette, on his dark suit.
-            Everything sits inside it. */}
+            as tall as the column beside it and a little taller (11-17: it ran
+            155px past the column's link; the user asked for it shorter, then
+            found it too small when narrowed to end at the link, and asked for
+            its width and sizes back with a bit more height), the photo a little
+            higher in it from 1280px, so the quote still sits under the
+            statuette. Everything sits inside it. */}
         <Reveal
           as="figure"
           delay={0.1}
-          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[560px] pointer-events-none"
+          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[560px] 1280:min-h-[630px] 1440:min-h-[680px] 1600:min-h-[700px] pointer-events-none"
         >
           <div className="absolute inset-0 overflow-hidden bg-neutral-900">
             <Image
@@ -263,7 +264,7 @@ export default function About() {
                   so the words line up with his name, the last line gold), with
                   air between the lines and before his name */}
               <div className="mt-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.45),0_0_22px_rgba(0,0,0,0.4)]">
-                <blockquote className="max-w-[24em] font-quote uppercase text-[16px] 550:text-[20px] 1080:text-[18px] leading-[1.3] tracking-[0.02em]">
+                <blockquote className="max-w-[24em] font-quote uppercase text-[16px] 550:text-[20px] 1080:text-[19px] 1280:text-[21px] 1440:text-[22px] leading-[1.3] tracking-[0.02em]">
                   {QUOTE.lines.map((line, i) => (
                     <p key={line} className={`text-balance ${i ? "mt-4" : ""}`}>
                       {i === 0 && (
@@ -279,7 +280,7 @@ export default function About() {
                     <span aria-hidden="true">”</span>
                   </p>
                 </blockquote>
-                <p className="mt-10 550:mt-12 1080:mt-10 flex items-center gap-3">
+                <p className="mt-10 550:mt-12 1440:mt-16 flex items-center gap-3">
                   <span aria-hidden="true" className="h-px w-8 bg-third" />
                   <span className="font-display text-[26px] 1440:text-[30px] leading-none tracking-[0.03em]">{founder.name}</span>
                 </p>
