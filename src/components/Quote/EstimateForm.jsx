@@ -54,12 +54,34 @@ function scrollParent(node) {
   return null;
 }
 
+// A field a send was turned away for (empty, or not right): scrolled to the
+// middle of the room above the held Send button (in the dialog's body, or on
+// the page under the navbar), then focused. 11-17: the user sent with the
+// email empty on a phone and couldn't tell what was missing: the plain focus
+// scrolled it only just into view, under the held button.
+function revealField(field) {
+  const held = field.form?.querySelector("[data-held]");
+  const below = held ? held.getBoundingClientRect().height : 0;
+  const box = (field.closest("label") ?? field).getBoundingClientRect();
+  const middle = (box.top + box.bottom) / 2;
+  const scroller = scrollParent(field);
+  if (scroller) {
+    const view = scroller.getBoundingClientRect();
+    scroller.scrollTop += middle - (view.top + view.bottom - below) / 2;
+  } else {
+    const top = document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0;
+    window.scrollBy(0, middle - (top + window.innerHeight - below) / 2);
+  }
+  field.focus({ preventScroll: true });
+}
+
 // 16px at least, on every text field: an iPhone zooms the page in on a field
 // smaller than that as it's tapped, and stays zoomed when the keyboard
 // closes (the user caught it: the page stuck zoomed in, swipes moving the
-// page behind the dialog)
+// page behind the dialog). Kept clear of the held Send button when the
+// keyboard moves between them (scroll-mb).
 const inputClasses =
-  "w-full h-12 bg-white/[0.04] border-b px-4 text-[16px] text-neutral-50 outline-none placeholder:text-white/30 transition-colors duration-200";
+  "scroll-mb-40 w-full h-12 bg-white/[0.04] border-b px-4 text-[16px] text-neutral-50 outline-none placeholder:text-white/30 transition-colors duration-200";
 const borderFor = (error) => (error ? "border-red-400" : "border-white/20 focus:border-third");
 
 function OptionCard({ option, selected, onSelect }) {
@@ -122,13 +144,13 @@ function StepForm({ onContinue, submit = "Continue", busy = false, after, sticky
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        onContinue();
+        onContinue(event);
       }}
       noValidate
     >
       {children}
       {sticky ? (
-        <div className="sticky bottom-0 z-10 mt-6 pt-4 pb-1 short:mt-4 short:pt-3 short:pb-0 bg-[#0d0c0b] shadow-[0_-18px_18px_-6px_#0d0c0b]">
+        <div data-held className="sticky bottom-0 z-10 mt-6 pt-4 pb-1 short:mt-4 short:pt-3 short:pb-0 bg-[#0d0c0b] shadow-[0_-18px_18px_-6px_#0d0c0b]">
           {button}
           {after}
         </div>
@@ -488,6 +510,12 @@ export default function EstimateForm({ talk = true }) {
     onSent: (result) => {
       setSent({ ref: result?.ref ?? null, booked: Boolean(result?.booked) });
       goTo(DETAILS);
+    },
+    // the first field it was turned away for, in view and focused
+    onInvalid: (errors, event) => {
+      const name = Object.keys(errors)[0];
+      const field = name && event?.target?.querySelector?.(`[name="${name}"]`);
+      if (field) revealField(field);
     },
   });
   // the last step done or skipped: the thank-you (naming the call when it made
