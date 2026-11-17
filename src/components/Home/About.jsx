@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TbArrowRight } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
-import { CONTAINER, H2, HexDot, LEDE, LIGHT, PhotoStandIn, SECTION, SectionLabel, Viewfinder } from "@/components/Home/parts";
+import { CONTAINER, H2, HexDot, LEDE, LIGHT, SECTION, SectionLabel, Viewfinder } from "@/components/Home/parts";
 import { BUSINESS } from "@/data/business";
 import portrait from "@/../public/images/about/andranik-emmy.jpg";
 
@@ -105,8 +105,8 @@ function Laurel({ top, main, bottom }) {
 }
 
 // Who we are, on white after the dark hero (laid out after an example the
-// user liked): the heading, three credentials, then a project photo beside
-// a short story of the company, and Andranik down the right in a
+// user liked): the heading, three credentials, then a short story of the
+// company, and Andranik down the right in a
 // viewfinder's corners, carrying what his own "Meet the contractor" graphic
 // says, all within the photo: the label at its top left with his awards
 // under it, small festival laurels, low key; at its foot, on a gradient that
@@ -183,12 +183,9 @@ export default function About() {
           ))}
         </ul>
 
-        {/* the photo as tall as the story beside it (on a phone, under it) */}
-        <div className="[grid-area:body] grid gap-8 700:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] 700:items-stretch 1080:pt-2">
-          <Reveal className="relative aspect-[16/9] 700:aspect-auto 700:min-h-[320px] max-700:order-2">
-            <PhotoStandIn />
-            <Viewfinder className="text-black/25" />
-          </Reveal>
+        {/* the story (a project picture beside it was a black stand-in until
+            11-17, when the user asked for it gone) */}
+        <div className="[grid-area:body] max-w-2xl 1080:pt-2">
           <Reveal delay={0.1}>
             <p className={LEDE.light}>
               LeTara Builders is a licensed general contractor in Los Angeles County, building new homes, home
@@ -217,7 +214,7 @@ export default function About() {
         <Reveal
           as="figure"
           delay={0.1}
-          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[620px] pointer-events-none"
+          className="[grid-area:portrait] relative aspect-[2/3] 550:aspect-[3/4] 700:aspect-[4/5] 1080:aspect-auto 1080:min-h-[620px] 1280:min-h-[680px] 1440:min-h-[740px] pointer-events-none"
         >
           <div className="absolute inset-0 overflow-hidden bg-neutral-900">
             <Image
