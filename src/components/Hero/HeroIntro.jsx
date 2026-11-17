@@ -9,6 +9,10 @@ import { drawScene } from "@/components/Hero/intro/scene";
 // mouse-wheel steps play as motion instead of jumps.
 const EASE = 0.12;
 
+// On a phone or tablet: seconds the copy, and the house with it, take to
+// follow the bottom of the screen as the browser's bars slide (see `drop`).
+const DROP_EASE = 0.09;
+
 // How long the finished render holds before the hero scrolls away, in
 // screens: a beat, no more (the user found longer holds too long, on a phone
 // and then on desktop). The scene plays over the rest of the pinned scroll,
@@ -92,12 +96,16 @@ export default function HeroIntro({ children }) {
       className="group relative h-[calc(475*var(--vh))] intro-still:h-auto bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.26),rgba(196,92,16,0.08)_45%,transparent_75%)] portrait:bg-[radial-gradient(ellipse_80%_35%_at_100%_25%,rgba(255,170,58,0.28),rgba(196,92,16,0.08)_45%,transparent_75%)] data-[look=blueprint]:bg-[#04122b] data-[look=blueprint]:bg-none data-[look=blueprint]:portrait:bg-none text-neutral-50"
     >
       {/* On a phone or tablet the pinned panel keeps one height while the
-          browser's bars slide in and out (11-17: iPhone Chrome's resized it
-          as they moved, and the scene was laid out again each time and
-          jumped, its bottom bar snapping away): the screen with its bars
-          showing (--svh, pinned at load, UI/StableViewport) and 120px more
-          below the copy, under the bottom bar (taller than any phone's bars),
-          so the scene still fills the screen when they slide away. */}
+          browser's bars slide in and out (11-17: in iPhone Chrome it was
+          resized as they moved, the canvas with it, and the scene was laid
+          out again each time and jumped, its bottom bar snapping away): the
+          screen with its bars showing (--svh, pinned at load,
+          UI/StableViewport) and 120px more below the copy, under the bottom
+          bar (taller than any phone's bars), so the scene still fills the
+          screen when they slide away. The copy glides down to the screen's
+          foot as they go, and the house into the room it leaves (`drop` in
+          playScene); the user wanted the hero to take the whole screen then,
+          as before. */}
       <div
         ref={panelRef}
         className="sticky top-0 h-dvh hero-touch:h-[calc(100*var(--svh)+120px)] hero-touch:pb-[120px] overflow-hidden flex items-end pt-28 sm:pt-22 intro-still:static intro-still:h-auto intro-still:block intro-still:pt-0"
@@ -139,13 +147,42 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
   let lastTick = 0;
   let idle = 0; // seconds the finished scene has spent drifting (see drift)
 
+  // On a phone or tablet the panel keeps one height (see its classes: the
+  // screen with the bars showing, and `spare` px under the copy), and the
+  // copy follows the screen's foot as the browser's bars slide: `drop` px
+  // below where it sits with them showing, gliding there (DROP_EASE), and
+  // the scene lays the house out round where the copy is. Nothing is
+  // resized, so the bars slide as smoothly as on the rest of the page.
+  let spare = 0;
+  let dropTarget = 0;
+  let dropShown = 0;
+  const readDrop = () => {
+    if (!spare) return 0;
+    const base = panel.offsetHeight - spare; // the screen with the bars showing
+    return Math.min(spare, Math.max(-base / 2, window.innerHeight - base));
+  };
+  const placeCopy = () => {
+    copy.style.transform = dropShown ? `translate3d(0,${dropShown.toFixed(1)}px,0)` : "";
+  };
+
   const draw = (t) => {
     if (!size) return;
     const { copyTop, copyRight, titleRight, navZoom, navBottom, head } = size.layout;
-    const key = [t.toFixed(4), size.width, size.height, size.dpr, copyTop, copyRight, titleRight, navZoom, navBottom, head?.top, idle.toFixed(3)].join(":");
+    const key = [t.toFixed(4), size.width, size.height, size.dpr, copyTop, copyRight, titleRight, navZoom, navBottom, head?.top, dropShown.toFixed(1), idle.toFixed(3)].join(":");
     if (key === drawn) return;
     drawn = key;
-    drawScene(context, { ...size, t, calm, fonts, idle, lite, look });
+    // On a phone, the copy where it's glided to, and the height that shows
+    // (the panel, less what's under the bottom bar), which the title and the
+    // air are sized by, as when the hero was the screen's height
+    const layout = spare
+      ? {
+          ...size.layout,
+          copyTop: copyTop + dropShown / size.height,
+          head: head && { ...head, top: head.top + dropShown },
+          view: size.height - spare + dropShown,
+        }
+      : size.layout;
+    drawScene(context, { ...size, layout, t, calm, fonts, idle, lite, look });
     // the page transition waits for this before it opens (UI/PageTransition)
     canvas.dataset.drawn = "1";
   };
@@ -160,7 +197,12 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     const portrait = height > width;
+    // the copy measured where it sits with the bars showing, then put back
+    spare = still ? 0 : parseFloat(getComputedStyle(panel).paddingBottom) || 0;
+    copy.style.transform = "";
     size = { width, height, dpr, portrait, layout: sceneLayout({ canvas, copy, width, height, portrait, still }) };
+    dropTarget = dropShown = readDrop();
+    placeCopy();
     drawn = "";
     if (!still) measure();
     draw(still ? 1 : shown);
@@ -214,8 +256,15 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
     lastTick = now;
     shown += (target - shown) * (calm ? 1 : 1 - Math.exp(-seconds / EASE));
     if (Math.abs(target - shown) < 0.0005) shown = target;
+    // the copy gliding after the screen's foot (a glide with Reduce Motion
+    // too: never a cut)
+    if (dropShown !== dropTarget) {
+      dropShown += (dropTarget - dropShown) * (1 - Math.exp(-seconds / DROP_EASE));
+      if (Math.abs(dropTarget - dropShown) < 0.5) dropShown = dropTarget;
+      placeCopy();
+    }
     draw(shown);
-    raf = shown === target ? 0 : requestAnimationFrame(tick);
+    raf = shown === target && dropShown === dropTarget ? 0 : requestAnimationFrame(tick);
     if (!raf) drift();
   };
 
@@ -273,9 +322,22 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
     if (!watching) drift();
   });
   window.addEventListener("scroll", onScroll, { passive: true, signal: abort.signal });
+  // the browser's bars sliding in or out (the screen's height changes, the
+  // panel's doesn't): the copy and the house glide to the new foot
+  window.addEventListener(
+    "resize",
+    () => {
+      const next = readDrop();
+      if (next === dropTarget) return;
+      dropTarget = next;
+      play();
+    },
+    { passive: true, signal: abort.signal },
+  );
 
   return () => {
     stopped = true;
+    copy.style.transform = "";
     abort.abort();
     cancelAnimationFrame(raf);
     cancelAnimationFrame(watching);

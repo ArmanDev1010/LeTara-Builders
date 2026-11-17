@@ -445,18 +445,22 @@ const CALM_EXTENT = (() => {
 // copy below it) has the screen to itself.
 function placeScene(ctx, width, height, portrait, layout, fonts) {
   const nav = navBottom(portrait, layout);
+  // the height that shows (a phone's pinned hero runs on under its
+  // browser's bottom bar, see HeroIntro): the title and the air are sized by
+  // it, as they were when the hero was the screen's height
+  const view = layout.view ?? height;
   const e = EXTENT[portrait ? "portrait" : "desktop"];
   const cfg = TITLE[portrait ? "portrait" : "desktop"];
   ctx.font = `100px ${fonts.display}`;
   const m = ctx.measureText(TITLE.text);
   const ascent = m.actualBoundingBoxAscent / 100;
   const capH = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100; // at 1px
-  const maxSize = Math.min((width * cfg.span * 100) / m.width, height * cfg.maxH);
+  const maxSize = Math.min((width * cfg.span * 100) / m.width, view * cfg.maxH);
   const titleAt = (size, capsTop) => ({ size, baseline: capsTop + ascent * size, bottom: capsTop + capH * size });
   const fit = ({ room: b }) => Math.min((b.x1 - b.x0) / (e[2] - e[0]), (b.y1 - b.y0) / (e[3] - e[1]));
   // the least air between them (more on a phone: 11-17, the user found the
   // house too close to the headline with the browser's bars showing)
-  const air = portrait ? clamp(0.035 * height, 22, 34) : clamp(0.028 * height, 14, 30);
+  const air = portrait ? clamp(0.035 * view, 22, 34) : clamp(0.028 * view, 14, 30);
   const head = layout.head ? headlineTop(ctx, layout.head, fonts) : null;
 
   // the house above the copy: the navbar, the title, the house and the
@@ -473,7 +477,7 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
     if (free - 3 * gap < 0.6 * houseH) gap = Math.max(12, (free - 0.6 * houseH) / 3);
     const title = titleAt(maxSize, nav + gap);
     const y0 = title.bottom + gap;
-    const y1 = y0 + Math.max(Math.min(houseH, free - 3 * gap), 0.1 * height);
+    const y1 = y0 + Math.max(Math.min(houseH, free - 3 * gap), 0.1 * view);
     return { title, room: { x0, x1, y0, y1, top: true } };
   };
   if (portrait) return stacked(0.04 * width, 0.96 * width, head ?? (layout.copyTop - 0.015) * height);
