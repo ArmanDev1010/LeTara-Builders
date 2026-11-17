@@ -54,25 +54,49 @@ function scrollParent(node) {
   return null;
 }
 
-// A field a send was turned away for (empty, or not right): scrolled to the
-// middle of the room above the held Send button (in the dialog's body, or on
-// the page under the navbar), then focused. 11-17: the user sent with the
-// email empty on a phone and couldn't tell what was missing: the plain focus
-// scrolled it only just into view, under the held button.
-function revealField(field) {
-  const held = field.form?.querySelector("[data-held]");
-  const below = held ? held.getBoundingClientRect().height : 0;
-  const box = (field.closest("label") ?? field).getBoundingClientRect();
-  const middle = (box.top + box.bottom) / 2;
-  const scroller = scrollParent(field);
-  if (scroller) {
-    const view = scroller.getBoundingClientRect();
-    scroller.scrollTop += middle - (view.top + view.bottom - below) / 2;
-  } else {
-    const top = document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0;
-    window.scrollBy(0, middle - (top + window.innerHeight - below) / 2);
+// The nearest ancestor that can scroll, whether or not it has anything to
+// scroll yet (the dialog's body), or null when the window scrolls.
+function scrollBox(node) {
+  for (let el = node?.parentElement; el && el !== document.body; el = el.parentElement) {
+    const { overflowY } = getComputedStyle(el);
+    if (overflowY === "auto" || overflowY === "scroll") return el;
   }
-  field.focus({ preventScroll: true });
+  return null;
+}
+
+// A phone's keyboard is up: the screen that shows is well short of the page's.
+const keyboardUp = (vv) => vv.height < window.innerHeight - 120;
+// Room left over the keyboard for the floating ˄ ˅ ✓ bar iOS 26 puts there
+// (over the page, not part of the keyboard: it covered a field, 11-17).
+const KEYBOARD_BAR = 64;
+
+// Brings a field to the middle of what shows of the form: inside its scroll
+// box (the dialog's body; on the page, the screen under the navbar), above
+// the held Send button, and above a phone's keyboard and its bar.
+// `onlyIfHidden` leaves it where it is if it's already in that room.
+// 11-17: the user sent with the email empty on an iPhone and couldn't tell
+// what was missing: the plain focus scrolled it only just into view, under
+// the held button, and then the keyboard covered it.
+function revealField(field, { onlyIfHidden = false } = {}) {
+  const box = scrollBox(field);
+  const frame = box
+    ? box.getBoundingClientRect()
+    : { top: document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0, bottom: window.innerHeight };
+  const held = field.form?.querySelector("[data-held]");
+  let top = frame.top;
+  let bottom = frame.bottom - (held ? held.offsetHeight : 0);
+  const vv = window.visualViewport;
+  if (vv && keyboardUp(vv)) {
+    top = Math.max(top, vv.offsetTop);
+    bottom = Math.min(bottom, vv.offsetTop + vv.height - KEYBOARD_BAR);
+  }
+  top += 8;
+  bottom -= 8;
+  const rect = (field.closest("label") ?? field).getBoundingClientRect();
+  if (onlyIfHidden && rect.top >= top && rect.bottom <= bottom) return;
+  const shift = (rect.top + rect.bottom) / 2 - (top + bottom) / 2;
+  if (box) box.scrollTop += shift;
+  else window.scrollBy(0, shift);
 }
 
 // 16px at least, on every text field: an iPhone zooms the page in on a field
@@ -515,7 +539,9 @@ export default function EstimateForm({ talk = true }) {
     onInvalid: (errors, event) => {
       const name = Object.keys(errors)[0];
       const field = name && event?.target?.querySelector?.(`[name="${name}"]`);
-      if (field) revealField(field);
+      if (!field) return;
+      revealField(field);
+      field.focus({ preventScroll: true });
     },
   });
   // the last step done or skipped: the thank-you (naming the call when it made
@@ -560,6 +586,38 @@ export default function EstimateForm({ talk = true }) {
   const jump = (index) => (sent ? undefined : index < step ? goTo(index) : goForward(index));
 
   useEffect(() => () => clearTimeout(advanceTimer.current), []);
+
+  // In the dialog, with a phone's keyboard up, the field being typed in stays
+  // in what shows: the form gets room at its foot as tall as the keyboard
+  // (a field near its end couldn't otherwise be scrolled above it), and a
+  // field the keyboard or its bar covers moves to the middle of what's left
+  // (revealField). On the page the browser brings fields above the keyboard
+  // itself. 11-17: on the user's iPhone a field sent empty was focused under
+  // the keyboard's bar.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const card = cardRef.current;
+    if (!vv || !card?.closest('[role="dialog"]')) return;
+    let frame = 0;
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const field = document.activeElement;
+        const typing = card.contains(field) && field.matches("input:not([type=checkbox]):not([type=radio]), textarea");
+        const up = typing && keyboardUp(vv);
+        card.style.paddingBottom = up ? `${Math.round(window.innerHeight - vv.height)}px` : "";
+        if (up) revealField(field, { onlyIfHidden: true });
+      });
+    };
+    vv.addEventListener("resize", fit);
+    card.addEventListener("focusin", fit);
+    return () => {
+      cancelAnimationFrame(frame);
+      vv.removeEventListener("resize", fit);
+      card.removeEventListener("focusin", fit);
+      card.style.paddingBottom = "";
+    };
+  }, []);
 
   // Once the next question has settled, bring the form's top back into view
   // if it scrolled away: in the dialog on a phone, where the options sit below
