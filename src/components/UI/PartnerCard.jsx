@@ -56,7 +56,7 @@ export default function PartnerCard({ className = "", as: Title = "h3" }) {
             was also founded by {BUSINESS.founder.name}.
           </p>
         </div>
-        <ul className="grid grid-cols-1 400:grid-cols-2 gap-x-6 gap-y-3 pointer-events-none">
+        <ul className="grid grid-cols-1 700:grid-cols-2 gap-x-6 gap-y-3 pointer-events-none">
           {partner.offers.map((offer) => (
             <li key={offer} className="flex items-center gap-2.5 text-[13.5px] uppercase tracking-[0.1em] text-vista-dark/85">
               <HexDot className="!text-vista" />
