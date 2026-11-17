@@ -27,6 +27,12 @@
   --color-third: #e9a648; /* the accent: the hero's gold */
   --color-fourth: #6b6b6b; /* muted text */
 
+  /* Vista Pergolas' own colors, from its site (11-17), only on what is
+     Vista's: the partner card (UI/PartnerCard), its logo and links to it. */
+  --color-vista: #a9cf4e; /* its green */
+  --color-vista-dark: #303030; /* its charcoal (text, the logo's V) */
+  --color-vista-tint: #eaf4d7; /* its pale green (its header) */
+
   /* Faces (next/font variables, set in app/layout.js) */
   --font-display: var(--font-bebas-neue), "Arial Narrow", sans-serif; /* the logo's face */
   --font-script: var(--font-courier-prime), "Courier New", monospace; /* a screenplay's typewriter */

@@ -1,14 +1,12 @@
 import LOGO from "@/data/vistaLogo.json";
 
-// Vista Pergolas' green.
-const GREEN = "#a9d04f";
-
 // Vista Pergolas' logo (LeTara's partner, data/business.js), a vector rebuild
 // (11-16): the only copy on its site is a 160×60 PNG. The V mark is measured
 // from a 598px copy of it, the lettering is Jost fitted to the small logo's
-// letters. Its dark parts take currentColor (text-white on a dark surface),
-// the green stays its own. Size it by height (h-[...]); the width follows.
-// Decorative unless given a `title`.
+// letters. Its dark parts take currentColor (text-vista-dark for its own
+// colors, as on the partner card; text-white on a dark surface), the green is
+// always Vista's (--color-vista in globals.css). Size it by height
+// (h-[...]); the width follows. Decorative unless given a `title`.
 export default function VistaLogo({ className = "", title }) {
   return (
     <svg
@@ -19,10 +17,10 @@ export default function VistaLogo({ className = "", title }) {
       focusable="false"
     >
       {title && <title>{title}</title>}
-      <path d={LOGO.back} fill={GREEN} />
+      <path d={LOGO.back} className="fill-vista" />
       <path d={LOGO.front} fill="currentColor" />
       <path d={LOGO.word} fill="currentColor" />
-      <path d={LOGO.tag} fill={GREEN} />
+      <path d={LOGO.tag} className="fill-vista" />
     </svg>
   );
 }
