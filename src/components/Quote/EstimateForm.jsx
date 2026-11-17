@@ -128,7 +128,7 @@ function StepForm({ onContinue, submit = "Continue", busy = false, after, sticky
     >
       {children}
       {sticky ? (
-        <div className="sticky bottom-0 z-10 mt-6 pt-4 pb-1 bg-[#0d0c0b] shadow-[0_-18px_18px_-6px_#0d0c0b]">
+        <div className="sticky bottom-0 z-10 mt-6 pt-4 pb-1 short:mt-4 short:pt-3 short:pb-0 bg-[#0d0c0b] shadow-[0_-18px_18px_-6px_#0d0c0b]">
           {button}
           {after}
         </div>
@@ -195,8 +195,9 @@ function LocationStep({ form, onContinue }) {
   );
 }
 
-// Name, phone and email, all required, with the optional text opt-in under
-// them: three across where there's room, else the name above phone and
+// Name, phone and email, all required, with the optional text opt-in in a
+// box under the phone field on a phone (under the row where they sit side by
+// side): three across where there's room, else the name above phone and
 // email. Its button sends the request (Andranik, 11-16: the lead is in
 // GoHighLevel before the optional last step). The phone shapes itself into
 // (747) 777-7777 as it's typed (lib/phone, as on HB Links). `lt_check` is a
@@ -218,10 +219,10 @@ function ContactStep({ form }) {
       onContinue={handleFormSubmit}
       submit={isSubmitting ? "Sending…" : "Send my request"}
       busy={isSubmitting}
-      after={<FormLegalNote dark className="mt-3" />}
+      after={<FormLegalNote dark className="mt-3 short:mt-2" />}
       sticky
     >
-      <div className="grid grid-cols-1 @min-[520px]:grid-cols-2 @min-[760px]:grid-cols-3 gap-x-4 gap-y-5">
+      <div className="grid grid-cols-1 @min-[520px]:grid-cols-2 @min-[760px]:grid-cols-3 gap-x-4 gap-y-5 short:gap-y-3">
         <Field label="Name" error={errors.name} className="@min-[520px]:col-span-2 @min-[760px]:col-span-1">
           <input
             {...register("name", { required: "Your name is required." })}
@@ -231,7 +232,11 @@ function ContactStep({ form }) {
             className={`mt-1.5 ${inputClasses} ${borderFor(errors.name)}`}
           />
         </Field>
-        <Field label="Phone" error={errors.phone}>
+        <Field
+          label="Phone"
+          error={errors.phone}
+          className="@min-[520px]:row-start-2 @min-[520px]:col-start-1 @min-[760px]:row-start-1 @min-[760px]:col-start-2"
+        >
           <input
             {...phoneField}
             onChange={(event) => {
@@ -245,7 +250,20 @@ function ContactStep({ form }) {
             className={`mt-1.5 ${inputClasses} ${borderFor(errors.phone)}`}
           />
         </Field>
-        <Field label="Email" error={errors.mail}>
+        {/* the text opt-in right under the phone field, in the way while
+            filling in on a phone (11-17: under the email, the held Send
+            button covered it and the user sent without seeing it); under the
+            whole row where the fields sit side by side */}
+        <SmsConsent
+          register={register}
+          dark
+          className="@min-[520px]:row-start-3 @min-[520px]:col-span-2 @min-[760px]:row-start-2 @min-[760px]:col-span-3"
+        />
+        <Field
+          label="Email"
+          error={errors.mail}
+          className="@min-[520px]:row-start-2 @min-[520px]:col-start-2 @min-[760px]:row-start-1 @min-[760px]:col-start-3"
+        >
           <input
             {...register("mail", {
               required: "Your email is required.",
@@ -259,7 +277,6 @@ function ContactStep({ form }) {
           />
         </Field>
       </div>
-      <SmsConsent register={register} dark className="mt-5" />
       <div aria-hidden="true" className="sr-only">
         <input type="text" tabIndex={-1} autoComplete="off" {...register("lt_check")} />
       </div>

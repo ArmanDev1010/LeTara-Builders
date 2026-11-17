@@ -24,17 +24,26 @@ function LegalLink({ slug, children }) {
 // allowed. Keep the wording in step with the SMS Terms and the Privacy
 // Policy's text-message section (data/legal) and with the A2P campaign
 // registration.
-// `dark` sets the text for a dark background (the quote dialog).
+// `dark` sets the text for a dark background (the quote dialog). It's a box
+// of its own, its first sentence on a line of its own and larger, turning
+// gold when ticked (11-17: the user found they sent the form without ever
+// seeing it; it also moved up, under the phone field).
 export function SmsConsent({ register, dark = false, className = "" }) {
   return (
-    <label className={`flex items-start gap-3 cursor-pointer ${className}`}>
+    <label
+      className={`flex items-start gap-3 cursor-pointer border p-3.5 short:p-2.5 transition-colors duration-200 ${
+        dark
+          ? "border-white/15 bg-white/[0.03] hover:border-white/30 has-[:checked]:border-third/60 has-[:checked]:bg-third/[0.07]"
+          : "border-black/15 has-[:checked]:border-third"
+      } ${className}`}
+    >
       <input
         type="checkbox"
         {...register("smsConsent")}
-        className="mt-[3px] h-4 w-4 shrink-0 accent-third cursor-pointer"
+        className="mt-px h-[18px] w-[18px] shrink-0 accent-third cursor-pointer"
       />
       <span className={`text-[12px] leading-relaxed ${dark ? "text-white/50" : "text-fourth"}`}>
-        <span className={`font-semibold ${dark ? "text-white/85" : "text-black/80"}`}>
+        <span className={`block mb-1 short:inline short:mb-0 text-[14px] short:text-[13px] leading-snug font-semibold ${dark ? "text-neutral-50" : "text-black/85"}`}>
           Text me about my request.
         </span>{" "}
         I agree to receive text messages from {BUSINESS.legalName} at the number
