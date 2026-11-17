@@ -3,9 +3,8 @@ import { TbArrowUpRight, TbStar, TbStarFilled } from "react-icons/tb";
 import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, LIGHT, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
-import { PREVIEW_GOOGLE, REVIEWS_SUMMARY } from "@/data/testimonials";
+import { REVIEWS_SUMMARY } from "@/data/testimonials";
 import { getReviews } from "@/lib/reviews";
-import { LAUNCHED } from "@/lib/seo";
 
 // A cut corner, top right, as on the services cards (the navbar's points).
 const CHAMFER = "[clip-path:polygon(0_0,calc(100%-18px)_0,100%_18px,100%_100%,0_100%)]";
@@ -115,9 +114,9 @@ export default async function Testimonials({ number = "04" }) {
   const reviews = await getReviews();
   if (!reviews.length) return null;
   const n = reviews.length;
-  // Google's line with the real profile; before launch, its stand-in; live
-  // without a profile, the rating with no Google name or links
-  const google = REVIEWS_SUMMARY.profile ? REVIEWS_SUMMARY : LAUNCHED ? null : PREVIEW_GOOGLE;
+  // Google's line with the real profile; until then the rating with no
+  // Google name or links
+  const google = REVIEWS_SUMMARY.profile ? REVIEWS_SUMMARY : null;
   // Google's numbers once they're filled in; until then the reviews' own
   const rating = (google && REVIEWS_SUMMARY.rating) || reviews.reduce((sum, review) => sum + review.stars, 0) / n;
   const count = (google && REVIEWS_SUMMARY.count) || n;
