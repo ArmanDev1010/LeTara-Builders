@@ -126,7 +126,11 @@ export default function ServiceAreas({
             </div>
             <div className="p-2">
               <div className="relative h-[280px] 400:h-[300px] 550:h-[340px] 800:h-[420px] 1280:h-[460px] overflow-hidden bg-[#141414]">
+                {/* Chrome on iPhone changes the frame before the page's
+                    script takes over (Safari doesn't), and React warned that
+                    it didn't match (11-17): harmless, so it's told to expect it */}
                 <iframe
+                  suppressHydrationWarning
                   key={area.name}
                   title={`Map of ${area.name}, ${region}`}
                   src={mapSrc(area)}

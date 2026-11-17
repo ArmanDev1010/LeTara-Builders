@@ -153,6 +153,9 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
   // below where it sits with them showing, gliding there (DROP_EASE), and
   // the scene lays the house out round where the copy is. Nothing is
   // resized, so the bars slide as smoothly as on the rest of the page.
+  // Only while the panel is pinned (11-17: the user saw the copy rise inside
+  // the hero's foot as they scrolled back up the page below it and the bars
+  // came back); it catches up once the hero pins again (`followFoot`).
   let spare = 0;
   let dropTarget = 0;
   let dropShown = 0;
@@ -160,6 +163,13 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
     if (!spare) return 0;
     const base = panel.offsetHeight - spare; // the screen with the bars showing
     return Math.min(spare, Math.max(-base / 2, window.innerHeight - base));
+  };
+  const followFoot = () => {
+    if (!spare) return;
+    const next = readDrop();
+    if (next === dropTarget || panel.getBoundingClientRect().top < -1) return;
+    dropTarget = next;
+    play();
   };
   const placeCopy = () => {
     copy.style.transform = dropShown ? `translate3d(0,${dropShown.toFixed(1)}px,0)` : "";
@@ -301,6 +311,7 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
   const onScroll = () => {
     scrolled = true;
     measure();
+    followFoot();
     play();
     drift();
   };
@@ -323,17 +334,9 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
   });
   window.addEventListener("scroll", onScroll, { passive: true, signal: abort.signal });
   // the browser's bars sliding in or out (the screen's height changes, the
-  // panel's doesn't): the copy and the house glide to the new foot
-  window.addEventListener(
-    "resize",
-    () => {
-      const next = readDrop();
-      if (next === dropTarget) return;
-      dropTarget = next;
-      play();
-    },
-    { passive: true, signal: abort.signal },
-  );
+  // panel's doesn't): the copy and the house glide to the new foot, if the
+  // hero is pinned (else on the scroll that pins it)
+  window.addEventListener("resize", followFoot, { passive: true, signal: abort.signal });
 
   return () => {
     stopped = true;
