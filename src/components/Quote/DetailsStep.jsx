@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { TbCheck, TbFileTypePdf, TbLoader2, TbPaperclip, TbX } from "react-icons/tb";
+import { TbCheck, TbChevronDown, TbFileTypePdf, TbLoader2, TbPaperclip, TbX } from "react-icons/tb";
 import ArrowButton from "@/components/UI/ArrowButton";
 import { ATTACH, detailQuestions } from "@/data/projectDetails";
 import { phoneDisplay } from "@/data/business";
@@ -35,39 +35,75 @@ function Received({ slot, booked }) {
   );
 }
 
-// One question: its options as chips, one answer or several (`many`).
-function Chips({ question, value, onChange }) {
+// One question as a dropdown (11-17: the user found the rows of chips
+// disorganized): a box with the question's answer so far, which opens its
+// options over what's below. One answer closes it as it's picked; several
+// (`many`) are ticked and it stays open. A click elsewhere or Escape closes
+// it (DetailsStep), and only one is open at a time.
+function Dropdown({ question, value, onChange, open, onOpen }) {
   const many = Boolean(question.many);
   const options = question.many ?? question.one;
   const picked = [].concat(value ?? []);
+  const id = `detail-${question.id}`;
   const toggle = (option) => {
-    if (!many) return onChange(picked[0] === option ? undefined : option);
+    if (!many) {
+      onChange(picked[0] === option ? undefined : option);
+      onOpen(false);
+      return;
+    }
     onChange(picked.includes(option) ? picked.filter((o) => o !== option) : [...picked, option]);
   };
   return (
-    <div role="group" aria-label={question.label}>
-      <p className={`${label} pointer-events-none`}>
+    <div className="relative" data-dropdown={question.id}>
+      <p id={`${id}-label`} className={`${label} pointer-events-none`}>
         {question.label}
-        {many && <span className="normal-case tracking-normal text-white/35"> · pick any</span>}
       </p>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {options.map((option) => {
-          const on = picked.includes(option);
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => toggle(option)}
-              aria-pressed={on}
-              className={`h-9 px-3 border text-[13.5px] leading-none transition-colors duration-200 cursor-pointer ${focusRing} ${
-                on ? "border-third bg-third/[0.12] text-third font-semibold" : "border-white/15 bg-white/[0.02] text-white/80 hover:border-white/40"
-              }`}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
+      <button
+        type="button"
+        onClick={() => onOpen(!open)}
+        aria-expanded={open}
+        aria-controls={`${id}-options`}
+        aria-labelledby={`${id}-label ${id}-value`}
+        className={`mt-2 w-full h-12 flex items-center justify-between gap-3 px-4 border bg-white/[0.04] text-left cursor-pointer transition-colors duration-200 ${focusRing} ${
+          open ? "border-third" : picked.length ? "border-third/45" : "border-white/12 hover:border-white/35"
+        }`}
+      >
+        <span id={`${id}-value`} className={`truncate text-[15px] ${picked.length ? "text-neutral-50" : "text-white/40"}`}>
+          {picked.length ? picked.join(", ") : many ? "Pick any" : "Choose one"}
+        </span>
+        <TbChevronDown aria-hidden="true" className={`shrink-0 text-[18px] text-third transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div
+          id={`${id}-options`}
+          role="group"
+          aria-labelledby={`${id}-label`}
+          className="absolute z-30 inset-x-0 top-full mt-1 py-1 border border-white/15 bg-[#171513] shadow-[0_20px_40px_-12px_rgba(0,0,0,0.95)]"
+        >
+          {options.map((option) => {
+            const on = picked.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggle(option)}
+                aria-pressed={on}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-[15px] cursor-pointer transition-colors duration-150 ${focusRing} ${
+                  on ? "text-third" : "text-white/85 hover:bg-white/[0.06]"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`grid place-items-center w-4 h-4 shrink-0 border ${many ? "" : "rounded-full"} ${on ? "border-third bg-third text-neutral-950" : "border-white/30"}`}
+                >
+                  {on && <TbCheck className="text-[11px]" />}
+                </span>
+                {option}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -113,8 +149,9 @@ function FileRow({ item, onRemove, busy }) {
 
 // The quote form's optional last step (Andranik, 11-16), shown once the
 // request is in (the contact step sends it): what's been received, then
-// questions answered with a tap, by project (data/projectDetails), the
-// visitor's own words, and photos or plans to attach. "Send details" sends
+// photos or plans to attach (first since 11-17, the user asked), questions
+// answered from dropdowns, by project (data/projectDetails), and the
+// visitor's own words. "Send details" sends
 // each file on its own (photos made smaller first, lib/shrinkImage), then the
 // answers with the files' addresses, to the lead its first part made
 // (`sent.ref`); "Skip" finishes without them. Either way the thank-you opens
@@ -126,10 +163,31 @@ export default function DetailsStep({ project, slot, sent, onDone }) {
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [open, setOpen] = useState(null); // the dropdown that's open (its question's id)
   const previews = useRef([]);
 
   // the pictures' object URLs go when the step does
   useEffect(() => () => previews.current.forEach((url) => URL.revokeObjectURL(url)), []);
+
+  // an open dropdown closes on a click outside it, or Escape
+  useEffect(() => {
+    if (!open) return;
+    const outside = (event) => {
+      if (!event.target.closest?.(`[data-dropdown="${open}"]`)) setOpen(null);
+    };
+    const escape = (event) => {
+      if (event.key !== "Escape") return;
+      // (the dropdown takes this Escape, not the dialog)
+      event.stopPropagation();
+      setOpen(null);
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape, true);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape, true);
+    };
+  }, [open]);
 
   const setStatus = (id, status) => setFiles((list) => list.map((f) => (f.id === id ? { ...f, status } : f)));
 
@@ -205,61 +263,64 @@ export default function DetailsStep({ project, slot, sent, onDone }) {
     <div>
       <Received slot={slot} booked={sent.booked} />
 
-      <div className="mt-6 grid gap-x-8 gap-y-5 @min-[640px]:grid-cols-2">
+      {/* photos or plans first (the user asked), then the questions, then
+          their own words */}
+      <div className="mt-6">
+        <p className={`${label} pointer-events-none`}>Photos or plans</p>
+        {files.length < ATTACH.max && !busy && (
+          <label
+            className={`mt-2 flex items-center gap-3 border border-dashed border-white/25 px-4 py-3.5 cursor-pointer hover:border-third transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-third`}
+          >
+            <TbPaperclip aria-hidden="true" className="shrink-0 text-[20px] text-third" />
+            <span className="min-w-0">
+              <span className="block text-[14.5px] font-semibold text-neutral-50">Add photos or plans</span>
+              <span className="block text-[12.5px] text-white/45">Up to {ATTACH.max} files: photos, or PDFs up to 4 MB</span>
+            </span>
+            <input
+              type="file"
+              multiple
+              accept={ATTACH.accept}
+              className="sr-only"
+              onChange={(event) => {
+                add([...event.target.files]);
+                event.target.value = "";
+              }}
+            />
+          </label>
+        )}
+        {files.length > 0 && (
+          <ul className="mt-2 grid gap-1.5 @min-[640px]:grid-cols-2">
+            {files.map((item) => (
+              <FileRow key={item.id} item={item} busy={busy} onRemove={() => setFiles((list) => list.filter((f) => f.id !== item.id))} />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="mt-6 grid gap-x-6 gap-y-5 @min-[640px]:grid-cols-2">
         {questions.map((question) => (
-          <Chips
+          <Dropdown
             key={question.id}
             question={question}
             value={answers[question.id]}
             onChange={(value) => setAnswers((prev) => ({ ...prev, [question.id]: value }))}
+            open={open === question.id}
+            onOpen={(on) => setOpen(on ? question.id : null)}
           />
         ))}
       </div>
 
-      <div className="mt-6 grid gap-x-8 gap-y-5 @min-[640px]:grid-cols-2">
-        <label className="block">
-          <span className={label}>Anything else?</span>
-          <textarea
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            rows={4}
-            maxLength={5000}
-            placeholder="What you have in mind, what matters most, questions for Andy."
-            className="mt-2 w-full bg-white/[0.04] border border-white/12 px-4 py-3 text-[16px] leading-relaxed text-neutral-50 outline-none resize-none placeholder:text-white/30 focus:border-third transition-colors duration-200"
-          />
-        </label>
-        <div>
-          <p className={`${label} pointer-events-none`}>Photos or plans</p>
-          {files.length < ATTACH.max && !busy && (
-            <label
-              className={`mt-2 flex items-center gap-3 border border-dashed border-white/25 px-4 py-3.5 cursor-pointer hover:border-third transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-third`}
-            >
-              <TbPaperclip aria-hidden="true" className="shrink-0 text-[20px] text-third" />
-              <span className="min-w-0">
-                <span className="block text-[14.5px] font-semibold text-neutral-50">Add photos or plans</span>
-                <span className="block text-[12.5px] text-white/45">Up to {ATTACH.max} files: photos, or PDFs up to 4 MB</span>
-              </span>
-              <input
-                type="file"
-                multiple
-                accept={ATTACH.accept}
-                className="sr-only"
-                onChange={(event) => {
-                  add([...event.target.files]);
-                  event.target.value = "";
-                }}
-              />
-            </label>
-          )}
-          {files.length > 0 && (
-            <ul className="mt-2 grid gap-1.5">
-              {files.map((item) => (
-                <FileRow key={item.id} item={item} busy={busy} onRemove={() => setFiles((list) => list.filter((f) => f.id !== item.id))} />
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      <label className="mt-6 block">
+        <span className={label}>Anything else?</span>
+        <textarea
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          rows={3}
+          maxLength={5000}
+          placeholder="What you have in mind, what matters most, questions for Andy."
+          className="mt-2 w-full bg-white/[0.04] border border-white/12 px-4 py-3 text-[16px] leading-relaxed text-neutral-50 outline-none resize-none placeholder:text-white/30 focus:border-third transition-colors duration-200"
+        />
+      </label>
 
       {/* held at the dialog's foot while the questions scroll, so they're never
           out of sight */}

@@ -109,8 +109,15 @@ function Field({ label, error, className = "", children }) {
 // A step of fields with a Continue button: Enter in any field continues too,
 // and `onContinue` checks the fields before moving on. `submit` names the
 // button instead, `busy` disables it while it sends, and `after` goes
-// under it.
-function StepForm({ onContinue, submit = "Continue", busy = false, after, children }) {
+// under it. `sticky` holds the button (and `after`) at the foot of the
+// dialog, or of the screen on the page, while the fields scroll, as the last
+// step's are, so it's always in sight (11-17, the user asked).
+function StepForm({ onContinue, submit = "Continue", busy = false, after, sticky = false, children }) {
+  const button = (
+    <ArrowButton type="submit" disabled={busy} className={`${sticky ? "" : "mt-6"} max-550:w-full`}>
+      {submit}
+    </ArrowButton>
+  );
   return (
     <form
       onSubmit={(event) => {
@@ -120,10 +127,17 @@ function StepForm({ onContinue, submit = "Continue", busy = false, after, childr
       noValidate
     >
       {children}
-      <ArrowButton type="submit" disabled={busy} className="mt-6 max-550:w-full">
-        {submit}
-      </ArrowButton>
-      {after}
+      {sticky ? (
+        <div className="sticky bottom-0 z-10 mt-6 pt-4 pb-1 bg-[#0d0c0b] shadow-[0_-18px_18px_-6px_#0d0c0b]">
+          {button}
+          {after}
+        </div>
+      ) : (
+        <>
+          {button}
+          {after}
+        </>
+      )}
     </form>
   );
 }
@@ -204,7 +218,8 @@ function ContactStep({ form }) {
       onContinue={handleFormSubmit}
       submit={isSubmitting ? "Sending…" : "Send my request"}
       busy={isSubmitting}
-      after={<FormLegalNote dark className="mt-4" />}
+      after={<FormLegalNote dark className="mt-3" />}
+      sticky
     >
       <div className="grid grid-cols-1 @min-[520px]:grid-cols-2 @min-[760px]:grid-cols-3 gap-x-4 gap-y-5">
         <Field label="Name" error={errors.name} className="@min-[520px]:col-span-2 @min-[760px]:col-span-1">

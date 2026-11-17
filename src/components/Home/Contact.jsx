@@ -64,7 +64,7 @@ export default function Contact({
   intro = "A few quick questions, about a minute, and you pick a time for a free phone consultation.",
 }) {
   return (
-    <section id="contact" className={`${SECTION} section-dark overflow-hidden bg-[#070605] text-neutral-50`}>
+    <section id="contact" className={`${SECTION} section-dark overflow-clip bg-[#070605] text-neutral-50`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_0%_100%,rgba(233,166,72,0.14),transparent_70%)]"
