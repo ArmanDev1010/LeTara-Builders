@@ -9,6 +9,8 @@ import { BUSINESS } from "@/data/business";
 //   EMAIL_USER         Gmail account the email is sent from
 //   EMAIL_PASS         that account's Gmail app password
 //   RECEIVER_EMAIL     where it's delivered (defaults to BUSINESS.email)
+//
+// `npm run email-check` signs in with them (and `-- --send` sends a test).
 
 export const emailConfigured = () => Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
@@ -26,7 +28,9 @@ const escapeHtml = (value) =>
 export async function sendOfficeEmail({ subject, heading, text, replyTo, attachments }) {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    // (Google shows app passwords in groups of four; pasted with the spaces
+    // or without, it's the same password)
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS.replace(/\s+/g, "") },
   });
   await transporter.sendMail({
     from: `"${BUSINESS.name} Website" <${process.env.EMAIL_USER}>`,
