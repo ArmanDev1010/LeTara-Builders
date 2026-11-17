@@ -99,9 +99,9 @@ function ServiceCard({ service, index, last, local }) {
           {title}
         </h3>
         {main ? (
-          <p className="mt-3 max-w-md text-[15.5px] leading-relaxed text-white/70">{line}</p>
+          <p className="mt-4 max-w-md text-[15.5px] leading-relaxed text-white/70">{line}</p>
         ) : (
-          <p className={`mt-2 text-[14px] leading-snug text-white/60 ${last ? "700:text-[15px] max-w-2xl" : ""}`}>{line}</p>
+          <p className={`mt-3 text-[14.5px] leading-relaxed text-white/60 ${last ? "700:text-[15px] max-w-2xl" : ""}`}>{line}</p>
         )}
       </div>
 

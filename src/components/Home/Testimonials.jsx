@@ -162,10 +162,17 @@ export default async function Testimonials({ number = "04" }) {
                     <span className="sr-only"> out of 5</span>
                   </span>
                   <Stars className="text-[16px]" />
+                  {/* without Google, the count on the same line (11-17, the user asked) */}
+                  {!google && (
+                    <>
+                      <span aria-hidden="true" className="text-black/30">
+                        ·
+                      </span>
+                      <span className="text-[14.5px] text-black/55">{`${count} client review${plural}`}</span>
+                    </>
+                  )}
                 </span>
-                <span className="block mt-1 text-[13.5px] text-black/55">
-                  {google ? `${count} review${plural} on Google` : `${count} client review${plural}`}
-                </span>
+                {google && <span className="block mt-1 text-[13.5px] text-black/55">{`${count} review${plural} on Google`}</span>}
               </span>
             </div>
             {google && (
