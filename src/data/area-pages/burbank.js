@@ -10,28 +10,28 @@ const burbank = {
     "Design-build contractor in Burbank: new homes, additions, ADUs, remodels and outdoor living, permitted with the City of Burbank and built by one licensed team.",
   hero: "Design-build in Burbank: new homes, additions, ADUs, remodels and outdoor living, permitted with the City of Burbank and built by one licensed team.",
 
-  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
-  // pages aren't alike (the user asked): the intro as its line, and one
-  // line per service (by its slug) on that service's card. Plain local
-  // descriptions, checked: who permits a project here and the rules that
-  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Shown in "What we build" (Area/AreaServices), so the area pages aren't
+  // alike: the intro as its line, and one line per service (by its slug) on
+  // that service's card. Short and search-minded, the area's name with the
+  // service, no history (11-17: the user found the first ones too long).
+  // Only checkable facts (see the top); additions on the ground floor.
   // Checked 11-17: downtown along San Fernando Boulevard, and Magnolia Park.
   local: {
     intro:
-      "Burbank is its own city: building permits come from its Building & Safety Division, and a project may also be reviewed by Public Works, the Fire Department and Burbank Water and Power, which has its own requirements for ADUs. Homes run from the flats around downtown to the streets below the Verdugo Mountains.",
+      "Burbank design-build contractor for new homes, additions, ADUs, remodels and outdoor living, permitted with the City of Burbank, not Los Angeles.",
     services: {
       "new-construction":
-        "New homes drawn to Burbank's zoning and, on streets toward the Verdugo Mountains where a lot is in a fire zone, to the fire code: ignition-resistant roofing, vents and siding.",
+        "Custom homes in Burbank, from the flats to fire-zone lots below the Verdugo Mountains.",
       "home-additions":
-        "Ground-floor additions that open a Burbank home onto its yard: a family room, a primary suite or a bigger kitchen, measured against the city's own setbacks before anything is drawn.",
+        "Ground-floor additions that open a Burbank home onto its yard: a family room or a primary suite.",
       "adu-contractor":
-        "Backyard ADUs designed to Burbank's rules and state ADU law, with power and water planned with Burbank Water and Power, which has its own ADU requirements.",
+        "Backyard ADUs in Burbank, with power and water planned with Burbank Water and Power.",
       "home-remodeling":
-        "Kitchen, bath and whole-home remodels drawn to Burbank's code and reviewed by its Building & Safety Division, with Public Works or the Fire Department where the project needs them.",
+        "Kitchen, bath and whole-home remodeling in Burbank, drawn to the city's own code.",
       "outdoor-living":
-        "Outdoor kitchens and patio covers, with gas, power and water run to them, permitted with the City of Burbank.",
+        "Outdoor kitchens and patio covers in Burbank, with gas, power and water run to them.",
       "commercial-construction":
-        "Shop, office and restaurant build-outs, from downtown's San Fernando Boulevard to Magnolia Park, reviewed by Burbank's Building & Safety Division, with the Fire Department and Burbank Water and Power where the space needs them.",
+        "Build-outs for shops, offices and restaurants in downtown Burbank and Magnolia Park.",
     },
   },
 

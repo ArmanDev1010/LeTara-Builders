@@ -8,27 +8,27 @@ const missionHills = {
     "Design-build contractor in Mission Hills, Los Angeles: new homes, additions, ADUs, remodels and outdoor living, permitted with LADBS and built by one licensed team.",
   hero: "New homes, additions, ADUs and remodels in Mission Hills, designed, permitted with the City of Los Angeles and built by one licensed team.",
 
-  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
-  // pages aren't alike (the user asked): the intro as its line, and one
-  // line per service (by its slug) on that service's card. Plain local
-  // descriptions, checked: who permits a project here and the rules that
-  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Shown in "What we build" (Area/AreaServices), so the area pages aren't
+  // alike: the intro as its line, and one line per service (by its slug) on
+  // that service's card. Short and search-minded, the area's name with the
+  // service, no history (11-17: the user found the first ones too long).
+  // Only checkable facts (see the top); additions on the ground floor.
   local: {
     intro:
-      "In Mission Hills, a City of Los Angeles neighborhood, LADBS issues the permits and LADWP supplies the power and water. The houses here are mostly single-family homes, many from the mid-century, on lots with room for an addition at the back, a backyard ADU or a junior ADU inside the house.",
+      "Mission Hills design-build contractor for mid-century homes: a new house, an addition, an ADU or a remodel, designed and built by one licensed team.",
     services: {
       "new-construction":
-        "If an older house would take more to fix than to replace, we design a new home for the lot, take it through LADBS and build it, demolition included, under one contract.",
+        "New homes in Mission Hills in place of a house past fixing, with the demolition in the same contract.",
       "home-additions":
-        "A single-story addition at the back of the house: a bigger family room or a bedroom suite opening onto the yard through wide doors, designed to match the house.",
+        "Single-story additions at the back of Mission Hills homes: a bigger family room or a bedroom suite.",
       "adu-contractor":
-        "Junior ADUs and backyard ADUs. A junior ADU turns part of the house into a small home of up to 500 square feet with its own entrance, and it can sit alongside a backyard ADU on the same lot.",
+        "Backyard ADUs and junior ADUs in Mission Hills, both allowed on the same lot under state law.",
       "home-remodeling":
-        "Kitchen and bathroom remodels for mid-century homes, with the wiring, plumbing and insulation brought up to today's code while the walls are open.",
+        "Kitchen and bathroom remodels for mid-century Mission Hills homes, wiring and plumbing brought up to code.",
       "outdoor-living":
-        "Pergolas and solid patio covers tied into the house, with lights and fans overhead, that make a Mission Hills yard usable all summer.",
+        "Pergolas and patio covers with lights and fans that make a Mission Hills yard usable all summer.",
       "commercial-construction":
-        "Offices, clinics and shops built out from the bare space: the walls and ceilings, the wiring and plumbing, the restrooms and the finishes, through LADBS plan check and inspections.",
+        "Office, clinic and shop build-outs in Mission Hills, from bare space to finished, through LADBS.",
     },
   },
 

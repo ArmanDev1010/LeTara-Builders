@@ -11,27 +11,27 @@ const granadaHills = {
     "Design-build contractor in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from Eichlers to foothill lots, designed and built by one licensed team.",
   hero: "Design-build in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from the flats to the foothills, by one licensed team.",
 
-  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
-  // pages aren't alike (the user asked): the intro as its line, and one
-  // line per service (by its slug) on that service's card. Plain local
-  // descriptions, checked: who permits a project here and the rules that
-  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Shown in "What we build" (Area/AreaServices), so the area pages aren't
+  // alike: the intro as its line, and one line per service (by its slug) on
+  // that service's card. Short and search-minded, the area's name with the
+  // service, no history (11-17: the user found the first ones too long).
+  // Only checkable facts (see the top); additions on the ground floor.
   local: {
     intro:
-      "Granada Hills is part of the City of Los Angeles, with permits from LADBS. It runs from ranch homes on the Valley floor up into the Santa Susana foothills, where hillside lots fall under the Baseline Hillside Ordinance and fire-zone rules can apply, and its Balboa Highlands Eichler tract is a historic district with design guidelines of its own.",
+      "Granada Hills' design-build contractor for ranch homes, Eichlers and foothill lots, with every project designed and built by one licensed team.",
     services: {
       "new-construction":
-        "A custom home in the foothills, designed for its slope and its view and built to the fire-zone code where it applies: a Class A roof, ember-resistant vents and ignition-resistant siding.",
+        "Custom homes in the Granada Hills foothills, designed for the slope, the view and the fire code.",
       "home-additions":
-        "Ranch homes in the flats often have room to grow at the back: a primary suite or a family room on the ground floor. On hillside lots, the Baseline Hillside Ordinance sets how much you can add; we work that out before design.",
+        "Ground-floor additions for Granada Hills ranch homes: a primary suite or a family room at the back.",
       "adu-contractor":
-        "Wide, flat lots in Granada Hills are good ground for a detached ADU, for family nearby or for rent. We design it to state ADU law and take it through LADBS.",
+        "Detached ADUs on wide Granada Hills lots, designed to state ADU law and permitted with LADBS.",
       "home-remodeling":
-        "Kitchen, bath and whole-home remodels, Eichlers included. In Balboa Highlands, a historic district, exterior changes are reviewed against its guidelines, and we design to them from the start.",
+        "Kitchen, bath and whole-home remodeling in Granada Hills, Eichlers in Balboa Highlands included.",
       "outdoor-living":
-        "Covered patios, pergolas and outdoor kitchens that make the most of a foothill view, built with ignition-resistant materials in a Very High Fire Hazard Severity Zone.",
+        "Covered patios, pergolas and outdoor kitchens that make the most of a foothill view.",
       "commercial-construction":
-        "Storefronts, offices and restaurant spaces on Granada Hills' commercial streets, built out for the business moving in: the layout, the systems and the finishes, permitted through LADBS.",
+        "Build-outs for shops, offices and restaurants on Granada Hills' commercial streets.",
     },
   },
 

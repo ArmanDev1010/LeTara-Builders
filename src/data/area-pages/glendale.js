@@ -11,28 +11,28 @@ const glendale = {
     "Design-build contractor in Glendale: new homes, additions, ADUs, remodels and outdoor living, taken through Glendale's design review and permits by one licensed team.",
   hero: "New homes, additions, ADUs, remodels and outdoor living in Glendale, designed to the city's own rules and built by one licensed team.",
 
-  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
-  // pages aren't alike (the user asked): the intro as its line, and one
-  // line per service (by its slug) on that service's card. Plain local
-  // descriptions, checked: who permits a project here and the rules that
-  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Shown in "What we build" (Area/AreaServices), so the area pages aren't
+  // alike: the intro as its line, and one line per service (by its slug) on
+  // that service's card. Short and search-minded, the area's name with the
+  // service, no history (11-17: the user found the first ones too long).
+  // Only checkable facts (see the top); additions on the ground floor.
   // Brand Boulevard is its main commercial street.
   local: {
     intro:
-      "Glendale is its own city, with its own building department, its own design review and its own utility, Glendale Water & Power. Lots run from the flats near downtown to steep streets in the Verdugos and the San Rafael Hills, and second-story additions go through design review before building plan check.",
+      "Glendale design-build contractor for homes on the flats and in the hills, with plans drawn for the city's design review and code, then built by one team.",
     services: {
       "new-construction":
-        "Custom homes drawn to Glendale's code and design guidelines. On streets climbing into the Verdugos or the San Rafael Hills, steep lots can need engineering and fire-zone construction, which we plan from the start.",
+        "Custom homes in Glendale, steep lots in the Verdugos and the San Rafael Hills included.",
       "home-additions":
-        "Ground-floor additions at the back or side of a Glendale house, drawn to the city's single-family guidelines. A second story would add design review, by staff or the Design Review Board, before plan check; we take the plans through whatever applies.",
+        "Ground-floor additions for Glendale homes, drawn to the city's single-family design guidelines.",
       "adu-contractor":
-        "Attached and detached ADUs. On a hillside lot, an ADU attached to the house can use the ground that's already level, with its own entrance, kitchen and bath, and its service planned with Glendale Water & Power.",
+        "Attached and detached ADUs in Glendale, with service planned with Glendale Water & Power.",
       "home-remodeling":
-        "Kitchen, bath and whole-home remodels drawn to Glendale's code and permitted through its Community Development Department, not the City of Los Angeles.",
+        "Kitchen, bath and whole-home remodeling in Glendale, permitted through the city's own building department.",
       "outdoor-living":
-        "Pergolas and solid patio covers tied into the house that make the yard usable most of the year, built with ignition-resistant materials in a fire zone.",
+        "Pergolas and patio covers that make a Glendale yard usable most of the year.",
       "commercial-construction":
-        "Tenant improvements for shops, offices and restaurants, on Brand Boulevard or a neighborhood street, permitted through Glendale's Community Development Department, with service from Glendale Water & Power.",
+        "Tenant improvements for shops, offices and restaurants on Brand Boulevard and across Glendale.",
     },
   },
 

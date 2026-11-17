@@ -10,27 +10,27 @@ const porterRanch = {
     "Design-build contractor in Porter Ranch: additions, remodels, ADUs, new homes and outdoor living for hillside lots, permitted with LADBS and built by one licensed team.",
   hero: "Additions, remodels, ADUs and outdoor living in Porter Ranch: designed for hillside lots, permitted with the City of Los Angeles and built by one team.",
 
-  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
-  // pages aren't alike (the user asked): the intro as its line, and one
-  // line per service (by its slug) on that service's card. Plain local
-  // descriptions, checked: who permits a project here and the rules that
-  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Shown in "What we build" (Area/AreaServices), so the area pages aren't
+  // alike: the intro as its line, and one line per service (by its slug) on
+  // that service's card. Short and search-minded, the area's name with the
+  // service, no history (11-17: the user found the first ones too long).
+  // Only checkable facts (see the top); additions on the ground floor.
   local: {
     intro:
-      "Porter Ranch is part of the City of Los Angeles, in the northwest corner of the Valley against the Santa Susana Mountains. Many of its homes sit on hillside lots under the Baseline Hillside Ordinance, much of it is in a Very High Fire Hazard Severity Zone, and if your tract has an HOA, its architectural review comes before the city's permits.",
+      "Design-build for Porter Ranch homes, hillside lots included: one licensed team takes your project through any HOA review, the permits and the build.",
     services: {
       "new-construction":
-        "A new home on a hillside lot, designed to the Baseline Hillside Ordinance's limits on size and grading, and to the fire code where the lot is in a Very High Fire Hazard Severity Zone, as much of Porter Ranch is.",
+        "New custom homes on Porter Ranch hillside lots, designed within the city's hillside limits and the fire code.",
       "home-additions":
-        "A primary suite on the ground floor, with its own bath and closet, or a bigger family room. If your HOA has architectural review, its approval comes first; we prepare the drawings for it, then for LADBS.",
+        "Ground-floor primary suites and family rooms for Porter Ranch homes, drawn for your HOA and for LADBS.",
       "adu-contractor":
-        "On a sloped lot, the grade and the access decide where an ADU can go: attached to the house, or in the garage. We find the spot that works on the site visit and design around it.",
+        "ADUs on sloped Porter Ranch lots, attached, detached or in the garage, placed where the grade allows.",
       "home-remodeling":
-        "Kitchen remodels that open a closed-off kitchen to the family room, with an island and better light, plus bathroom remodels and whole-home updates.",
+        "Kitchens opened up to the family room, plus bath and whole-home remodeling in Porter Ranch.",
       "outdoor-living":
-        "Outdoor kitchens and covered patios on a sloped yard, with footings engineered for the grade, gas, power and water run to them, and ignition-resistant materials in the fire zone.",
+        "Outdoor kitchens and covered patios on sloped Porter Ranch yards, on footings engineered for the grade.",
       "commercial-construction":
-        "Office and retail suites built out for a new tenant: the layout, the systems and the finishes, designed, permitted through LADBS and built by one team.",
+        "Office and retail suite build-outs in Porter Ranch, designed, permitted and built by one team.",
     },
   },
 
