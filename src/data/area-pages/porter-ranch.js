@@ -9,13 +9,12 @@ const porterRanch = {
   description:
     "Design-build contractor in Porter Ranch: additions, remodels, ADUs, new homes and outdoor living for hillside lots, permitted with LADBS and built by one licensed team.",
   hero: "Additions, remodels, ADUs and outdoor living in Porter Ranch: designed for hillside lots, permitted with the City of Los Angeles and built by one team.",
-  services:
-    "From a new wing to an outdoor kitchen with a view, every kind of project, designed for hillside lots.",
 
-  // Parked, not shown (11-12): the "Building in <area>" section was
-  // scrapped until the user decides what goes after the quote form. Plain
-  // local descriptions, checked: who permits a project here and the rules
-  // that come up, then one per service (by its slug).
+  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
+  // pages aren't alike (the user asked): the intro as its line, and one
+  // line per service (by its slug) on that service's card. Plain local
+  // descriptions, checked: who permits a project here and the rules that
+  // come up. Additions are on the ground floor (Andranik, 11-16).
   local: {
     intro:
       "Porter Ranch is part of the City of Los Angeles, in the northwest corner of the Valley against the Santa Susana Mountains. Many of its homes sit on hillside lots under the Baseline Hillside Ordinance, much of it is in a Very High Fire Hazard Severity Zone, and if your tract has an HOA, its architectural review comes before the city's permits.",
@@ -23,13 +22,15 @@ const porterRanch = {
       "new-construction":
         "A new home on a hillside lot, designed to the Baseline Hillside Ordinance's limits on size and grading, and to the fire code where the lot is in a Very High Fire Hazard Severity Zone, as much of Porter Ranch is.",
       "home-additions":
-        "A primary suite on the ground floor, with its own bath and closet, or more room upstairs. If your HOA has architectural review, its approval comes first; we prepare the drawings for it, then for LADBS.",
+        "A primary suite on the ground floor, with its own bath and closet, or a bigger family room. If your HOA has architectural review, its approval comes first; we prepare the drawings for it, then for LADBS.",
       "adu-contractor":
         "On a sloped lot, the grade and the access decide where an ADU can go: attached to the house, or in the garage. We find the spot that works on the site visit and design around it.",
       "home-remodeling":
         "Kitchen remodels that open a closed-off kitchen to the family room, with an island and better light, plus bathroom remodels and whole-home updates.",
       "outdoor-living":
         "Outdoor kitchens and covered patios on a sloped yard, with footings engineered for the grade, gas, power and water run to them, and ignition-resistant materials in the fire zone.",
+      "commercial-construction":
+        "Office and retail suites built out for a new tenant: the layout, the systems and the finishes, designed, permitted through LADBS and built by one team.",
     },
   },
 

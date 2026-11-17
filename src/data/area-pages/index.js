@@ -11,9 +11,9 @@ import vanNuys from "./van-nuys";
 // One page per service area (data/areas.js), Los Angeles excepted (its page
 // is the homepage), served at /design-build-contractor-<slug> and rendered
 // by components/Area/AreaPage. Each file holds what makes its page its own:
-// the hero's line, a line over the services' cards, "Why build
-// here?" (`local`: a line about the place, and how we'd go
-// about each service there), and the local questions. HB Links' lesson: area
+// the hero's line, `local` (a line about the place over the services'
+// cards, and how we'd go about each service there, on its card; shown since
+// 11-17), and the local questions. HB Links' lesson: area
 // pages without real local content read as doorway pages, so every fact here is one that can be checked (who
 // issues permits, the utility, hillside, fire and historic rules, design
 // review), and the similarity between pages is measured, not guessed. No

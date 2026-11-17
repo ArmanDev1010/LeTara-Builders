@@ -70,7 +70,7 @@ export default function AreaPage({ page }) {
         />
       </ServiceHero>
 
-      <AreaServices number={number("services")} heading={["What we build", `in ${name}.`]} intro={page.services} />
+      <AreaServices number={number("services")} heading={["What we build", `in ${name}.`]} local={page.local} />
       <Process number={number("process")} intro={`How a project in ${name} goes with us, from the first call to the final walkthrough.`} />
       <Contact
         number={number("quote")}

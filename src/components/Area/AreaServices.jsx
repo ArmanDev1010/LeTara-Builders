@@ -47,8 +47,10 @@ const FOOT = "700:col-span-2 1080:col-span-3 min-h-[220px] 700:min-h-[200px] 108
 // lifts a little and a gold rule draws in along the foot. With Reduce
 // Motion only the colors change and the rule fades in. The arrow box is
 // always there, so a phone shows the card opens too.
-function ServiceCard({ service, index, last }) {
+function ServiceCard({ service, index, last, local }) {
   const { title, kicker, blurb, text, home, icon, href, slug } = service;
+  // the area's own line for this service, where it has one
+  const line = local?.[slug] ?? (index === 0 ? text : last ? home : blurb);
   const main = index === 0;
   const span = main ? LEAD : last ? FOOT : CARD;
   const titleId = `card-${slug}`;
@@ -97,9 +99,9 @@ function ServiceCard({ service, index, last }) {
           {title}
         </h3>
         {main ? (
-          <p className="mt-3 max-w-md text-[15.5px] leading-relaxed text-white/70">{text}</p>
+          <p className="mt-3 max-w-md text-[15.5px] leading-relaxed text-white/70">{line}</p>
         ) : (
-          <p className={`mt-2 text-[14px] leading-snug text-white/60 ${last ? "700:text-[15px] max-w-xl" : ""}`}>{last ? home : blurb}</p>
+          <p className={`mt-2 text-[14px] leading-snug text-white/60 ${last ? "700:text-[15px] max-w-2xl" : ""}`}>{line}</p>
         )}
       </div>
 
@@ -123,8 +125,10 @@ function ServiceCard({ service, index, last }) {
 // Commercial across the foot. Each card is black, with the service's icon
 // large and faint in its top right and on a hexagon in its top left, and
 // its name over it (no photos: the user's call, 11-11). The page passes its
-// own `number`, `heading` (its lines) and `intro`.
-export default function AreaServices({ number, heading, intro }) {
+// own `number`, `heading` (its lines) and `local` (data/area-pages: since
+// 11-17 its intro is the section's line and each service's line is on that
+// service's card, the area's own words, so no two area pages read alike).
+export default function AreaServices({ number, heading, local }) {
   return (
     <section id="services" className={`${SECTION} ${LIGHT}`}>
       <div className={CONTAINER}>
@@ -140,13 +144,13 @@ export default function AreaServices({ number, heading, intro }) {
             </Reveal>
           </div>
           <Reveal as="p" delay={0.1} className={`${LEDE.light} max-w-xl 1080:pb-1`}>
-            {intro}
+            {local.intro}
           </Reveal>
         </div>
 
         <ul className="mt-10 1080:mt-12 grid gap-3 700:grid-cols-2 1080:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_minmax(0,1fr)] 1080:grid-rows-[repeat(2,minmax(230px,auto))_minmax(200px,auto)] 1440:grid-rows-[repeat(2,minmax(250px,auto))_minmax(210px,auto)]">
           {SERVICES.map((service, i) => (
-            <ServiceCard key={service.title} service={service} index={i} last={i > 0 && i === SERVICES.length - 1} />
+            <ServiceCard key={service.title} service={service} index={i} last={i > 0 && i === SERVICES.length - 1} local={local.services} />
           ))}
         </ul>
       </div>

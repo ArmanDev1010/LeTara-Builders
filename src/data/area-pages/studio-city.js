@@ -10,13 +10,13 @@ const studioCity = {
   description:
     "Design-build contractor in Studio City: new homes, additions, remodels, ADUs and outdoor living, in the flats and the hills, designed and built by one licensed team.",
   hero: "New homes, additions, remodels, ADUs and outdoor living in Studio City, from the flats to the hills, designed and built by one licensed team.",
-  services:
-    "From remodels in the flats to new homes in the hills, every kind of project, designed and built by one team.",
 
-  // Parked, not shown (11-12): the "Building in <area>" section was
-  // scrapped until the user decides what goes after the quote form. Plain
-  // local descriptions, checked: who permits a project here and the rules
-  // that come up, then one per service (by its slug).
+  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
+  // pages aren't alike (the user asked): the intro as its line, and one
+  // line per service (by its slug) on that service's card. Plain local
+  // descriptions, checked: who permits a project here and the rules that
+  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Checked 11-17: Ventura Boulevard is under the Ventura/Cahuenga Boulevard Corridor Specific Plan (Los Angeles City Planning).
   local: {
     intro:
       "Studio City is part of the City of Los Angeles, with permits from LADBS. It runs from older homes on the flats north of Ventura Boulevard to hillside lots toward Mulholland Drive, where the Baseline Hillside Ordinance applies and properties in the Mulholland Scenic Parkway Specific Plan area go through its design review.",
@@ -24,13 +24,15 @@ const studioCity = {
       "new-construction":
         "Custom homes in the hills, designed for the slope and the view, within the Baseline Hillside Ordinance's limits and through Mulholland design review where it applies.",
       "home-additions":
-        "Additions near Mulholland Drive that add more than 900 square feet go before the Mulholland Design Review Board. We plan the addition for that review and prepare the plans for it.",
+        "In the flats, a ground-floor addition drawn to the lot's setbacks and floor-area limit; near Mulholland Drive, one that adds more than 900 square feet goes before the Mulholland Design Review Board, and we prepare the plans for it.",
       "adu-contractor":
         "Most single-family lots in Studio City can take an ADU, in the flats or the hills. On a hillside, the slope and access shape where it can go; we find the best spot on the site visit.",
       "home-remodeling":
         "Whole-home, kitchen and bath remodels for older houses in the flats that keep their character, with new structure, systems and a layout for today.",
       "outdoor-living":
         "Patios and outdoor living spaces on hillside lots, with footings engineered for the slope, that turn the view into a room.",
+      "commercial-construction":
+        "Shops, offices and restaurants along Ventura Boulevard, where the Ventura/Cahuenga Boulevard Corridor Specific Plan adds rules of its own, built out and permitted through LADBS.",
     },
   },
 

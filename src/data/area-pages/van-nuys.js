@@ -8,27 +8,29 @@ const vanNuys = {
   description:
     "Design-build contractor in Van Nuys: new homes, rebuilds, additions, ADUs, remodels and outdoor living, permitted with LADBS and built by one licensed team.",
   hero: "Design-build in Van Nuys: new homes, additions, ADUs, remodels and outdoor living, by one licensed team that handles the permits too.",
-  services:
-    "New, added on or made over: every kind of project, for Van Nuys homes and businesses.",
 
-  // Parked, not shown (11-12): the "Building in <area>" section was
-  // scrapped until the user decides what goes after the quote form. Plain
-  // local descriptions, checked: who permits a project here and the rules
-  // that come up, then one per service (by its slug).
+  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
+  // pages aren't alike (the user asked): the intro as its line, and one
+  // line per service (by its slug) on that service's card. Plain local
+  // descriptions, checked: who permits a project here and the rules that
+  // come up. Additions are on the ground floor (Andranik, 11-16).
+  // Checked 11-17: a change of use gets a new Certificate of Occupancy (LADBS); flat lots' floor area is capped by the Baseline Mansionization Ordinance.
   local: {
     intro:
-      "Van Nuys is part of the City of Los Angeles, and LADBS's Valley development services center is here, at 6262 Van Nuys Boulevard. Its neighborhoods are mostly post-war homes on flat, regular lots, where a second story, a garage conversion or a backyard ADU can often fit.",
+      "Van Nuys is part of the City of Los Angeles, and LADBS's Valley development services center is here, at 6262 Van Nuys Boulevard. Its neighborhoods are mostly post-war homes on flat, regular lots, where a ground-floor addition, a garage conversion or a backyard ADU can often fit.",
     services: {
       "new-construction":
         "Knock down and rebuild: when an older house has reached the end of its life, we design a new home to the lot's zoning, then demolish and build it under one contract.",
       "home-additions":
-        "Second-story additions that build up instead of out, with bedrooms and a bath upstairs and the yard kept as it is. A second story often needs new foundation work, which we check first.",
+        "Additions on the ground floor at the back of the house: a bedroom and bath, a primary suite or a bigger family room, sized to the floor area a flat lot is allowed under the city's Baseline Mansionization Ordinance.",
       "adu-contractor":
         "Garage conversions into ADUs, with their own kitchen and bath. State law allows the conversion on single-family lots, and the city can't require you to replace the parking.",
       "home-remodeling":
         "Kitchen and bath remodels that bring an older house's wiring, plumbing and insulation up to today's code while the walls are open.",
       "outdoor-living":
         "Outdoor kitchens with counters, a grill and a sink under a pergola, with gas, power and water run to them and permitted with the city.",
+      "commercial-construction":
+        "Shop, office and restaurant build-outs, permitted at LADBS's own Valley office here on Van Nuys Boulevard. When a space changes use, say from a store to a restaurant, LADBS issues a new Certificate of Occupancy.",
     },
   },
 

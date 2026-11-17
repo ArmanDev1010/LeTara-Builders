@@ -10,13 +10,12 @@ const granadaHills = {
   description:
     "Design-build contractor in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from Eichlers to foothill lots, designed and built by one licensed team.",
   hero: "Design-build in Granada Hills: new homes, additions, ADUs, remodels and outdoor living, from the flats to the foothills, by one licensed team.",
-  services:
-    "From Eichler remodels to new homes in the foothills, every kind of project, designed and built by one team.",
 
-  // Parked, not shown (11-12): the "Building in <area>" section was
-  // scrapped until the user decides what goes after the quote form. Plain
-  // local descriptions, checked: who permits a project here and the rules
-  // that come up, then one per service (by its slug).
+  // Shown since 11-17 in "What we build" (Area/AreaServices), so the area
+  // pages aren't alike (the user asked): the intro as its line, and one
+  // line per service (by its slug) on that service's card. Plain local
+  // descriptions, checked: who permits a project here and the rules that
+  // come up. Additions are on the ground floor (Andranik, 11-16).
   local: {
     intro:
       "Granada Hills is part of the City of Los Angeles, with permits from LADBS. It runs from ranch homes on the Valley floor up into the Santa Susana foothills, where hillside lots fall under the Baseline Hillside Ordinance and fire-zone rules can apply, and its Balboa Highlands Eichler tract is a historic district with design guidelines of its own.",
@@ -31,6 +30,8 @@ const granadaHills = {
         "Kitchen, bath and whole-home remodels, Eichlers included. In Balboa Highlands, a historic district, exterior changes are reviewed against its guidelines, and we design to them from the start.",
       "outdoor-living":
         "Covered patios, pergolas and outdoor kitchens that make the most of a foothill view, built with ignition-resistant materials in a Very High Fire Hazard Severity Zone.",
+      "commercial-construction":
+        "Storefronts, offices and restaurant spaces on Granada Hills' commercial streets, built out for the business moving in: the layout, the systems and the finishes, permitted through LADBS.",
     },
   },
 
