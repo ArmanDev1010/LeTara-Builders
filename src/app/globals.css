@@ -48,6 +48,16 @@
   }
 }
 
+/* A phone or tablet playing the drawn intro (not held sideways too short for
+   it, see intro-still): its pinned panel keeps one height, so the scene isn't
+   laid out again each time the browser's bars slide in or out
+   (components/Hero/HeroIntro.jsx). */
+@custom-variant hero-touch {
+  @media (hover: none) and (pointer: coarse) and (min-height: 501px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
+    @slot;
+  }
+}
+
 /* The timelapse heroes (components/Hero/HeroBuildSequence.jsx) show a still
    of the finished job instead on touch screens — phones and tablets,
    scrolled with a finger, where scrubbing the timelapse felt off — and on

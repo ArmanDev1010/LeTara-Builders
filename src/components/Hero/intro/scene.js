@@ -454,20 +454,26 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
   const maxSize = Math.min((width * cfg.span * 100) / m.width, height * cfg.maxH);
   const titleAt = (size, capsTop) => ({ size, baseline: capsTop + ascent * size, bottom: capsTop + capH * size });
   const fit = ({ room: b }) => Math.min((b.x1 - b.x0) / (e[2] - e[0]), (b.y1 - b.y0) / (e[3] - e[1]));
-  const air = clamp(0.028 * height, 14, 30); // the least air between them
+  // the least air between them (more on a phone: 11-17, the user found the
+  // house too close to the headline with the browser's bars showing)
+  const air = portrait ? clamp(0.035 * height, 22, 34) : clamp(0.028 * height, 14, 30);
   const head = layout.head ? headlineTop(ctx, layout.head, fonts) : null;
 
   // the house above the copy: the navbar, the title, the house and the
   // headline, the same air between each (the house as wide as the room
-  // lets it be); where there isn't room for that, the least air over and
-  // under the title, and the house as big as what's left lets it be
+  // lets it be); where there isn't room for that, `air` between each, under
+  // the house too, and the house as big as what's left lets it be; on a
+  // screen so short that leaves it under 60% of that, the air gives way
+  // (down to 12px) rather than the house. (Until 11-17 the house's room ran
+  // down to the headline when it was short of room.)
   const stacked = (x0, x1, bottom) => {
     const houseH = ((x1 - x0) * (e[3] - e[1])) / (e[2] - e[0]);
-    const even = (bottom - nav - capH * maxSize - houseH) / 3;
-    const gap = even >= air ? even : air;
+    const free = bottom - nav - capH * maxSize; // for the house and the air
+    let gap = Math.max((free - houseH) / 3, air);
+    if (free - 3 * gap < 0.6 * houseH) gap = Math.max(12, (free - 0.6 * houseH) / 3);
     const title = titleAt(maxSize, nav + gap);
     const y0 = title.bottom + gap;
-    const y1 = even >= air ? y0 + houseH : Math.max(y0 + 0.18 * height, bottom);
+    const y1 = y0 + Math.max(Math.min(houseH, free - 3 * gap), 0.1 * height);
     return { title, room: { x0, x1, y0, y1, top: true } };
   };
   if (portrait) return stacked(0.04 * width, 0.96 * width, head ?? (layout.copyTop - 0.015) * height);

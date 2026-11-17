@@ -91,9 +91,16 @@ export default function HeroIntro({ children }) {
       id="hero"
       className="group relative h-[calc(475*var(--vh))] intro-still:h-auto bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.26),rgba(196,92,16,0.08)_45%,transparent_75%)] portrait:bg-[radial-gradient(ellipse_80%_35%_at_100%_25%,rgba(255,170,58,0.28),rgba(196,92,16,0.08)_45%,transparent_75%)] data-[look=blueprint]:bg-[#04122b] data-[look=blueprint]:bg-none data-[look=blueprint]:portrait:bg-none text-neutral-50"
     >
+      {/* On a phone or tablet the pinned panel keeps one height while the
+          browser's bars slide in and out (11-17: iPhone Chrome's resized it
+          as they moved, and the scene was laid out again each time and
+          jumped, its bottom bar snapping away): the screen with its bars
+          showing (--svh, pinned at load, UI/StableViewport) and 120px more
+          below the copy, under the bottom bar (taller than any phone's bars),
+          so the scene still fills the screen when they slide away. */}
       <div
         ref={panelRef}
-        className="sticky top-0 h-dvh overflow-hidden flex items-end pt-28 sm:pt-22 intro-still:static intro-still:h-auto intro-still:block intro-still:pt-0"
+        className="sticky top-0 h-dvh hero-touch:h-[calc(100*var(--svh)+120px)] hero-touch:pb-[120px] overflow-hidden flex items-end pt-28 sm:pt-22 intro-still:static intro-still:h-auto intro-still:block intro-still:pt-0"
       >
         <canvas
           ref={canvasRef}
