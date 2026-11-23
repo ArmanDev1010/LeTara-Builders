@@ -122,7 +122,7 @@ const PASSES = [
 // ---- the property ----------------------------------------------------------
 // The Craftsman home on its lot, as the turntable shows it (not the drawing's
 // cutaway and rooms): the house with its porch on stone piers and its upper
-// floor, the addition on its right, the ADU cottage in the back corner, the
+// floor, the addition on its right, the ADU in the back corner, the
 // patio under the pergola with the outdoor kitchen and the fire pit. Boxes in
 // feet, none overlapping (so they can be put in drawing order, see
 // drawOrder); a `gable` one is a roof inside its box (gableFaces). `thin`
@@ -136,12 +136,14 @@ const LOT = ASSET.lot;
 
 // How each finish takes the light: `albedo`, how much it reflects; `slats`,
 // lines across it every so many feet (the siding's boards, the shingles'
-// courses).
+// courses); `tint`, its own color, as a multiple of the light's.
 const MATS = {
   siding: { albedo: 0.5, slats: 0.75 },
   shingle: { albedo: 0.2, slats: 0.9 },
   concrete: { albedo: 0.46 },
   stone: { albedo: 0.38 },
+  stucco: { albedo: 0.62, tint: [1.14, 1.04, 0.86] }, // the ADU: warm white, apart from the grey house
+  roof: { albedo: 0.18 },
   deck: { albedo: 0.3 },
   wood: { albedo: 0.36 },
 };
@@ -153,7 +155,7 @@ const matOf = (b) => MATS[b.mat] ?? MATS.concrete;
 const NOTES = [
   { at: [25.5, 25.6, 8], dir: [-1, -1], text: "Main house" },
   { at: [39.25, 14.6, 10], dir: [1, -1], text: "Addition" },
-  { at: [1, 14.4, 38], dir: [-1, -1], text: "ADU" },
+  { at: [-19, 10.4, 36], dir: [-1, -1], text: "ADU" },
   { at: [55, 10.1, 13], dir: [1, 1], text: "Pergola" },
 ];
 
@@ -469,40 +471,43 @@ const navBottom = (portrait, layout) =>
 // stacked behind it on a phone, and the light sat on "BUILD." on desktop.
 // `span`: its width at most, as a share of the screen's; `maxH`: its size at
 // most, as a share of the height; `faint` / `bright`: its outline's opacity,
-// unlit and lit; `fill`: a lit word's fill.
+// unlit and lit; `fill`: a lit word's fill; `stretch`: how much taller than
+// the face its letters are drawn (on a phone, like a lock screen's stretched
+// clock: the user asked, 11-23, with it fainter everywhere).
 const TITLE = {
   text: "DREAM. DESIGN. BUILD.",
-  portrait: { span: 0.86, maxH: 0.05, faint: 0.22, bright: 0.65, fill: 0.13 },
-  desktop: { span: 0.84, maxH: 0.17, faint: 0.07, bright: 0.28, fill: 0.05 },
+  portrait: { span: 0.86, maxH: 0.05, faint: 0.15, bright: 0.45, fill: 0.08, stretch: 1.55 },
+  desktop: { span: 0.84, maxH: 0.17, faint: 0.05, bright: 0.2, fill: 0.035, stretch: 1 },
 };
 // px from the title down to the house's room, beside the copy
 const UNDER_TITLE = 20;
 
-// How much of the screen the house takes from every angle it's seen from,
-// on a screen 1 unit away: [x0, y0, x1, y1] around the target. The lot's
-// line, only a faint dashed one, may run past it.
-const EXTENT = (() => {
-  const pts = BOXES.flatMap(shapeVertices);
+// How big the house looks, on a screen 1 unit away: the widest and the
+// tallest it gets from any one angle it's seen from ({ w, h }). It's centred
+// as it looks at each moment (see camera), so a room it fits at this size
+// fits it from every angle. (Until 11-23, centred on all the angles at once,
+// it was fitted to their extent together, a tenth wider than it ever looks.)
+// The lot's line, only a faint dashed one, may run past it.
+const sizeOf = (e) => ({ w: e[2] - e[0], h: e[3] - e[1] });
+const biggest = (a, b) => ({ w: Math.max(a.w, b.w), h: Math.max(a.h, b.h) });
+function sizeFrom(pts) {
   const out = {};
-  for (const [key, orbit] of Object.entries(ORBIT)) {
-    const e = [Infinity, Infinity, -Infinity, -Infinity];
-    for (const [yaw, pitch] of allAngles(orbit)) extentOf(view(yaw, pitch).project, pts, e);
-    out[key] = e;
-  }
+  for (const [key, orbit] of Object.entries(ORBIT))
+    out[key] = allAngles(orbit).reduce((size, [yaw, pitch]) => biggest(size, sizeOf(extentOf(view(yaw, pitch).project, pts))), { w: 0, h: 0 });
   return out;
+}
+const SIZE = sizeFrom(BOXES.flatMap(shapeVertices));
+// With `calm`, the pieces where they start too, so the camera can circle
+// without the view zooming as they land.
+const CALM_SIZE = (() => {
+  const apartSize = sizeFrom(dreamCorners(0, true));
+  return Object.fromEntries(Object.keys(SIZE).map((key) => [key, biggest(SIZE[key], apartSize[key])]));
 })();
-// With `calm`, the house and the pieces where they start, from every angle,
-// so the camera can circle without the view zooming as they land.
-const CALM_EXTENT = (() => {
-  const pts = dreamCorners(0, true);
-  const out = {};
-  for (const [key, orbit] of Object.entries(ORBIT)) {
-    const e = [...EXTENT[key]];
-    for (const [yaw, pitch] of allAngles(orbit)) extentOf(view(yaw, pitch).project, pts, e);
-    out[key] = e;
-  }
-  return out;
-})();
+// On a wide screen the house takes this much of its room, the room ending
+// ROOM_FOOT of the way down (11-23: the user found it a little big and too
+// close to the foot of the screen).
+const DESKTOP_FILL = 0.88;
+const ROOM_FOOT = 0.88;
 
 // Where the title and the house go: the title's size and baseline, and the
 // house's room, a box in CSS px (`top`: the house sits at its top, so the air
@@ -514,15 +519,16 @@ const CALM_EXTENT = (() => {
 // copy below it) has the screen to itself.
 function placeScene(ctx, width, height, portrait, layout, fonts) {
   const nav = navBottom(portrait, layout);
-  const e = EXTENT[portrait ? "portrait" : "desktop"];
+  const size = SIZE[portrait ? "portrait" : "desktop"];
   const cfg = TITLE[portrait ? "portrait" : "desktop"];
   ctx.font = `100px ${fonts.display}`;
   const m = ctx.measureText(TITLE.text);
-  const ascent = m.actualBoundingBoxAscent / 100;
-  const capH = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100; // at 1px
+  // (at 1px, as drawn: stretched on a phone)
+  const ascent = (m.actualBoundingBoxAscent / 100) * cfg.stretch;
+  const capH = ((m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100) * cfg.stretch;
   const maxSize = Math.min((width * cfg.span * 100) / m.width, height * cfg.maxH);
-  const titleAt = (size, capsTop) => ({ size, baseline: capsTop + ascent * size, bottom: capsTop + capH * size });
-  const fit = ({ room: b }) => Math.min((b.x1 - b.x0) / (e[2] - e[0]), (b.y1 - b.y0) / (e[3] - e[1]));
+  const titleAt = (px, capsTop) => ({ size: px, stretch: cfg.stretch, baseline: capsTop + ascent * px, bottom: capsTop + capH * px });
+  const fit = ({ room: b }) => Math.min((b.x1 - b.x0) / size.w, (b.y1 - b.y0) / size.h);
   // the least air between them (more on a phone: 11-17, the user found the
   // house too close to the headline with the browser's bars showing)
   const air = portrait ? clamp(0.035 * height, 22, 34) : clamp(0.028 * height, 14, 30);
@@ -536,7 +542,7 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
   // (down to 12px) rather than the house. (Until 11-17 the house's room ran
   // down to the headline when it was short of room.)
   const stacked = (x0, x1, bottom) => {
-    const houseH = ((x1 - x0) * (e[3] - e[1])) / (e[2] - e[0]);
+    const houseH = ((x1 - x0) * size.h) / size.w;
     const free = bottom - nav - capH * maxSize; // for the house and the air
     let gap = Math.max((free - houseH) / 3, air);
     if (free - 3 * gap < 0.6 * houseH) gap = Math.max(12, (free - 0.6 * houseH) / 3);
@@ -552,8 +558,8 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
   // beside the copy: the title halfway between the navbar and the
   // headline's letters, the house below it
   const space = head - nav;
-  const size = Math.min(maxSize, (space * 0.55) / capH);
-  const title = titleAt(size, nav + (space - capH * size) / 2);
+  const px = Math.min(maxSize, (space * 0.55) / capH);
+  const title = titleAt(px, nav + (space - capH * px) / 2);
   const y0 = title.bottom + UNDER_TITLE;
   const beside = {
     title,
@@ -561,7 +567,7 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
       x0: Math.min(0.6, Math.max(layout.copyRight ?? 0, layout.titleRight ?? 0) + 0.03) * width,
       x1: 0.975 * width,
       y0,
-      y1: Math.max(y0 + 0.18 * height, 0.93 * height),
+      y1: Math.max(y0 + 0.18 * height, ROOM_FOOT * height),
     },
   };
   return fit(beside) >= fit(overhead) ? beside : overhead;
@@ -584,21 +590,19 @@ function camera(width, height, portrait, t, spin, calm, box) {
   // scroll's turn too (the visitor's own scroll moves it)
   const [yaw, pitch] = angles(orbit, k);
   const { eye, project } = view(yaw + SPIN * spin, pitch);
-  // the house, and in DREAM the pieces where they hang (with `calm`, where
-  // they start, from every angle, so it doesn't zoom)
-  const whole = EXTENT[portrait ? "portrait" : "desktop"];
-  const e = calm
-    ? CALM_EXTENT[portrait ? "portrait" : "desktop"]
-    : apart(t) > 0
-      ? extentOf(project, dreamCorners(t, false), [...whole])
-      : whole;
-  // pushed in all the way, it still fits
-  const s0 = Math.min((box.x1 - box.x0) / (e[2] - e[0]), (box.y1 - box.y0) / (e[3] - e[1])) / (1 + PUSH_IN);
-  const s = s0 * (1 + (calm ? 0 : PUSH_IN * smooth(0, 1, t)));
-  // centred in the room as it is now (the pieces where they are): the house
-  // as it looks from here, not the extent of every angle, so it's centred
-  // at each one; it fits, being no bigger than that extent
+  // as it is now (the pieces where they are)
   const now = extentOf(project, dreamCorners(t, calm));
+  // sized for the house at its biggest, and in DREAM for the pieces where
+  // they hang (with `calm`, where they start, so it doesn't zoom); on a wide
+  // screen a little smaller than its room
+  const key = portrait ? "portrait" : "desktop";
+  const e = calm ? CALM_SIZE[key] : apart(t) > 0 ? biggest(SIZE[key], sizeOf(now)) : SIZE[key];
+  // pushed in all the way, it still fits
+  const fill = portrait ? 1 : DESKTOP_FILL;
+  const s0 = (fill * Math.min((box.x1 - box.x0) / e.w, (box.y1 - box.y0) / e.h)) / (1 + PUSH_IN);
+  const s = s0 * (1 + (calm ? 0 : PUSH_IN * smooth(0, 1, t)));
+  // centred in the room as it looks from here, so it's centred at every
+  // angle (it fits, being no bigger than the size above)
   const ox = (box.x0 + box.x1) / 2 - s * ((now[0] + now[2]) / 2);
   const oy = (box.y0 + box.y1) / 2 - s * ((now[1] + now[3]) / 2);
   return {
@@ -627,7 +631,8 @@ export const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
 function shade(b, n, colors) {
   const a = matOf(b).albedo;
   const k = Math.max(0, dot(n, KEY)), r = Math.max(0, dot(n, RIM));
-  return [0, 1, 2].map((i) => Math.min(255, Math.round(a * (34 + SKY_LIGHT[i] * 1.1 * k + colors.mid[i] * 0.6 * r) + 3)));
+  const tint = matOf(b).tint ?? [1, 1, 1];
+  return [0, 1, 2].map((i) => Math.min(255, Math.round(a * tint[i] * (34 + SKY_LIGHT[i] * 1.1 * k + colors.mid[i] * 0.6 * r) + 3)));
 }
 
 // a light sprite for a lamp's or a window's glow, a hot core in a glow (the
@@ -1272,10 +1277,14 @@ function drawTitle(ctx, width, portrait, title, t, fonts) {
   ctx.textAlign = "left";
   ctx.lineJoin = "round";
   ctx.font = `${title.size}px ${fonts.display}`;
+  // stretched tall from its baseline (on a phone)
+  ctx.translate(0, title.baseline);
+  ctx.scale(1, title.stretch);
   const space = ctx.measureText(" ").width;
   const widths = words.map((w) => ctx.measureText(w).width);
   let x = width / 2 - (widths.reduce((sum, w) => sum + w, 0) + space * 2) / 2;
-  ctx.lineWidth = Math.max(1, title.size / (portrait ? 45 : 110));
+  // (thinner as it's stretched, so its outline stays even)
+  ctx.lineWidth = Math.max(0.8, title.size / (portrait ? 45 : 110) / ((1 + title.stretch) / 2));
   const done = smooth(T.settle - 0.05, T.settle, t);
   const lit = (i) => {
     const from = PASSES[i].from, to = PASSES[i + 1]?.from ?? 2;
@@ -1288,10 +1297,10 @@ function drawTitle(ctx, width, portrait, title, t, fonts) {
     const c = i === 1 ? BLUE : GOLD;
     if (k > 0) {
       ctx.fillStyle = rgba(c.mid, fill * k);
-      ctx.fillText(word, x, title.baseline);
+      ctx.fillText(word, x, 0);
     }
     ctx.strokeStyle = rgba(mix([255, 255, 255], c.mid, k), lerp(faint, bright, k));
-    ctx.strokeText(word, x, title.baseline);
+    ctx.strokeText(word, x, 0);
     x += widths[i] + space;
   });
   ctx.restore();

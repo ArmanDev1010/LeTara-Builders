@@ -19,6 +19,7 @@ const CHAMFER = "[clip-path:polygon(0_0,calc(100%-20px)_0,100%_20px,100%_100%,0_
 // While the drawing is held above the cards on a phone or tablet, it's this
 // much of its size, so more of the cards shows (the user asked, 11-23);
 // sitting in its place it's full size.
+const HELD = 0.75;
 const HELD_SCALE = "group-data-[stuck]/pin:[transform:scale(0.75)]";
 const HELD_SCALE_Y = "group-data-[stuck]/pin:[transform:scaleY(0.75)]";
 
@@ -134,6 +135,7 @@ export default function Services({
   useEffect(() => {
     const panel = canvasRef.current.closest("[data-pin]");
     const list = listRef.current;
+    const white = panel.querySelector("[data-pin-white]");
     const touch = window.matchMedia("(hover: none)");
     const gap = (r, y) => (y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0);
     let raf = 0;
@@ -150,6 +152,19 @@ export default function Services({
         clearTimeout(settle);
         settle = setTimeout(schedule, 560);
       }
+      // Held, its place in the page is as short as it's drawn, and the
+      // cards' list takes the difference at its top, so nothing moves; it
+      // then lets go once the last card is all under it (11-23: the user saw
+      // the foot of the last card ride along under the smaller drawing). The
+      // white behind it is the full drawing's height, scaled with it.
+      const H = canvasRef.current.offsetHeight;
+      const cut = held ? Math.round(H * (1 - HELD)) : 0;
+      const height = cut ? `${H - cut}px` : "";
+      if (panel.style.height !== height) {
+        panel.style.height = height;
+        list.style.paddingTop = cut ? `${cut}px` : "";
+      }
+      white.style.height = `${H}px`;
       touchRef.current = touch.matches;
       if (!touch.matches) return;
       const nav = document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0;
@@ -177,6 +192,7 @@ export default function Services({
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(settle);
+      panel.style.height = list.style.paddingTop = white.style.height = "";
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       touch.removeEventListener("change", schedule);
@@ -214,7 +230,7 @@ export default function Services({
             data-pin=""
             className="group/pin relative pointer-events-none 1080:sticky 1080:top-28 1080:self-start services-pin:sticky services-pin:top-[84px] 700:services-pin:top-[88px] services-pin:z-10 before:absolute before:inset-x-0 before:bottom-full before:h-[88px] before:bg-white before:opacity-0 data-[stuck]:before:opacity-100"
           >
-            <span aria-hidden="true" className={`absolute inset-0 origin-top bg-white transition-transform duration-500 ${EASE} ${HELD_SCALE_Y}`}>
+            <span data-pin-white="" aria-hidden="true" className={`absolute inset-x-0 top-0 h-full origin-top bg-white transition-transform duration-500 ${EASE} ${HELD_SCALE_Y}`}>
               <span className="absolute inset-x-0 top-full h-6 bg-gradient-to-b from-white to-transparent opacity-0 transition-opacity group-data-[stuck]/pin:opacity-100" />
             </span>
             <div className={`relative origin-top transition-transform duration-500 ${EASE} ${HELD_SCALE}`}>

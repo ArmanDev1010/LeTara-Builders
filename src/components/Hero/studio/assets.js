@@ -312,13 +312,13 @@ const pergolaSlats = Array.from({ length: 7 }, (_, i) => {
 
 const property = {
   word: "LOS ANGELES",
-  target: [28, 7, 17],
+  target: [22, 7, 17],
   dist: 168,
   yaw: [-34, -14],
   pitch: 26,
   light: [24, 30, 52],
-  stage: 50,
-  lot: { x: [-10, 58 + PATIO_X], z: [-15, 49] },
+  stage: 62, // round the whole lot, the ADU's corner included
+  lot: { x: [-30, 58 + PATIO_X], z: [-15, 49] },
   order: ["site", "new-construction", "home-additions", "adu-contractor", "outdoor-living"],
   layers: {
     site: {},
@@ -378,10 +378,16 @@ const property = {
     { id: "bathWallR", min: [6.5, 0.85, 20], max: [6.9, 5.6, 25.5], mat: "drywall", layer: "home-remodeling", diagramOnly: true, section: true },
     { id: "tub", min: [0.5, 0.85, 20.5], max: [3.1, 2.6, 25.5], mat: "counter", layer: "home-remodeling", diagramOnly: true },
     { id: "vanity", min: [3.8, 0.85, 23.8], max: [6.5, 3.3, 25.5], mat: "cabinet", layer: "home-remodeling", diagramOnly: true },
-    // the ADU, a matching cottage in the back corner of the yard
-    { id: "aduSlab", min: [-6, 0, 32], max: [8, 0.6, 44], mat: "concrete", layer: "adu-contractor" },
-    { id: "aduBody", min: [-6, 0.6, 32], max: [8, 9.6, 44], mat: "siding", layer: "adu-contractor" },
-    { id: "aduRoof", min: [-7, 9.6, 31], max: [9, 14.4, 45], mat: "shingle", gable: "x", layer: "adu-contractor" },
+    // the ADU, a home of its own in the back corner of the yard: set apart
+    // from the house, light stucco under a flat roof, a wide glass slider
+    // onto its own deck, a path to the house (11-23: the user found the
+    // matching cottage that was here, close behind the house, read as part
+    // of it)
+    { id: "aduPath", min: [-12, 0, 26.5], max: [0, 0.15, 28.5], mat: "concrete", layer: "adu-contractor" },
+    { id: "aduDeck", min: [-26, 0, 25], max: [-12, 0.35, 29.5], mat: "deck", layer: "adu-contractor" },
+    { id: "aduSlab", min: [-26, 0, 30], max: [-12, 0.6, 42], mat: "concrete", layer: "adu-contractor" },
+    { id: "aduBody", min: [-26, 0.6, 30], max: [-12, 9.6, 42], mat: "stucco", layer: "adu-contractor" },
+    { id: "aduRoof", min: [-27, 9.6, 29], max: [-11, 10.4, 43], mat: "roof", layer: "adu-contractor" },
     // beside the house: the patio under the pergola, the outdoor kitchen,
     // the fire pit
     { id: "patio", min: [46, 0, 3], max: [64, 0.35, 23], mat: "deck", layer: "outdoor-living" },
@@ -407,9 +413,9 @@ const property = {
     { box: "hGround", face: "x-", u: [0.5, 0.69], v: [0.3, 0.75] },
     { box: "hGround", face: "x-", u: [0.23, 0.38], v: [0.3, 0.75] },
     // the ADU: its door and a window
-    { box: "aduBody", face: "z-", u: [0.12, 0.3], v: [0, 0.78] },
-    { box: "aduBody", face: "z-", u: [0.45, 0.85], v: [0.3, 0.78] },
-    { box: "aduBody", face: "x-", u: [0.3, 0.7], v: [0.35, 0.75] },
+    { box: "aduBody", face: "z-", u: [0.08, 0.52], v: [0, 0.84] },
+    { box: "aduBody", face: "z-", u: [0.64, 0.9], v: [0.38, 0.8] },
+    { box: "aduBody", face: "x-", u: [0.25, 0.75], v: [0.4, 0.78] },
     // the addition: a window to the street
     { box: "aBody", face: "z-", u: [0.2, 0.8], v: [0.3, 0.78] },
     // in the drawing: the same windows on the walls it has in pieces, cut
@@ -436,7 +442,7 @@ const property = {
   marks: {
     "new-construction": [9, 2.6, -4.6],
     "home-additions": [38.8, 16.8, 3],
-    "adu-contractor": [1, 16.5, 38],
+    "adu-contractor": [-19, 13, 36],
     "home-remodeling": [8.5, 6.5, 15],
     "outdoor-living": [46 + PATIO_X, 12.5, 13],
   },

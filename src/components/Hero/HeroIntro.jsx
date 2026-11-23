@@ -65,11 +65,14 @@ export default function HeroIntro({ children }) {
     // As tall as the screen (in steady --svh, see UI/StableViewport), never
     // too short for the house and the copy, as a service page's hero (Hero/
     // ServiceHero). A phone held sideways shows the scene a screen tall, the
-    // headline below it (it's too short for both).
+    // headline below it (it's too short for both). On a phone the copy sits
+    // low (32px from the foot) and the hero is at least 660px, so the house
+    // has more room and Safari with its bars (664px) shows the buttons
+    // (11-23: the user wanted the house bigger there).
     <section
       ref={sectionRef}
       id="hero"
-      className="relative flex items-end overflow-hidden h-[calc(100*var(--svh))] min-h-[700px] 700:min-h-[600px] pt-28 intro-still:block intro-still:h-auto intro-still:min-h-0 intro-still:pt-0 bg-[#050b1b] text-neutral-50"
+      className="relative flex items-end overflow-hidden h-[calc(100*var(--svh))] min-h-[660px] 700:min-h-[600px] pt-28 intro-still:block intro-still:h-auto intro-still:min-h-0 intro-still:pt-0 bg-[#050b1b] text-neutral-50"
     >
       <canvas
         ref={canvasRef}
@@ -80,7 +83,7 @@ export default function HeroIntro({ children }) {
       {/* shade under the copy; on a wide screen it eases off to the right,
           where the house can come down beside the copy */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-[#02050d]/80 via-[#02050d]/35 to-transparent 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
-      <div ref={copyRef} className="wide-zoom relative z-20 900:pb-16 pb-20 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10">
+      <div ref={copyRef} className="wide-zoom relative z-20 pb-8 700:pb-20 900:pb-16 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10">
         {children}
       </div>
     </section>

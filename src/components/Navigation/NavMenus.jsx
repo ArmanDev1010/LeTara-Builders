@@ -47,11 +47,14 @@ const number = (i) => String(i + 1).padStart(2, "0");
 
 // ---- wide screen: the panels --------------------------------------------------
 
+// On a window under 760px tall (`short`) the services run in two columns of
+// three, so the panel (532px tall in one) never runs off the screen's foot
+// (11-23: the user found it close to the bottom and asked).
 export function ServicesPanel({ onNavigate, onQuote }) {
   return (
-    <div className="w-[470px] py-3">
+    <div className="w-[470px] short:w-[800px] py-3">
       <p className={`${label} px-6 pt-2 pb-3`}>What we build</p>
-      <ul>
+      <ul className="short:grid short:grid-flow-col short:grid-rows-3 short:grid-cols-2">
         {SERVICES.map(({ title, blurb, href }, i) => (
           <li key={title}>
             <Link

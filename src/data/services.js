@@ -43,7 +43,7 @@ export const SERVICES = [
     title: "ADUs",
     kicker: "On your lot",
     blurb: "A second home on your lot, attached or detached",
-    home: "A second home on the same lot: a cottage in the yard like this one, attached to the house, or in the garage.",
+    home: "A second home on the same lot: a detached one like this, attached to the house, or in the garage.",
     icon: TbHomePlus,
   },
   {
