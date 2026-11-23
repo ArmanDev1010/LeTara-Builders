@@ -46,8 +46,8 @@ const LEGAL_PATHS = new Set(LEGAL_PAGES.map(({ slug }) => `/${slug}`));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Resolves once the page's hero image is decoded — or, for the homepage's
-// drawn hero (Hero/HeroIntro), once its canvas has its first frame — or after
+// Resolves once the page's hero image is decoded — or, for a drawn hero
+// (Hero/HeroIntro, Hero/ServiceHero), once its canvas has its first frame — or after
 // `wait` ms.
 async function heroReady(wait) {
   const image = document.querySelector("#hero img");

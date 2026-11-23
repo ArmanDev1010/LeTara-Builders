@@ -7,7 +7,7 @@ import { EmailLink, ExternalLink, PhoneLink } from "./links";
 // Motion (UI/MotionPreferences, globals.css, and the calm versions in
 // HeroIntro, ServiceHero, the reviews, the page transition and the reveals:
 // the animations still play, calmer and slower, with no zoom, fades for
-// slides, and only pure atmosphere such as the hero's dust stopped); the
+// slides, and only pure atmosphere such as the service heroes' dust stopped); the
 // phone and email beside every form. Keep the motion wording true whenever
 // motion changes (CLAUDE.md).
 const accessibility = {

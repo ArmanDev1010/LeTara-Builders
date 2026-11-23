@@ -1,6 +1,6 @@
-// The homepage hero, drawn on a 2D canvas as the visitor scrolls: a house
-// rendered the way a visual-effects shot is, pass by pass (Andranik's first
-// trade), to the tagline, Dream. Design. Build.
+// The homepage hero, drawn on a 2D canvas, playing by itself as the page
+// opens: a house rendered the way a visual-effects shot is, pass by pass
+// (Andranik's first trade), to the tagline, Dream. Design. Build.
 //
 //   DREAM   the house as a vision in gold glass, in pieces, as in an
 //           architect's exploded view: each piece hangs over its place, and
@@ -13,40 +13,34 @@
 //           turns gold again and the windows come on, one by one, until it's
 //           the finished render.
 //
-// The camera turns slowly around it all the while. Behind it, in outline
-// across the screen, "DREAM. DESIGN. BUILD.", each word lighting up with its
-// pass; a viewfinder's corners frame it.
+// The camera turns slowly around it all the while, and once it's built, a
+// little further as the hero scrolls away (`spin`). It stands on a faint
+// drafting grid, in perspective, on black. Behind it, in outline across the
+// screen, "DREAM. DESIGN. BUILD.", each word lighting up with its pass; a
+// viewfinder's corners frame it.
 //
-//   drawScene(context, { width, height, dpr, t, portrait, layout, calm, idle, fonts })
+//   drawScene(context, { width, height, dpr, t, spin, portrait, layout, calm, lite, fonts })
 //
 // paints the scene at progress `t` (0-1) on a canvas of `width` x `height`
 // CSS px at `dpr` device px each. `layout` places it around the hero's copy,
 // as fractions of the screen: `copyTop` (where the copy starts), `copyRight`
 // and `titleRight` (how far right its text and its headline reach), and
 // `navZoom` (how much the navbar has grown on a big screen). `calm` is the
-// Reduce Motion version: the camera circles without pushing in, the pieces start a little
-// closer together, nothing flashes. `idle` (seconds)
-// keeps the dust drifting and the pool shimmering once the scene has
-// finished. `lite` (phones and tablets) draws the light shafts smaller and in
-// fewer passes and leaves out the film grain. `fonts` are the CSS families
-// for the lettering.
+// Reduce Motion version: the camera circles without pushing in, the pieces
+// start a little closer together, nothing flashes. `lite` (phones and
+// tablets) leaves out the film grain. `fonts` are the CSS families for the
+// lettering.
 //
 // Everything is drawn from numbers here, nothing is downloaded. World units
 // are feet: y points up, the front of the house faces -z, the ADU is at +x.
-// Black, white and greys, plus two colors: the gold light and blueprint blue.
+// Black, white and greys, plus two colors: gold and blueprint blue, the
+// passes' colors.
 //
-// Its math, colors and lighting pieces are exported for the service pages'
-// turntable (Hero/studio/studio.js), which draws one object in the same look.
-//
-// `look: "blueprint"` (a demo for Andranik, 11-16, at /?look=blueprint: he
-// likes the animation but asked for other colors, something like a
-// blueprint, and no light): the same three passes and camera on a dark
-// blueprint, a drafting grid on it and the lot gridded in perspective, all
-// in white and blue ink; no light, shafts, bloom or dust; built, the house is
-// shaded in blues with white outlines and its windows come on cool white.
-// Kept apart from HB Links' blueprint (blue paper with white lines, its
-// design-build sequence). If he approves it, it becomes the hero and the
-// rest of the site follows; if not, it comes out.
+// No light of its own since 11-23 (when it began playing by itself rather
+// than with the scroll, the user asked for no light or flare and no dust): the backlight
+// with its shafts, bloom and streak, and the dust, are gone from this scene.
+// Its math, colors and those lighting pieces are still exported for the
+// service pages' turntable (Hero/studio/studio.js), which uses them.
 
 export const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const lerp = (a, b, k) => a + (b - a) * k;
@@ -81,45 +75,42 @@ export const lerp3 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), ler
 // ---- palette ---------------------------------------------------------------
 export const GOLD = { core: [255, 244, 214], mid: [255, 170, 58], deep: [196, 92, 16] };
 export const BLUE = { core: [232, 244, 255], mid: [74, 150, 255], deep: [20, 64, 190] };
-// The blueprint look's colors: the sheet (deep blue to near black at its
-// edges), its grid, the ink (white and blue), and the built house's shades.
-const BP = {
-  sheet: [7, 27, 58],
-  edge: [2, 9, 22],
-  grid: [130, 180, 240],
-  ink: [236, 245, 255],
-  cyan: [120, 192, 255],
-  deep: [44, 108, 208],
-  shadow: [9, 28, 60],
-  lit: [104, 160, 228],
-  room: { deep: [58, 128, 222], mid: [160, 212, 255], core: [238, 247, 255] },
+// the drafting grid's lines (see drawGrid)
+const GRID = [140, 176, 230];
+// The sky (drawSky): blue hour, the twilight homes are photographed in, from
+// its top down to the horizon, then the ground darkening to the foot of the
+// screen; bluer, a blueprint's, while the house is drawn in blue.
+const SKY = {
+  dusk: { top: [5, 11, 27], horizon: [24, 42, 82], ground: [8, 13, 26], foot: [2, 4, 10] },
+  blueprint: { top: [4, 15, 40], horizon: [18, 54, 112], ground: [6, 16, 36], foot: [2, 6, 15] },
 };
-const BLUEPRINT_COLORS = { core: BP.ink, mid: BP.cyan, deep: BP.deep, bp: true };
-// the light's colors, from gold (0) to blue (1); halfway (0.5) it's white
+// the passes' colors, from gold (0) to blue (1); halfway (0.5) it's white
 const lightColors = (s) => ({
   core: mix(GOLD.core, BLUE.core, s),
   mid: mix(GOLD.mid, BLUE.mid, s),
   deep: mix(GOLD.deep, BLUE.deep, s),
 });
 
-// ---- timeline (fractions of the scroll) -------------------------------------
+// ---- timeline (fractions of the play, see PLAY in HeroIntro) ----------------
+// Retimed 11-23 for playing by itself in a few seconds: the notes are held
+// long enough to read (about 0.7s of 5) before the scan starts.
 const T = {
-  dream: [0.0, 0.3], // DREAM: the pieces come together
-  white: [0.25, 0.31], // the light goes white, and holds (the user liked it)…
-  lines: [0.29, 0.5], // DESIGN: the wireframe draws itself
-  glass: [0.37, 0.47], // the glass house fades under it
-  blue: [0.42, 0.48], // …then the light goes blueprint blue
-  notes: [0.46, 0.53], // the notes come up… (and go at the start of BUILD)
-  rise: [0.58, 0.79], // BUILD: the scan rises through it
-  gold: [0.6, 0.74], // …and the light turns gold again
-  lights: [0.77, 0.9], // the windows come on
-  settle: 0.93, // the camera arrives
+  dream: [0.0, 0.28], // DREAM: the pieces come together
+  white: [0.23, 0.29], // the glass goes white, and holds (the user liked it)…
+  lines: [0.27, 0.48], // DESIGN: the wireframe draws itself
+  glass: [0.35, 0.45], // the glass house fades under it
+  blue: [0.4, 0.46], // …then it all goes blueprint blue
+  notes: [0.42, 0.47], // the notes come up… (and go at the start of BUILD)
+  rise: [0.61, 0.8], // BUILD: the scan rises through it
+  gold: [0.63, 0.76], // …and it turns gold again
+  lights: [0.78, 0.91], // the windows come on
+  settle: 0.94, // the camera arrives
 };
 // the three passes, each lighting its word in the title from `from`
 const PASSES = [
   { word: "DREAM.", from: 0 },
-  { word: "DESIGN.", from: 0.29 },
-  { word: "BUILD.", from: 0.57 },
+  { word: "DESIGN.", from: 0.27 },
+  { word: "BUILD.", from: 0.6 },
 ];
 
 // ---- the property ----------------------------------------------------------
@@ -158,12 +149,12 @@ const LOT = { x: [-40, 42], z: [-30, 27] };
 // lines across it every so many feet; `glass`, a glass wall (dark, its
 // mullions every 4 ft, lit from inside once the lights are on).
 const MATS = {
-  glass: { albedo: 0.05, glass: true, tone: 0.3 },
-  clad: { albedo: 0.17, slats: 1.1, tone: 0.55 },
-  concrete: { albedo: 0.46, tone: 0.82 },
-  stucco: { albedo: 0.62, tone: 0.95 },
-  deck: { albedo: 0.3, tone: 0.62 },
-  wood: { albedo: 0.24, tone: 0.6 },
+  glass: { albedo: 0.05, glass: true },
+  clad: { albedo: 0.17, slats: 1.1 },
+  concrete: { albedo: 0.46 },
+  stucco: { albedo: 0.62 },
+  deck: { albedo: 0.3 },
+  wood: { albedo: 0.24 },
 };
 
 // Windows on a box's face: `u` across it (left to right as you face it), `v`
@@ -191,15 +182,9 @@ const NOTES = [
   { at: [-29.5, 10.5, -6], dir: [-1, -1], text: "Pergola" },
 ];
 
-// The key light: behind the house, a little above its roof, so the fronts
-// are in shadow, the roofs and edges catch it, and once it's built the house
-// stands against it, cutting into its shafts.
-const LIGHT = [-4, 26, 95];
-const KEY = norm(sub(LIGHT, [2, 8, 0]));
-// where the light shows on screen: on the back edge of the upper floor's
-// roof, as if setting behind it, and so below the title on a wide screen
-// (higher up, it sat on "BUILD." and the user couldn't read it)
-const LIGHT_AT = [0, 20.6, 7];
+// The key light: behind the house, a little above its roof, so the roofs and
+// edges catch it (in the pass's color); it isn't drawn.
+const KEY = norm([-6, 18, 95]);
 const FILL = norm([0.25, 0.55, -0.8]); // a little from the camera's side
 
 // A box's faces: the four corners (bottom left, bottom right, top right, top
@@ -336,8 +321,10 @@ export function drawOrder(list, eye) {
 // ---- camera ----------------------------------------------------------------
 // It circles the house, looking at the middle of it from DIST feet: from its
 // left (the pergola) round to its right (the ADU), a little lower as it
-// goes, already moving at the first scroll (`orbitEase`), with Reduce Motion
-// on too (`calm`). The view is fitted into the room the copy leaves (see
+// goes, already moving as the play starts (`orbitEase`), with Reduce Motion
+// on too (`calm`). Then, as the hero scrolls away, it turns SPIN degrees
+// further (`spin`, as the service pages' turntable does): a touch, nothing
+// to scroll through. The view is fitted into the room the copy leaves (see
 // room), the same size all the way round, and pushes in a little as the
 // scene plays (not with `calm`). In DREAM it also takes in the pieces where
 // they hang, closing in as they land (not with `calm`: no zoom).
@@ -347,6 +334,7 @@ const ORBIT = {
   desktop: { yaw: [-38, 20], pitch: [17, 11] },
   portrait: { yaw: [-30, 14], pitch: [24, 18] },
 };
+const SPIN = 14;
 const PUSH_IN = 0.06;
 
 function view(yawDeg, pitchDeg) {
@@ -368,7 +356,12 @@ function view(yawDeg, pitchDeg) {
   return { eye, project };
 }
 const angles = (orbit, k) => [lerp(orbit.yaw[0], orbit.yaw[1], k), lerp(orbit.pitch[0], orbit.pitch[1], k)];
-// part ease-out, part ease-in-out: moving from the first scroll (with an
+// every angle it's seen from: round the orbit, then the scroll's turn
+const allAngles = (orbit) => [
+  ...Array.from({ length: 25 }, (_, i) => angles(orbit, i / 24)),
+  ...Array.from({ length: 6 }, (_, i) => [orbit.yaw[1] + (SPIN * (i + 1)) / 6, orbit.pitch[1]]),
+];
+// part ease-out, part ease-in-out: moving from the start (with an
 // ease-in-out alone it hardly moved at first), arriving gently
 const orbitEase = (x) => 0.35 * (1 - (1 - x) ** 2) + 0.65 * x * x * (3 - 2 * x);
 // [x0, y0, x1, y1] of points on a screen 1 unit away, grown from `e`
@@ -416,8 +409,7 @@ const EXTENT = (() => {
   const out = {};
   for (const [key, orbit] of Object.entries(ORBIT)) {
     const e = [Infinity, Infinity, -Infinity, -Infinity];
-    const views = Array.from({ length: 25 }, (_, i) => angles(orbit, i / 24));
-    for (const [yaw, pitch] of views) extentOf(view(yaw, pitch).project, pts, e);
+    for (const [yaw, pitch] of allAngles(orbit)) extentOf(view(yaw, pitch).project, pts, e);
     out[key] = e;
   }
   return out;
@@ -429,7 +421,7 @@ const CALM_EXTENT = (() => {
   const out = {};
   for (const [key, orbit] of Object.entries(ORBIT)) {
     const e = [...EXTENT[key]];
-    for (let i = 0; i <= 24; i++) extentOf(view(...angles(orbit, i / 24)).project, pts, e);
+    for (const [yaw, pitch] of allAngles(orbit)) extentOf(view(yaw, pitch).project, pts, e);
     out[key] = e;
   }
   return out;
@@ -445,22 +437,18 @@ const CALM_EXTENT = (() => {
 // copy below it) has the screen to itself.
 function placeScene(ctx, width, height, portrait, layout, fonts) {
   const nav = navBottom(portrait, layout);
-  // the height that shows (a phone's pinned hero runs on under its
-  // browser's bottom bar, see HeroIntro): the title and the air are sized by
-  // it, as they were when the hero was the screen's height
-  const view = layout.view ?? height;
   const e = EXTENT[portrait ? "portrait" : "desktop"];
   const cfg = TITLE[portrait ? "portrait" : "desktop"];
   ctx.font = `100px ${fonts.display}`;
   const m = ctx.measureText(TITLE.text);
   const ascent = m.actualBoundingBoxAscent / 100;
   const capH = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100; // at 1px
-  const maxSize = Math.min((width * cfg.span * 100) / m.width, view * cfg.maxH);
+  const maxSize = Math.min((width * cfg.span * 100) / m.width, height * cfg.maxH);
   const titleAt = (size, capsTop) => ({ size, baseline: capsTop + ascent * size, bottom: capsTop + capH * size });
   const fit = ({ room: b }) => Math.min((b.x1 - b.x0) / (e[2] - e[0]), (b.y1 - b.y0) / (e[3] - e[1]));
   // the least air between them (more on a phone: 11-17, the user found the
   // house too close to the headline with the browser's bars showing)
-  const air = portrait ? clamp(0.035 * view, 22, 34) : clamp(0.028 * view, 14, 30);
+  const air = portrait ? clamp(0.035 * height, 22, 34) : clamp(0.028 * height, 14, 30);
   const head = layout.head ? headlineTop(ctx, layout.head, fonts) : null;
 
   // the house above the copy: the navbar, the title, the house and the
@@ -477,7 +465,7 @@ function placeScene(ctx, width, height, portrait, layout, fonts) {
     if (free - 3 * gap < 0.6 * houseH) gap = Math.max(12, (free - 0.6 * houseH) / 3);
     const title = titleAt(maxSize, nav + gap);
     const y0 = title.bottom + gap;
-    const y1 = y0 + Math.max(Math.min(houseH, free - 3 * gap), 0.1 * view);
+    const y1 = y0 + Math.max(Math.min(houseH, free - 3 * gap), 0.1 * height);
     return { title, room: { x0, x1, y0, y1, top: true } };
   };
   if (portrait) return stacked(0.04 * width, 0.96 * width, head ?? (layout.copyTop - 0.015) * height);
@@ -511,13 +499,14 @@ function headlineTop(ctx, { top, size, line }, fonts) {
   return top + (line - ascent - descent) / 2 + ascent - m.actualBoundingBoxAscent;
 }
 
-function camera(width, height, portrait, t, calm, box) {
+function camera(width, height, portrait, t, spin, calm, box) {
   const orbit = ORBIT[portrait ? "portrait" : "desktop"];
   const k = orbitEase(clamp(t / T.settle));
   // it circles with Reduce Motion on too (the user's iPhone has it on, and a
-  // still camera read as nothing happening), with no push-in or zoom
+  // still camera read as nothing happening), with no push-in or zoom; the
+  // scroll's turn too (the visitor's own scroll moves it)
   const [yaw, pitch] = angles(orbit, k);
-  const { eye, project } = view(yaw, pitch);
+  const { eye, project } = view(yaw + SPIN * spin, pitch);
   // the house, and in DREAM the pieces where they hang (with `calm`, where
   // they start, from every angle, so it doesn't zoom)
   const whole = EXTENT[portrait ? "portrait" : "desktop"];
@@ -556,15 +545,7 @@ export const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
 
 // A face's color in the light: a little ambient, the fill from the camera's
 // side, and the key light (gold, or blue while it's blue) where it faces it.
-// In the blueprint look, a technical illustration's: blues lit from above
-// and in front (there's no light behind), each finish a little lighter or
-// darker (`tone`).
-const BP_SUN = norm([-0.45, 0.8, -0.4]);
 function shade(mat, n, colors) {
-  if (colors.bp) {
-    const k = Math.max(0, dot(n, BP_SUN)), f = Math.max(0, dot(n, FILL));
-    return mix(BP.shadow, BP.lit, clamp((0.16 + 0.6 * k + 0.24 * f) * MATS[mat].tone));
-  }
   const a = MATS[mat].albedo;
   const k = Math.max(0, dot(n, KEY)), f = Math.max(0, dot(n, FILL));
   return [0, 1, 2].map((i) =>
@@ -572,7 +553,8 @@ function shade(mat, n, colors) {
   );
 }
 
-// a light sprite for the lit windows' glow: a hot core in a glow
+// a light sprite for a lamp's or a window's glow, a hot core in a glow (the
+// service pages' turntable; this scene's windows have a softer one, GLARE)
 const sprites = {};
 export function sprite(color) {
   const key = color.join(",");
@@ -710,14 +692,14 @@ function drawVertices(ctx, cam, t, colors) {
 }
 
 // The ground: the lot, dashed in DESIGN; in BUILD a dark ground that fades
-// into the dark at its edges (no hard edge: the house stands in a void),
-// the light pooling round the house, and the scan's plane rising through it.
-function drawGround(ctx, cam, t, colors, fonts) {
+// into the dark at its edges (no hard edge: the house stands in a void), a
+// little of the pass's color round the house, and the scan's plane rising
+// through it. The drafting grid lies over it (drawGrid).
+function drawGround(ctx, cam, t, colors, fonts, grid) {
   const corners = [[LOT.x[0], 0, LOT.z[0]], [LOT.x[1], 0, LOT.z[0]], [LOT.x[1], 0, LOT.z[1]], [LOT.x[0], 0, LOT.z[1]]];
   const pts = corners.map((p) => cam.toScreen(p));
   const built = smooth(T.rise[0] - 0.02, T.rise[0] + 0.06, t);
-  if (colors.bp) drawLotGrid(ctx, cam);
-  if (built > 0 && !colors.bp) {
+  if (built > 0) {
     // an ellipse on screen as wide as the lot and as deep as it looks
     const [hx, hy] = cam.toScreen([1, 0, -1]);
     const rx = (Math.max(...pts.map(([x]) => x)) - Math.min(...pts.map(([x]) => x))) * 0.62;
@@ -726,20 +708,42 @@ function drawGround(ctx, cam, t, colors, fonts) {
     ctx.translate(hx, hy);
     ctx.scale(1, ry / rx);
     let g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-    g.addColorStop(0, `rgba(14,13,12,${0.95 * built})`);
-    g.addColorStop(0.6, `rgba(9,9,8,${0.8 * built})`);
-    g.addColorStop(1, "rgba(5,5,5,0)");
+    g.addColorStop(0, `rgba(7,11,22,${0.95 * built})`);
+    g.addColorStop(0.6, `rgba(6,9,19,${0.8 * built})`);
+    g.addColorStop(1, "rgba(6,9,19,0)");
     ctx.fillStyle = g;
     ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
     ctx.globalCompositeOperation = "lighter";
     g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * 0.9);
-    g.addColorStop(0, rgba(colors.mid, 0.13 * built));
-    g.addColorStop(0.5, rgba(colors.deep, 0.05 * built));
+    g.addColorStop(0, rgba(colors.mid, 0.07 * built));
+    g.addColorStop(0.5, rgba(colors.deep, 0.025 * built));
     g.addColorStop(1, rgba(colors.deep, 0));
     ctx.fillStyle = g;
     ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
     ctx.restore();
   }
+  // the lamplight falling out through the glass floor onto the ground round
+  // it (the house drawn over it), once it's lit
+  const spill = litAt(t, GLASS_ON);
+  if (spill > 0) {
+    const { min, max } = BOX.ground;
+    const foot = [[min[0], 0, min[2]], [max[0], 0, min[2]], [max[0], 0, max[2]], [min[0], 0, max[2]]].map((p) => cam.toScreen(p));
+    const [sx, sy] = cam.toScreen([(min[0] + max[0]) / 2, 0, (min[2] + max[2]) / 2]);
+    const rx = (Math.max(...foot.map(([x]) => x)) - Math.min(...foot.map(([x]) => x))) * 0.95;
+    const ry = Math.max(8, (Math.max(...foot.map(([, y]) => y)) - Math.min(...foot.map(([, y]) => y))) * 1.4);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.translate(sx, sy);
+    ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+    g.addColorStop(0, rgba(ROOM.mid, 0.2 * spill));
+    g.addColorStop(0.5, rgba(ROOM.floor, 0.08 * spill));
+    g.addColorStop(1, rgba(ROOM.floor, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
+    ctx.restore();
+  }
+  drawGrid(ctx, cam, grid);
   // the property line, dashed, while it's a drawing
   const line = smooth(T.lines[0], T.lines[0] + 0.08, t) * (1 - smooth(T.rise[0], T.rise[0] + 0.08, t));
   if (line > 0) {
@@ -778,55 +782,88 @@ function drawGround(ctx, cam, t, colors, fonts) {
   }
 }
 
-// The blueprint look's lot: gridded every 4 ft in perspective, like a CAD
-// viewport's ground, fading toward its edges.
-function drawLotGrid(ctx, cam) {
+// The drafting grid (11-23: the user asked for a subtle blueprint grid
+// behind the build, in place of the light): on the ground, in perspective,
+// a line every 4 ft and a heavier one every 20, turning with the camera like
+// a CAD viewport's and fading out round the house (GRID_R feet), so it has
+// no edge; and on the sheet behind it all, flat (drawSheet). Both a little
+// stronger while the house is a drawing (`grid`, 1 to 1.6). Each line is one
+// stroke, its fade a gradient along it with a stop at each of GRID_STOPS
+// (placed where those points fall on screen, so the perspective is right):
+// cut into short pieces instead, it cost a phone several ms a frame.
+const GRID_R = 78;
+const GRID_STEP = 4;
+const GRID_STOPS = [0, 0.12, 0.25, 0.38, 0.5, 0.62, 0.75, 0.88, 1];
+function drawGrid(ctx, cam, strength) {
+  const [cx, , cz] = TARGET;
   ctx.save();
   ctx.lineWidth = 1;
-  const span = (v, [a, b]) => 1 - Math.abs((v - (a + b) / 2) / ((b - a) / 2)) ** 3;
-  for (let x = Math.ceil(LOT.x[0] / 4) * 4; x <= LOT.x[1]; x += 4) {
-    const [a, b] = [cam.toScreen([x, 0, LOT.z[0]]), cam.toScreen([x, 0, LOT.z[1]])];
-    ctx.strokeStyle = rgba(BP.grid, (x % 20 === 0 ? 0.2 : 0.09) * span(x, LOT.x));
-    ctx.beginPath();
-    ctx.moveTo(a[0], a[1]);
-    ctx.lineTo(b[0], b[1]);
-    ctx.stroke();
-  }
-  for (let z = Math.ceil(LOT.z[0] / 4) * 4; z <= LOT.z[1]; z += 4) {
-    const [a, b] = [cam.toScreen([LOT.x[0], 0, z]), cam.toScreen([LOT.x[1], 0, z])];
-    ctx.strokeStyle = rgba(BP.grid, (z % 20 === 0 ? 0.2 : 0.09) * span(z, LOT.z));
-    ctx.beginPath();
-    ctx.moveTo(a[0], a[1]);
-    ctx.lineTo(b[0], b[1]);
-    ctx.stroke();
+  // lines along z (at x = c), then along x (at z = c)
+  for (const [mid, along, point] of [[cx, cz, (c, v) => [c, 0, v]], [cz, cx, (c, v) => [v, 0, c]]]) {
+    for (let c = Math.ceil((mid - GRID_R) / GRID_STEP) * GRID_STEP; c < mid + GRID_R; c += GRID_STEP) {
+      const off = c - mid;
+      const half = Math.sqrt(GRID_R * GRID_R - off * off);
+      if (!(half > 1)) continue;
+      const at = (k) => cam.toScreen(point(c, along - half + 2 * half * k));
+      const [ax, ay] = at(0), [bx, by] = at(1);
+      const len2 = (bx - ax) ** 2 + (by - ay) ** 2;
+      if (len2 < 1) continue;
+      const peak = (Math.abs(c % 20) < 1e-6 ? 0.18 : 0.09) * strength;
+      const g = ctx.createLinearGradient(ax, ay, bx, by);
+      for (const k of GRID_STOPS) {
+        const [px, py] = at(k);
+        const v = (2 * k - 1) * half;
+        const fade = Math.max(0, 1 - (off * off + v * v) / (GRID_R * GRID_R)) ** 2;
+        g.addColorStop(clamp(((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / len2), rgba(GRID, peak * fade));
+      }
+      ctx.strokeStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
 
-// The blueprint look's sheet: deep blue, darker toward the edges, under a
-// drafting grid (a fine line every 24 px, a heavier one every 120).
-function drawSheet(ctx, width, height, cam) {
-  const cx = (cam.box.x0 + cam.box.x1) / 2, cy = (cam.box.y0 + cam.box.y1) / 2;
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.9);
-  g.addColorStop(0, rgba(BP.sheet));
-  g.addColorStop(1, rgba(BP.edge));
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, width, height);
-  ctx.save();
-  ctx.lineWidth = 1;
-  for (const [step, a] of [[24, 0.045], [120, 0.08]]) {
-    ctx.strokeStyle = rgba(BP.grid, a);
-    ctx.beginPath();
-    for (let x = (width / 2) % step; x < width; x += step) {
-      ctx.moveTo(Math.round(x) + 0.5, 0);
-      ctx.lineTo(Math.round(x) + 0.5, height);
+// The sheet behind it all: a fine line every 24 px and a heavier one every
+// 120, centred on the house's room and fading out from it, fainter than the
+// ground's. It doesn't move, so it's drawn once per size and kept.
+let sheet = null;
+function drawSheet(ctx, width, height, dpr, room, strength) {
+  const cx = Math.round((room.x0 + room.x1) / 2), cy = Math.round((room.y0 + room.y1) / 2);
+  const key = [width, height, dpr, cx, cy].join(":");
+  if (sheet?.key !== key) {
+    const c = makeCanvas(Math.round(width * dpr), Math.round(height * dpr));
+    const g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.lineWidth = 1;
+    for (const [step, a] of [[24, 0.04], [120, 0.07]]) {
+      g.strokeStyle = rgba(GRID, a);
+      g.beginPath();
+      for (let x = cx % step; x < width; x += step) {
+        g.moveTo(Math.round(x) + 0.5, 0);
+        g.lineTo(Math.round(x) + 0.5, height);
+      }
+      for (let y = cy % step; y < height; y += step) {
+        g.moveTo(0, Math.round(y) + 0.5);
+        g.lineTo(width, Math.round(y) + 0.5);
+      }
+      g.stroke();
     }
-    for (let y = 0.5; y < height; y += step) {
-      ctx.moveTo(0, Math.round(y) + 0.5);
-      ctx.lineTo(width, Math.round(y) + 0.5);
-    }
-    ctx.stroke();
+    g.globalCompositeOperation = "destination-in";
+    const r = Math.max(width, height) * 0.62;
+    const m = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+    m.addColorStop(0, "rgba(0,0,0,1)");
+    m.addColorStop(0.45, "rgba(0,0,0,0.6)");
+    m.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = m;
+    g.fillRect(0, 0, width, height);
+    sheet = { key, canvas: c };
   }
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, strength);
+  ctx.drawImage(sheet.canvas, 0, 0, width, height);
   ctx.restore();
 }
 
@@ -837,20 +874,21 @@ const litAt = (t, on) => smooth(on, on + 0.08, clamp((t - T.lights[0]) / (T.ligh
 const FURNITURE = [[0.08, 0.27, 2.6], [0.33, 0.35, 5.5], [0.47, 0.64, 3.4], [0.74, 0.79, 4.2], [0.86, 0.95, 2.2]];
 
 // A lit room seen through glass, in a face's rectangle `u` across and `v`
-// up: warm light, brightest at the ceiling where the lamps are and falling
-// off toward the floor, the furniture dark against it where the glass comes
-// down to the floor. Its light spills out (glows). `vHead` is where the
-// window's top is when the scan has only built part of it.
-function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, vHead = v1, bp = false) {
+// up: warm lamplight (ROOM), a little brighter toward the ceiling and
+// falling off toward the floor, the furniture dark against it where the
+// glass comes down to the floor, and a little glare round it (`glows`, see
+// drawGlows). `vHead` is where the window's top is when the scan has only
+// built part of it.
+const ROOM = { floor: [150, 76, 22], mid: [242, 164, 74], ceiling: [252, 206, 138] };
+function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, vHead = v1) {
   const quad = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
   const [fx, fy] = cam.toScreen(onFace(face, (u0 + u1) / 2, v0));
   const [hx, hy] = cam.toScreen(onFace(face, (u0 + u1) / 2, vHead));
   const g = ctx.createLinearGradient(fx, fy, hx, hy + 0.01);
-  const warm = bp ? BP.room : GOLD;
-  g.addColorStop(0, rgba(warm.deep, 0.6 * lit));
-  g.addColorStop(0.5, rgba(warm.mid, 0.78 * lit));
-  g.addColorStop(0.88, rgba(warm.core, 0.92 * lit));
-  g.addColorStop(1, rgba(warm.mid, 0.7 * lit));
+  g.addColorStop(0, rgba(ROOM.floor, 0.9 * lit));
+  g.addColorStop(0.55, rgba(ROOM.mid, 0.92 * lit));
+  g.addColorStop(0.92, rgba(ROOM.ceiling, 0.94 * lit));
+  g.addColorStop(1, rgba(ROOM.mid, 0.92 * lit));
   ctx.save();
   path(ctx, quad);
   ctx.fillStyle = g;
@@ -858,7 +896,7 @@ function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, vHead = v1, bp
   const height = face.p[3][1] - face.p[0][1];
   if (v0 < 0.05) {
     ctx.clip();
-    ctx.fillStyle = bp ? `rgba(6,22,52,${0.8 * lit})` : `rgba(22,12,4,${0.8 * lit})`;
+    ctx.fillStyle = `rgba(22,12,4,${0.8 * lit})`;
     for (const [a, b, h] of FURNITURE) {
       if (a < u0 || b > u1) continue;
       const top = Math.min(h / height, v1);
@@ -868,7 +906,7 @@ function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, vHead = v1, bp
   }
   ctx.restore();
   const span = Math.hypot(...sub(onFace(face, u0, v0), onFace(face, u1, v1)));
-  glows.push({ at: onFace(face, (u0 + u1) / 2, (v0 + v1) / 2), r: span * 0.5, a: lit * 0.45 });
+  glows.push({ at: onFace(face, (u0 + u1) / 2, (v0 + v1) / 2), r: span * 0.4, a: lit });
 }
 
 // One face of a built box: its shade (darker at the foot), and its finish:
@@ -905,7 +943,7 @@ function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
     path(ctx, pts);
     ctx.fillStyle = g;
     ctx.fill();
-    if (lit > 0) drawRoom(ctx, cam, full, [0, 1], [0, vTop], lit, glows, vTop, colors.bp);
+    if (lit > 0) drawRoom(ctx, cam, full, [0, 1], [0, vTop], lit, glows, vTop);
     const w = Math.hypot(full.p[1][0] - full.p[0][0], full.p[1][2] - full.p[0][2]);
     ctx.beginPath();
     for (let u = 6 / w; u < 1 - 1 / w; u += 6 / w) {
@@ -919,8 +957,8 @@ function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
     }
-    ctx.strokeStyle = colors.bp ? rgba(BP.ink, 0.45) : "rgba(6,6,6,0.85)";
-    ctx.lineWidth = colors.bp ? 1 : 1.4;
+    ctx.strokeStyle = "rgba(6,6,6,0.85)";
+    ctx.lineWidth = 1.4;
     ctx.stroke();
   }
   if (mat.slats && sideFace) {
@@ -931,7 +969,7 @@ function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
     }
-    ctx.strokeStyle = colors.bp ? rgba(BP.ink, 0.12) : "rgba(255,255,255,0.045)";
+    ctx.strokeStyle = "rgba(255,255,255,0.045)";
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -948,22 +986,21 @@ function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
     const quad = [[w.u[0], w.v[0]], [w.u[1], w.v[0]], [w.u[1], vTop], [w.u[0], vTop]].map(([u, v]) => cam.toScreen(onFace(full, u, v)));
     const lit = litAt(t, w.on);
     path(ctx, quad);
-    ctx.fillStyle = colors.bp ? "rgb(6,19,44)" : "rgb(12,13,16)";
+    ctx.fillStyle = "rgb(12,13,16)";
     ctx.fill();
-    if (lit > 0) drawRoom(ctx, cam, full, w.u, [w.v[0], vTop], lit, glows, w.v[1], colors.bp);
+    if (lit > 0) drawRoom(ctx, cam, full, w.u, [w.v[0], vTop], lit, glows, w.v[1]);
     path(ctx, quad);
-    ctx.strokeStyle = colors.bp ? rgba(BP.ink, 0.7) : "rgba(4,4,4,0.9)";
+    ctx.strokeStyle = "rgba(4,4,4,0.9)";
     ctx.lineWidth = 1.4;
     ctx.stroke();
   }
 
-  // a fine edge, and the light catching the top edges that face it (in the
-  // blueprint look, white linework all round instead)
+  // a fine edge, and the light catching the top edges that face it
   path(ctx, pts);
-  ctx.strokeStyle = colors.bp ? rgba(BP.ink, 0.62) : "rgba(255,255,255,0.05)";
+  ctx.strokeStyle = "rgba(255,255,255,0.05)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  if (key === "y+" && part.max[1] === b.max[1] && !colors.bp) {
+  if (key === "y+" && part.max[1] === b.max[1]) {
     const catchK = Math.max(0, dot([0, 1, 0], KEY));
     ctx.strokeStyle = rgba(colors.mid, 0.45 * catchK);
     ctx.stroke();
@@ -972,7 +1009,7 @@ function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
 
 // One box in BUILD: the part below the scan solid (its cut glowing where the
 // scan is passing through it), the part above still wireframe.
-function drawBox(ctx, cam, b, t, colors, glows, idle) {
+function drawBox(ctx, cam, b, t, colors, glows) {
   const k = clamp((t - T.rise[0]) / (T.rise[1] - T.rise[0]));
   const h = k * (HEIGHT + 0.5);
   const solid = below(b, h);
@@ -981,7 +1018,7 @@ function drawBox(ctx, cam, b, t, colors, glows, idle) {
     for (const key of ["z-", "z+", "x-", "x+", "y+"]) {
       if (!visible(fs[key], cam.eye)) continue;
       drawFace(ctx, cam, b, solid, key, fs[key], colors, t, glows);
-      if (b.id === "deck" && key === "y+") drawPool(ctx, cam, t, idle);
+      if (b.id === "deck" && key === "y+") drawPool(ctx, cam, t);
     }
     // the cut, where the scan is passing through
     if (solid.max[1] < b.max[1]) {
@@ -1000,9 +1037,9 @@ function drawBox(ctx, cam, b, t, colors, glows, idle) {
   if (rest) strokeEdges(ctx, cam, edges(rest).map(([a, c]) => ({ a, c })), colors, 1 - smooth(T.rise[1] - 0.04, T.rise[1], t));
 }
 
-// The pool in the deck: dark water, then lit from below, its ripples
-// shimmering once the scene has finished (`idle`).
-function drawPool(ctx, cam, t, idle) {
+// The pool in the deck: dark water, then lit from below, ripples of light
+// across it.
+function drawPool(ctx, cam, t) {
   const pts = [[POOL.x[0], POOL.z[0]], [POOL.x[1], POOL.z[0]], [POOL.x[1], POOL.z[1]], [POOL.x[0], POOL.z[1]]].map(([x, z]) =>
     cam.toScreen([x, POOL.y, z]),
   );
@@ -1028,8 +1065,7 @@ function drawPool(ctx, cam, t, idle) {
     for (let i = 0; i < 9; i++) {
       const z = lerp(POOL.z[0] + 1, POOL.z[1] - 1, r2());
       const x0 = lerp(POOL.x[0], POOL.x[1] - 6, r2());
-      const wob = Math.sin(idle * 1.4 + i * 1.7) * 0.6;
-      const a = cam.toScreen([x0 + wob, POOL.y, z]), b = cam.toScreen([x0 + 4 + r2() * 4 + wob, POOL.y, z + (r2() - 0.5)]);
+      const a = cam.toScreen([x0, POOL.y, z]), b = cam.toScreen([x0 + 4 + r2() * 4, POOL.y, z + (r2() - 0.5)]);
       ctx.beginPath();
       ctx.moveTo(a[0], a[1]);
       ctx.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 1.5, b[0], b[1]);
@@ -1039,17 +1075,33 @@ function drawPool(ctx, cam, t, idle) {
   ctx.restore();
 }
 
-// the windows' light spilling out into the night
-function drawGlows(ctx, cam, glows, idle, bp = false) {
+// The windows' glare, a little (11-23): a soft warm haze round each lit
+// window, with no hot middle. Until then each had a white-hot core at nearly
+// half strength, spilling over the roof and past the walls, and the user
+// found the light too much; with none at all, the house looked bland.
+// GLARE: how strong (`a`) and how far it reaches (`size`, times the
+// window's size).
+const GLARE = { a: 0.45, size: 3 };
+let glare = null;
+function drawGlows(ctx, cam, glows) {
   if (!glows.length) return;
+  if (!glare) {
+    glare = makeCanvas(64, 64);
+    const g = glare.getContext("2d");
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, rgba(ROOM.ceiling, 0.7));
+    grad.addColorStop(0.3, rgba(ROOM.mid, 0.3));
+    grad.addColorStop(1, rgba(ROOM.mid, 0));
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+  }
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  const img = sprite(bp ? BP.room.mid : GOLD.mid);
   for (const { at, r, a } of glows) {
     const [x, y, z] = cam.toScreen(at);
-    const size = r * (cam.s / z) * 3;
-    ctx.globalAlpha = a * (0.95 + 0.05 * Math.sin(idle * 2));
-    ctx.drawImage(img, x - size / 2, y - size / 2, size, size * 0.8);
+    const size = r * (cam.s / z) * GLARE.size;
+    ctx.globalAlpha = a * GLARE.a;
+    ctx.drawImage(glare, x - size / 2, y - size * 0.4, size, size * 0.8);
   }
   ctx.restore();
 }
@@ -1100,8 +1152,8 @@ function drawNotes(ctx, cam, a, notes, fonts, width, tone = NOTE_TONES.blue) {
   ctx.restore();
 }
 
-// ---- the light and the air ---------------------------------------------------
-// The source, the haze around it, and a bank of fog behind the house that
+// ---- the light and the air (the service pages' turntable) -----------------------
+// The source, the haze around it, and a bank of fog behind the object that
 // it reads against.
 export function drawLight(ctx, colors, flare, [lx, ly], scale) {
   ctx.save();
@@ -1136,79 +1188,6 @@ export function drawLight(ctx, colors, flare, [lx, ly], scale) {
   ctx.restore();
 }
 
-// Light shafts, the built house cutting through them: the light and the
-// house drawn at quarter size, then smeared outward from the light.
-let rayA = null, rayB = null;
-function godRays(ctx, dpr, [sx, sy], colors, flare, strength, drawOccluders, lite) {
-  if (strength <= 0) return;
-  // (on a phone, `lite`: drawn smaller and smeared in fewer passes)
-  const W = Math.max(2, Math.round(ctx.canvas.width / (lite ? 6 : 4)));
-  const H = Math.max(2, Math.round(ctx.canvas.height / (lite ? 6 : 4)));
-  rayA ??= makeCanvas(W, H);
-  rayB ??= makeCanvas(W, H);
-  for (const c of [rayA, rayB]) {
-    if (c.width !== W || c.height !== H) {
-      c.width = W;
-      c.height = H;
-    }
-  }
-  const A = rayA.getContext("2d"), B = rayB.getContext("2d");
-  const s = W / ctx.canvas.width;
-  const lx = sx * dpr * s, ly = sy * dpr * s;
-  A.setTransform(1, 0, 0, 1, 0, 0);
-  A.globalAlpha = 1;
-  A.globalCompositeOperation = "source-over";
-  A.fillStyle = "#000";
-  A.fillRect(0, 0, W, H);
-  A.globalCompositeOperation = "lighter";
-  const r0 = Math.max(W, H) * 0.045 * flare;
-  let g = A.createRadialGradient(lx, ly, 0, lx, ly, r0);
-  g.addColorStop(0, rgba(colors.core, 1));
-  g.addColorStop(0.4, rgba(colors.mid, 0.7));
-  g.addColorStop(1, rgba(colors.mid, 0));
-  A.fillStyle = g;
-  A.beginPath();
-  A.arc(lx, ly, r0, 0, TAU);
-  A.fill();
-  const r = rng(3);
-  for (let i = 0; i < 10; i++) {
-    const a = r() * TAU, d = r0 * (0.8 + r() * 1.6), rr = r0 * (0.06 + r() * 0.16);
-    const x = lx + Math.cos(a) * d, y = ly + Math.sin(a) * d;
-    g = A.createRadialGradient(x, y, 0, x, y, rr);
-    g.addColorStop(0, rgba(colors.mid, 0.35));
-    g.addColorStop(1, rgba(colors.mid, 0));
-    A.fillStyle = g;
-    A.beginPath();
-    A.arc(x, y, rr, 0, TAU);
-    A.fill();
-  }
-  A.globalCompositeOperation = "source-over";
-  drawOccluders(A, dpr * s);
-  const blur = (from, to, step, n) => {
-    to.setTransform(1, 0, 0, 1, 0, 0);
-    to.globalAlpha = 1;
-    to.globalCompositeOperation = "source-over";
-    to.fillStyle = "#000";
-    to.fillRect(0, 0, W, H);
-    to.globalCompositeOperation = "lighter";
-    for (let i = 0; i < n; i++) {
-      const k = 1 + step * i;
-      to.globalAlpha = (1 - i / n) * (2.2 / n);
-      to.setTransform(k, 0, 0, k, lx * (1 - k), ly * (1 - k));
-      to.drawImage(from.canvas, 0, 0);
-    }
-    to.globalAlpha = 1;
-  };
-  blur(A, B, lite ? 0.1 : 0.06, lite ? 6 : 10);
-  blur(B, A, lite ? 0.02 : 0.012, lite ? 6 : 10);
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalCompositeOperation = "lighter";
-  ctx.globalAlpha = 0.7 * strength;
-  ctx.drawImage(rayA, 0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.restore();
-}
-
 // over everything: a bloom round the light, and an anamorphic streak through it
 export function drawBloom(ctx, colors, flare, [lx, ly], scale) {
   ctx.save();
@@ -1236,10 +1215,8 @@ export function drawBloom(ctx, colors, flare, [lx, ly], scale) {
   ctx.restore();
 }
 
-// Dust drifting through the light (screen space): specks behind the house, a
-// few big out-of-focus ones in front. The scroll moves it; once the scene is
-// finished, so does time (`idle`, seconds), so it keeps drifting while the
-// last frame holds.
+// Dust drifting through the light (screen space): specks behind the object,
+// a few big out-of-focus ones in front. `t` and `idle` (seconds) move it.
 const DUST = (() => {
   const r = rng(42), out = [];
   for (let i = 0; i < 140; i++) out.push({ x: r(), y: r(), d: 0.35 + r() * 1.35, p: r() * TAU, s: 0.6 + r() });
@@ -1290,7 +1267,7 @@ export function grainTile() {
 // placeScene), visible but in the background: each word outlined, the
 // pass's word brighter in its light's color and faintly filled, the first lit
 // from the first frame; once the render is complete, all three.
-function drawTitle(ctx, width, portrait, title, t, fonts, bp = false) {
+function drawTitle(ctx, width, portrait, title, t, fonts) {
   const words = PASSES.map((p) => p.word);
   ctx.save();
   ctx.textBaseline = "alphabetic";
@@ -1307,12 +1284,10 @@ function drawTitle(ctx, width, portrait, title, t, fonts, bp = false) {
     const on = from <= 0 ? 1 : smooth(from - 0.03, from + 0.03, t);
     return Math.max(on * (1 - smooth(to - 0.03, to + 0.03, t)), done);
   };
-  const tone = TITLE[portrait ? "portrait" : "desktop"];
-  // (on the blueprint, a little stronger: it has no light to stand against)
-  const [faint, bright, fill] = [tone.faint, tone.bright, tone.fill].map((a) => (bp ? Math.min(1, a * 1.5) : a));
+  const { faint, bright, fill } = TITLE[portrait ? "portrait" : "desktop"];
   words.forEach((word, i) => {
     const k = lit(i);
-    const c = bp ? { mid: i === 1 ? BP.ink : BP.cyan } : i === 1 ? BLUE : GOLD;
+    const c = i === 1 ? BLUE : GOLD;
     if (k > 0) {
       ctx.fillStyle = rgba(c.mid, fill * k);
       ctx.fillText(word, x, title.baseline);
@@ -1342,37 +1317,76 @@ function drawFrame(ctx, cam, portrait, width) {
   ctx.restore();
 }
 
+// The sky (11-23: the user asked for some color in the background): SKY,
+// from its top to the horizon (where the ground meets it, behind the house,
+// wherever the camera is), then the ground darkening toward the foot of the
+// screen, where the copy is; and along the horizon a wide, soft glow in the
+// pass's color (gold, white, blue, gold), the last of the day behind the
+// house: warm in the gold passes, like a dusk sky's last light, blue in
+// DESIGN's. A band, never a light: no source, no rays (the user had the
+// light taken out). Kept below the title (`title`), so it never washes the
+// words out (looking down at the start, the camera sees the horizon at the
+// title's height). `hue` 0-1 is the passes' color, gold to blue.
+function drawSky(ctx, width, height, cam, colors, hue, title) {
+  const { box } = cam;
+  const rx = Math.max(box.x1 - box.x0, width * 0.5) * 0.85;
+  const ry = Math.max(40, (box.y1 - box.y0) * 0.3);
+  const d = sub(TARGET, cam.eye);
+  const ahead = norm([d[0], 0, d[2]]);
+  const [, horizon] = cam.toScreen([cam.eye[0] + ahead[0] * 1e5, cam.eye[1], cam.eye[2] + ahead[2] * 1e5]);
+  const line = Math.max(horizon, title.bottom + 0.55 * ry);
+  const at = clamp(line / height, 0.05, 0.9);
+  const blue = clamp(hue * 2 - 1); // 0, until the house is drawn in blue
+  const c = (k) => mix(SKY.dusk[k], SKY.blueprint[k], blue);
+  let g = ctx.createLinearGradient(0, 0, 0, height);
+  g.addColorStop(0, rgba(c("top")));
+  g.addColorStop(at, rgba(c("horizon")));
+  g.addColorStop(Math.min(1, at + 0.12), rgba(c("ground")));
+  g.addColorStop(1, rgba(c("foot")));
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, width, height);
+  // the glow along the horizon, centred behind the house: the pass's deep
+  // color laid over the sky, and a little of its bright one added at its
+  // heart
+  ctx.save();
+  ctx.translate((box.x0 + box.x1) / 2, line);
+  ctx.scale(1, ry / rx);
+  g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, rgba(colors.deep, 0.34));
+  g.addColorStop(0.5, rgba(colors.deep, 0.12));
+  g.addColorStop(1, rgba(colors.deep, 0));
+  ctx.fillStyle = g;
+  ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
+  ctx.globalCompositeOperation = "lighter";
+  g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * 0.6);
+  g.addColorStop(0, rgba(colors.mid, 0.1));
+  g.addColorStop(1, rgba(colors.mid, 0));
+  ctx.fillStyle = g;
+  ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
+  ctx.restore();
+}
+
 // ---- the frame -------------------------------------------------------------
 const DEFAULT_FONTS = { display: "'Bebas Neue', 'Arial Narrow', sans-serif", mono: "'Courier New', monospace" };
 
-export function drawScene(ctx, { width, height, dpr = 1, t, portrait = false, layout, calm = false, idle = 0, lite = false, fonts = DEFAULT_FONTS, look = "render" }) {
-  const bp = look === "blueprint";
+export function drawScene(ctx, { width, height, dpr = 1, t, spin = 0, portrait = false, layout, calm = false, lite = false, fonts = DEFAULT_FONTS }) {
   layout ??= portrait ? { copyTop: 0.56 } : { copyTop: 0.58, copyRight: 0.45, titleRight: 0.42 };
   const { title, room } = placeScene(ctx, width, height, portrait, layout, fonts);
-  const cam = camera(width, height, portrait, t, calm, room);
-  // the light: gold, then white (held), then blue, then gold again
+  const cam = camera(width, height, portrait, t, spin, calm, room);
+  // the passes' color: gold, then white (held), then blue, then gold again
   const hue = (0.5 * smooth(T.white[0], T.white[1], t) + 0.5 * smooth(T.blue[0], T.blue[1], t)) * (1 - smooth(T.gold[0], T.gold[1], t));
-  const colors = bp ? BLUEPRINT_COLORS : lightColors(hue);
-  // the light flares as the render completes; on screen it's kept just over
-  // the back of the roof (riding on it in DREAM), so it's behind the house
-  // from every angle
-  const flare = 1 + 0.35 * Math.exp(-(((t - T.rise[1]) / 0.04) ** 2));
-  const light = cam.toScreen(LIGHT_AT.map((v, i) => v + offsetOf(PIECE.upper, t, calm)[i]));
-  const lightScale = Math.max(cam.box.x1 - cam.box.x0, cam.box.y1 - cam.box.y0) * 0.75;
+  const colors = lightColors(hue);
   const built = smooth(T.rise[0], T.rise[0] + 0.04, t);
+  // the grid a little stronger while the house is a drawing
+  const grid = 1 + 0.6 * smooth(T.lines[0], T.lines[0] + 0.08, t) * (1 - smooth(T.rise[0], T.rise[0] + 0.1, t));
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalCompositeOperation = "source-over";
   ctx.globalAlpha = 1;
-  if (bp) drawSheet(ctx, width, height, cam);
-  else {
-    ctx.fillStyle = "#030303";
-    ctx.fillRect(0, 0, width, height);
-    drawLight(ctx, colors, flare, light, lightScale);
-  }
-  drawTitle(ctx, width, portrait, title, t, fonts, bp);
-  if (!bp) drawDust(ctx, calm ? 0 : t, calm ? 0 : idle, colors, width, height, light, false);
-  drawGround(ctx, cam, t, colors, fonts);
+  drawSky(ctx, width, height, cam, colors, hue, title);
+  drawSheet(ctx, width, height, dpr, room, grid);
+  drawTitle(ctx, width, portrait, title, t, fonts);
+  drawGround(ctx, cam, t, colors, fonts, grid);
 
   // DREAM: the pieces coming together, until DESIGN draws over them
   drawDream(ctx, cam, t, calm, colors);
@@ -1387,40 +1401,16 @@ export function drawScene(ctx, { width, height, dpr = 1, t, portrait = false, la
   // BUILD, far to near
   const glows = [];
   if (t >= T.rise[0]) {
-    // the pool shimmers once it's finished (not with Reduce Motion)
-    for (const b of drawOrder(BOXES, cam.eye)) drawBox(ctx, cam, b, t, colors, glows, calm ? 0 : idle);
+    for (const b of drawOrder(BOXES, cam.eye)) drawBox(ctx, cam, b, t, colors, glows);
   }
-  drawGlows(ctx, cam, glows, calm ? 0 : idle, bp);
-
-  // shafts round the built house, then the bloom over everything (none in
-  // the blueprint look: no light)
-  if (!bp) godRays(ctx, dpr, light, colors, flare, lerp(0.45, 1, built), (c, scale) => {
-    if (t < T.rise[0]) return;
-    const h = clamp((t - T.rise[0]) / (T.rise[1] - T.rise[0])) * (HEIGHT + 0.5);
-    c.setTransform(scale, 0, 0, scale, 0, 0);
-    c.fillStyle = "#000";
-    for (const b of BOXES) {
-      const solid = below(b, h);
-      if (!solid) continue;
-      const fs = faces(solid);
-      for (const key of ["z-", "z+", "x-", "x+", "y+"]) {
-        if (!visible(fs[key], cam.eye)) continue;
-        path(c, fs[key].p.map((p) => cam.toScreen(p)));
-        c.fill();
-      }
-    }
-  }, lite);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (!bp) drawBloom(ctx, colors, flare, light, lightScale);
-  // the notes over the light and its bloom, so the glare never washes them out
+  drawGlows(ctx, cam, glows);
   drawNotes(ctx, cam, smooth(T.notes[0], T.notes[1], t) * (1 - smooth(T.rise[0], T.rise[0] + 0.05, t)), NOTES, fonts, width);
 
-  // in front of the lens: out-of-focus dust, a vignette, grain
-  if (!bp) drawDust(ctx, calm ? 0 : t, calm ? 0 : idle, colors, width, height, light, true);
+  // in front of the lens: a vignette, grain
   const vx = (cam.box.x0 + cam.box.x1) / 2, vy = height * 0.45;
   const v = ctx.createRadialGradient(vx, vy, Math.min(width, height) * 0.3, vx, vy, Math.max(width, height) * 0.85);
   v.addColorStop(0, "rgba(0,0,0,0)");
-  v.addColorStop(1, bp ? "rgba(2,8,20,0.55)" : "rgba(0,0,0,0.7)");
+  v.addColorStop(1, "rgba(1,3,10,0.65)");
   ctx.fillStyle = v;
   ctx.fillRect(0, 0, width, height);
   // (no grain on a phone, `lite`: unseen at that size, and costly there)
@@ -1428,7 +1418,7 @@ export function drawScene(ctx, { width, height, dpr = 1, t, portrait = false, la
     ctx.save();
     ctx.globalCompositeOperation = "overlay";
     ctx.globalAlpha = 0.08;
-    const r = rng(Math.round(t * 1000 + idle * 24) + 1); // new grain each frame
+    const r = rng(Math.round(t * 1000 + spin * 400) + 1); // new grain each frame
     ctx.translate(-r() * 256, -r() * 256);
     ctx.fillStyle = ctx.createPattern(grainTile(), "repeat");
     ctx.fillRect(0, 0, width + 256, height + 256);

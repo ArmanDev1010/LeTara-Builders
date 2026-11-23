@@ -1,80 +1,57 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CALM_QUERY, STILL_QUERY, reachedByLink } from "@/components/Hero/arrival";
+import { CALM_QUERY, STILL_QUERY } from "@/components/Hero/arrival";
 import { LITE_QUERY, sceneDpr, sceneFonts, sceneLayout } from "@/components/Hero/intro/layout";
 import { drawScene } from "@/components/Hero/intro/scene";
 
-// Seconds the drawn scene takes to catch up with the scroll position, so
-// mouse-wheel steps play as motion instead of jumps.
-const EASE = 0.12;
+// It plays by itself as the page opens (11-23: Andranik asked for it to play "as soon as you open the page,
+// maybe with a little bit of a pause"). The pause: the first frame, the
+// house in pieces, holds this long, so a visitor arriving through the page
+// transition sees it play once the wall has opened (UI/PageTransition takes
+// about 0.85s from the first frame), and one landing on the site has a beat
+// to take it in.
+const START_DELAY = 900;
 
-// On a phone or tablet: seconds the copy, and the house with it, take to
-// follow the bottom of the screen as the browser's bars slide (see `drop`).
-const DROP_EASE = 0.09;
+// How long it plays, in seconds: all three passes, quick enough to finish
+// while the headline is read, not so quick the notes can't be (see T in
+// intro/scene.js; 6.5s at first, which the user found a little slow).
+// Reduce Motion plays it a little slower.
+const PLAY = 5;
+const CALM_PLAY = 6.5;
 
-// How long the finished render holds before the hero scrolls away, in
-// screens: a beat, no more (the user found longer holds too long, on a phone
-// and then on desktop). The scene plays over the rest of the pinned scroll,
-// 360vh: more scroll than the old hero's 240vh, so each flick of a finger or
-// turn of the wheel moves it less and it reads smoother (the user compared
-// it with HB Links', which plays over ~550vh). The section is 475vh tall,
-// 375vh pinned (in steady --vh units, see UI/StableViewport), so it holds
-// 15vh. Change the section's height and HOLD together.
-const HOLD = 0.15;
-
-// The homepage hero: pinned for a few screens of scroll over the intro scene
-// (intro/scene.js), "The Render": a house comes to life pass by pass, the way
-// a visual-effects shot does, to the tagline. Dream: its pieces, in gold
-// glass, hang apart as in an exploded view and come together; Design: a
-// blueprint-blue wireframe draws over them; Build: it fills in, solid, and
-// its windows light up. The copy (`children`) sits at
-// the bottom left, as on HB Links' hero; the scene puts the house beside it
-// or above it, never under it. Phones held sideways get the finished scene
-// as a still; Reduce Motion plays a calmer version (see `calm` in scene.js)
-// that follows the scroll exactly instead of gliding after it.
-//
-// /?look=blueprint shows the blueprint look instead (`look` in scene.js), a
-// demo for Andranik (11-16): read once the page is in the browser, and set on
-// the section (`data-look`) for its own background and the shade under the
-// copy.
+// The homepage hero, one screen tall: "The Render" (intro/scene.js), a house
+// coming to life pass by pass, the way a visual-effects shot does, to the
+// tagline. Dream: its pieces, in gold glass, hang apart as in an exploded
+// view and come together; Design: a blueprint-blue wireframe draws over
+// them; Build: it fills in, solid, and its windows light up. Then, as the
+// hero scrolls away, the camera turns a little further (`spin`), as on the
+// service pages' heroes: a touch, nothing to scroll through. The copy
+// (`children`) sits at the bottom left; the scene puts the house beside it
+// or above it, never under it. A phone held sideways shows the scene with
+// the copy below it.
 export default function HeroIntro({ children }) {
-  const trackRef = useRef(null);
-  const panelRef = useRef(null);
+  const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const copyRef = useRef(null);
-  const arrivalRef = useRef(null);
+  // how far it has played, 0-1, kept if the scene restarts (a phone turned
+  // sideways, Reduce Motion switched)
+  const playedRef = useRef(0);
 
   useEffect(() => {
-    // Reached by a link: start at the very top, so the scene opens on its
-    // first frame. Next.js resets the scroll itself; this backs it up.
-    // Back/Forward and links to a section (#…) keep their own position.
-    // Asked once per hero — React runs this twice in development.
-    if (!arrivalRef.current) {
-      arrivalRef.current = { arrived: reachedByLink() && !window.location.hash };
-      if (arrivalRef.current.arrived && window.scrollY > 0)
-        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }
-    let { arrived } = arrivalRef.current;
-    const look = new URLSearchParams(window.location.search).get("look") === "blueprint" ? "blueprint" : "render";
-    trackRef.current.dataset.look = look;
-
     const still = window.matchMedia(STILL_QUERY);
     const calm = window.matchMedia(CALM_QUERY);
     let stop = null;
     const sync = () => {
       stop?.();
       stop = playScene({
-        track: trackRef.current,
-        panel: panelRef.current,
+        section: sectionRef.current,
         canvas: canvasRef.current,
         copy: copyRef.current,
         still: still.matches,
         calm: calm.matches,
-        arrived,
-        look,
+        played: playedRef,
       });
-      arrived = false;
     };
     sync();
     still.addEventListener("change", sync);
@@ -87,114 +64,67 @@ export default function HeroIntro({ children }) {
   }, []);
 
   return (
-    // Until the scene's first frame is drawn, the section shows its gold glow,
-    // so the hero doesn't flash black. Phones held sideways show the finished
-    // scene as a still, the headline below it (it's too short for both).
+    // As tall as the screen (in steady --svh, see UI/StableViewport), never
+    // too short for the house and the copy, as a service page's hero (Hero/
+    // ServiceHero). A phone held sideways shows the scene a screen tall, the
+    // headline below it (it's too short for both).
     <section
-      ref={trackRef}
+      ref={sectionRef}
       id="hero"
-      className="group relative h-[calc(475*var(--vh))] intro-still:h-auto bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.26),rgba(196,92,16,0.08)_45%,transparent_75%)] portrait:bg-[radial-gradient(ellipse_80%_35%_at_100%_25%,rgba(255,170,58,0.28),rgba(196,92,16,0.08)_45%,transparent_75%)] data-[look=blueprint]:bg-[#04122b] data-[look=blueprint]:bg-none data-[look=blueprint]:portrait:bg-none text-neutral-50"
+      className="relative flex items-end overflow-hidden h-[calc(100*var(--svh))] min-h-[700px] 700:min-h-[600px] pt-28 intro-still:block intro-still:h-auto intro-still:min-h-0 intro-still:pt-0 bg-[#050b1b] text-neutral-50"
     >
-      {/* On a phone or tablet the pinned panel keeps one height while the
-          browser's bars slide in and out (11-17: in iPhone Chrome it was
-          resized as they moved, the canvas with it, and the scene was laid
-          out again each time and jumped, its bottom bar snapping away): the
-          screen with its bars showing (--svh, pinned at load,
-          UI/StableViewport) and 120px more below the copy, under the bottom
-          bar (taller than any phone's bars), so the scene still fills the
-          screen when they slide away. The copy glides down to the screen's
-          foot as they go, and the house into the room it leaves (`drop` in
-          playScene); the user wanted the hero to take the whole screen then,
-          as before. */}
-      <div
-        ref={panelRef}
-        className="sticky top-0 h-dvh hero-touch:h-[calc(100*var(--svh)+120px)] hero-touch:pb-[120px] overflow-hidden flex items-end pt-28 sm:pt-22 intro-still:static intro-still:h-auto intro-still:block intro-still:pt-0"
-      >
-        <canvas
-          ref={canvasRef}
-          role="img"
-          aria-label="A house takes shape in the dark, pass by pass: its pieces, in gold glass, float down into place, blue lines draw it as a blueprint, and it fills in, solid, until its windows light up. A modern home with a pool, a pergola and an ADU. Behind it, in outline: Dream. Design. Build."
-          className="absolute inset-0 h-full w-full intro-still:relative intro-still:h-[calc(100*var(--vh))]"
-        />
-        {/* shade under the copy; on a wide screen it eases off to the right,
-            where the house can come down beside the copy */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-black/75 via-black/35 to-transparent group-data-[look=blueprint]:from-[#020a1c]/85 group-data-[look=blueprint]:via-[#020a1c]/40 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
-        <div
-          ref={copyRef}
-          className="wide-zoom relative z-20 900:pb-16 pb-20 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10"
-        >
-          {children}
-        </div>
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label="A house takes shape in the dark, pass by pass: its pieces, in gold glass, come down into place, blue lines draw it as a blueprint, and it fills in, solid, until its windows light up. A modern home with a pool, a pergola and an ADU, on a drafting grid. Behind it, in outline: Dream. Design. Build."
+        className="absolute inset-0 h-full w-full intro-still:relative intro-still:h-[calc(100*var(--vh))]"
+      />
+      {/* shade under the copy; on a wide screen it eases off to the right,
+          where the house can come down beside the copy */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-[#02050d]/80 via-[#02050d]/35 to-transparent 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
+      <div ref={copyRef} className="wide-zoom relative z-20 900:pb-16 pb-20 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10">
+        {children}
       </div>
     </section>
   );
 }
 
-// Draws the scene for how far the hero has been scrolled through (or, when
-// `still`, its finished frame once). Returns a function that stops it.
-function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
+// Plays the scene once, from where it got to (`played`), then keeps it
+// turning with the scroll. Returns a function that stops it.
+function playScene({ section, canvas, copy, still, calm, played }) {
   const context = canvas.getContext("2d");
   const lite = window.matchMedia(LITE_QUERY).matches;
-  const abort = new AbortController();
   const fonts = sceneFonts();
+  const duration = calm ? CALM_PLAY : PLAY;
 
   let stopped = false;
   let size = null; // { width, height, dpr, portrait, layout }
   let drawn = "";
-  let target = 0; // scroll progress through the hero, 0-1
-  let shown = 0; // the progress drawn, easing toward `target`
+  let spin = 0; // how far the hero has scrolled away, 0-1
   let raf = 0;
+  let queued = 0;
   let lastTick = 0;
-  let idle = 0; // seconds the finished scene has spent drifting (see drift)
+  let started = played.current > 0;
 
-  // On a phone or tablet the panel keeps one height (see its classes: the
-  // screen with the bars showing, and `spare` px under the copy), and the
-  // copy follows the screen's foot as the browser's bars slide: `drop` px
-  // below where it sits with them showing, gliding there (DROP_EASE), and
-  // the scene lays the house out round where the copy is. Nothing is
-  // resized, so the bars slide as smoothly as on the rest of the page.
-  // Only while the panel is pinned (11-17: the user saw the copy rise inside
-  // the hero's foot as they scrolled back up the page below it and the bars
-  // came back); it catches up once the hero pins again (`followFoot`).
-  let spare = 0;
-  let dropTarget = 0;
-  let dropShown = 0;
-  const readDrop = () => {
-    if (!spare) return 0;
-    const base = panel.offsetHeight - spare; // the screen with the bars showing
-    return Math.min(spare, Math.max(-base / 2, window.innerHeight - base));
-  };
-  const followFoot = () => {
-    if (!spare) return;
-    const next = readDrop();
-    if (next === dropTarget || panel.getBoundingClientRect().top < -1) return;
-    dropTarget = next;
-    play();
-  };
-  const placeCopy = () => {
-    copy.style.transform = dropShown ? `translate3d(0,${dropShown.toFixed(1)}px,0)` : "";
+  const inView = () => {
+    const { top, bottom } = section.getBoundingClientRect();
+    return bottom > 0 && top < window.innerHeight;
   };
 
-  const draw = (t) => {
-    if (!size) return;
+  const draw = () => {
+    queued = 0;
+    if (!size || stopped) return;
+    const t = ease(played.current);
     const { copyTop, copyRight, titleRight, navZoom, navBottom, head } = size.layout;
-    const key = [t.toFixed(4), size.width, size.height, size.dpr, copyTop, copyRight, titleRight, navZoom, navBottom, head?.top, dropShown.toFixed(1), idle.toFixed(3)].join(":");
+    const key = [t.toFixed(4), spin.toFixed(4), size.width, size.height, size.dpr, copyTop, copyRight, titleRight, navZoom, navBottom, head?.top].join(":");
     if (key === drawn) return;
     drawn = key;
-    // On a phone, the copy where it's glided to, and the height that shows
-    // (the panel, less what's under the bottom bar), which the title and the
-    // air are sized by, as when the hero was the screen's height
-    const layout = spare
-      ? {
-          ...size.layout,
-          copyTop: copyTop + dropShown / size.height,
-          head: head && { ...head, top: head.top + dropShown },
-          view: size.height - spare + dropShown,
-        }
-      : size.layout;
-    drawScene(context, { ...size, layout, t, calm, fonts, idle, lite, look });
+    drawScene(context, { ...size, t, spin, calm, fonts, lite });
     // the page transition waits for this before it opens (UI/PageTransition)
     canvas.dataset.drawn = "1";
+  };
+  const redraw = () => {
+    if (!queued && !raf) queued = requestAnimationFrame(draw);
   };
 
   // No more canvas pixels than the screen has (within PIXEL_BUDGET, see
@@ -207,144 +137,67 @@ function playScene({ track, panel, canvas, copy, still, calm, arrived, look }) {
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     const portrait = height > width;
-    // the copy measured where it sits with the bars showing, then put back
-    spare = still ? 0 : parseFloat(getComputedStyle(panel).paddingBottom) || 0;
-    copy.style.transform = "";
     size = { width, height, dpr, portrait, layout: sceneLayout({ canvas, copy, width, height, portrait, still }) };
-    dropTarget = dropShown = readDrop();
-    placeCopy();
     drawn = "";
-    if (!still) measure();
-    draw(still ? 1 : shown);
-  };
-  const resizeObserver = new ResizeObserver(resize);
-  // redraw once the faces have loaded
-  document.fonts?.ready.then(() => {
-    if (stopped) return;
-    resize();
-  });
-
-  if (still) {
-    resizeObserver.observe(canvas);
-    return () => {
-      stopped = true;
-      resizeObserver.disconnect();
-    };
-  }
-
-  // Reached by a link, the hero opens at the start of the scene: until the
-  // visitor first touches, scrolls or presses a key, wherever the browser
-  // leaves the page counts as the start (`lead`, px into the hero). iOS
-  // Safari, its toolbar collapsed by scrolling the last page, can land a new
-  // one a little way down.
-  let lead = 0;
-  let leading = arrived;
-  if (leading) {
-    const done = () => (leading = false);
-    for (const type of ["touchstart", "wheel", "keydown", "pointerdown"])
-      window.addEventListener(type, done, { once: true, passive: true, signal: abort.signal });
-  }
-
-  const measure = () => {
-    const distance = track.offsetHeight - panel.offsetHeight;
-    const into = -track.getBoundingClientRect().top;
-    // (more than a little way down is a real scroll position, not a landing)
-    if (leading) lead = into > 0 && into < distance / 4 ? into : 0;
-    else if (into <= 0) lead = 0;
-    const run = distance - lead;
-    const progress = run > 0 ? Math.min(1, Math.max(0, (into - lead) / run)) : 0;
-    // the share of the pinned scroll that plays the scene (see HOLD)
-    const hold = HOLD * panel.offsetHeight;
-    const play = distance > 0 ? Math.min(1, Math.max(0.5, (distance - hold) / distance)) : 1;
-    target = Math.min(1, progress / play);
+    draw();
   };
 
+  // It plays only while the hero is on screen (a page opened further down,
+  // by Back or a link to a section, plays it when it's scrolled up to), and
+  // by the frames it's shown (a tab in the background holds it).
   const tick = (now) => {
-    // rAF's timestamp can be a little older than the performance.now() that
-    // started the loop, so never step backwards.
-    const seconds = Math.min(Math.max(0, (now - lastTick) / 1000), 0.1);
+    raf = 0;
+    if (stopped) return;
+    if (!inView()) return;
+    played.current = Math.min(1, played.current + Math.min(Math.max(0, (now - lastTick) / 1000), 0.1) / duration);
     lastTick = now;
-    shown += (target - shown) * (calm ? 1 : 1 - Math.exp(-seconds / EASE));
-    if (Math.abs(target - shown) < 0.0005) shown = target;
-    // the copy gliding after the screen's foot (a glide with Reduce Motion
-    // too: never a cut)
-    if (dropShown !== dropTarget) {
-      dropShown += (dropTarget - dropShown) * (1 - Math.exp(-seconds / DROP_EASE));
-      if (Math.abs(dropTarget - dropShown) < 0.5) dropShown = dropTarget;
-      placeCopy();
-    }
-    draw(shown);
-    raf = shown === target && dropShown === dropTarget ? 0 : requestAnimationFrame(tick);
-    if (!raf) drift();
-  };
-
-  // Once the scene has finished, the dust keeps drifting and the pool
-  // shimmering (30 frames a second is plenty for them) until the hero
-  // scrolls out of view. Not with Reduce Motion: it's only atmosphere.
-  let drifting = 0;
-  let lastDrift = 0;
-  const driftTick = (now) => {
-    drifting = 0;
-    if (stopped || shown < 1) return;
-    const { top, bottom } = track.getBoundingClientRect();
-    if (bottom <= 0 || top >= window.innerHeight) return;
-    const seconds = (now - lastDrift) / 1000;
-    if (seconds >= 1 / 30) {
-      idle += Math.min(seconds, 0.1);
-      lastDrift = now;
-      draw(1);
-    }
-    drifting = requestAnimationFrame(driftTick);
-  };
-  const drift = () => {
-    if (calm || drifting || stopped || shown < 1) return;
-    lastDrift = performance.now();
-    drifting = requestAnimationFrame(driftTick);
+    draw();
+    if (played.current < 1) raf = requestAnimationFrame(tick);
   };
   const play = () => {
-    if (raf || stopped) return;
+    if (raf || stopped || !started || played.current >= 1) return;
     lastTick = performance.now();
     raf = requestAnimationFrame(tick);
   };
+  const timer = started
+    ? 0
+    : setTimeout(() => {
+        started = true;
+        play();
+      }, START_DELAY);
 
-  let scrolled = false;
   const onScroll = () => {
-    scrolled = true;
-    measure();
-    followFoot();
+    const { top, height } = section.getBoundingClientRect();
+    if (!inView()) return;
+    spin = Math.min(1, Math.max(0, -top / height));
     play();
-    drift();
+    redraw();
   };
 
-  measure();
-  shown = target;
-  resizeObserver.observe(canvas);
-  resizeObserver.observe(copy);
-  // For the first second, re-read the scroll every frame and jump straight to
-  // it, in case the browser resets it for a new page without a scroll event
-  // reaching us.
-  const settleUntil = performance.now() + 1000;
-  let watching = requestAnimationFrame(function watch(now) {
-    if (stopped) return;
-    measure();
-    if (!scrolled) shown = target;
-    draw(shown);
-    watching = now < settleUntil ? requestAnimationFrame(watch) : 0;
-    if (!watching) drift();
-  });
-  window.addEventListener("scroll", onScroll, { passive: true, signal: abort.signal });
-  // the browser's bars sliding in or out (the screen's height changes, the
-  // panel's doesn't): the copy and the house glide to the new foot, if the
-  // hero is pinned (else on the scroll that pins it)
-  window.addEventListener("resize", followFoot, { passive: true, signal: abort.signal });
+  const observer = new ResizeObserver(resize);
+  observer.observe(canvas);
+  observer.observe(copy);
+  // redraw once the faces have loaded
+  document.fonts?.ready.then(() => !stopped && resize());
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  play();
 
   return () => {
     stopped = true;
-    copy.style.transform = "";
-    abort.abort();
+    clearTimeout(timer);
     cancelAnimationFrame(raf);
-    cancelAnimationFrame(watching);
-    cancelAnimationFrame(drifting);
-    resizeObserver.disconnect();
+    cancelAnimationFrame(queued);
+    observer.disconnect();
+    window.removeEventListener("scroll", onScroll);
   };
+}
+
+// The play's time to the scene's progress: easing in over its first moment,
+// so it starts from the still first frame without a jolt, then steady (the
+// scene's passes have their own easing).
+const EASE_IN = 0.08;
+function ease(u) {
+  const c = 1 / (1 - EASE_IN / 2);
+  return u < EASE_IN ? (c * u * u) / (2 * EASE_IN) : c * (u - EASE_IN / 2);
 }

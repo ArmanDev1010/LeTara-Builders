@@ -20,9 +20,9 @@ function measure(unit) {
 // so a block sized with them keeps its height while the toolbars move.
 // Safari holds vh and svh steady itself, but Chrome, the Google app and
 // other iPhone browsers resize them each time their bottom bar slides in or
-// out, and the homepage hero is 475 of them tall (Hero/HeroIntro): it grew
-// and shrank by hundreds of px and everything below it jumped (found on HB
-// Links). They're measured again only when the width changes, which means
+// out: on HB Links its homepage hero, hundreds of them tall, grew and
+// shrank by hundreds of px and everything below it jumped. The heroes here
+// are a screen tall in them (Hero/HeroIntro, Hero/ServiceHero). They're measured again only when the width changes, which means
 // the phone was turned or a desktop window resized. Off a touch screen,
 // where no toolbar slides, a change of height counts too.
 export default function StableViewport() {

@@ -39,21 +39,12 @@
   --font-quote: var(--font-oswald), "Arial Narrow", sans-serif; /* Oswald Light: Andranik's quote (About) */
 }
 
-/* The homepage's drawn intro (components/Hero/HeroIntro.jsx) plays on phones
-   too; only screens held sideways too short to pin it get its finished frame
-   as a still. Keep in step with STILL_QUERY in components/Hero/arrival.js. */
+/* The drawn heroes (components/Hero/HeroIntro.jsx, ServiceHero.jsx) on a
+   screen held sideways too short for the scene and the copy together: the
+   scene a screen tall, the copy below it. Keep in step with STILL_QUERY in
+   components/Hero/arrival.js. */
 @custom-variant intro-still {
   @media (max-height: 500px) and (orientation: landscape) {
-    @slot;
-  }
-}
-
-/* A phone or tablet playing the drawn intro (not held sideways too short for
-   it, see intro-still): its pinned panel keeps one height, so the scene isn't
-   laid out again each time the browser's bars slide in or out
-   (components/Hero/HeroIntro.jsx). */
-@custom-variant hero-touch {
-  @media (hover: none) and (pointer: coarse) and (min-height: 501px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
     @slot;
   }
 }

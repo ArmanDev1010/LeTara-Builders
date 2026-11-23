@@ -1,4 +1,5 @@
-// Shared by the scroll-played heroes (HeroIntro, HeroBuildSequence).
+// Shared by the heroes: the drawn ones (HeroIntro, ServiceHero) and the
+// scroll-played timelapse (HeroBuildSequence).
 
 // Whether this hero's page was reached by a link inside the site — not
 // loaded, reloaded, or come back to with Back/Forward. Asked once per page:
@@ -24,10 +25,10 @@ export function reachedByLink() {
   return answer;
 }
 
-// The homepage's drawn intro (HeroIntro) plays on phones too; only screens
-// held sideways too short to pin it get its finished frame as a still.
-// Portrait phones keep the scroll even when Safari's toolbars leave under
-// 560px. The same query as the `intro-still` variant in globals.css.
+// The drawn heroes (HeroIntro, ServiceHero) on a screen held sideways too
+// short for the scene and the copy together: the scene a screen tall, the
+// copy below it. The same query as the `intro-still` variant in
+// globals.css.
 export const STILL_QUERY = "(max-height: 500px) and (orientation: landscape)";
 
 // The timelapse heroes (HeroBuildSequence) show their opening frame, the
