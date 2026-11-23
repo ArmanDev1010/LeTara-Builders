@@ -130,6 +130,16 @@
   zoom: var(--wide-zoom);
 }
 
+/* The homepage's Services drawing held under the navbar while its cards
+   scroll beneath it (components/Home/Services.jsx): where the drawing sits
+   above the cards (under 1080px), on a screen tall enough to keep room for
+   a card below it (not a phone held sideways, see intro-still). */
+@custom-variant services-pin {
+  @media (max-width: 1079.98px) and (min-height: 501px) {
+    @slot;
+  }
+}
+
 /* A homepage service card that's hovered (where there's a mouse to hover
    with) or whose link has keyboard focus: the pieces inside it react
    together (components/Home/Services.jsx). */

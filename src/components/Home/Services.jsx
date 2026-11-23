@@ -32,7 +32,12 @@ const CHAMFER = "[clip-path:polygon(0_0,calc(100%-20px)_0,100%_20px,100%_100%,0_
 // and arrow box gold. Commercial has no part in the home: its card spans the
 // foot and lights only itself. As the drawing scrolls into view the cutaway
 // opens: the roof and walls over the rooms fade into their dashed outline (a
-// fade, so the same with Reduce Motion). Under it all, LeTara's partner for
+// fade, so the same with Reduce Motion). On a touch screen, with nothing to
+// point with, the card at the middle of the screen lights up as it's
+// scrolled to (11-23: Andranik saw the section do nothing on his phone);
+// where the drawing is above the cards it's held under the navbar while
+// they scroll beneath it (`services-pin`, globals.css), on white, a fade
+// under it. Under it all, LeTara's partner for
 // patio covers and awnings, Vista Pergolas (UI/PartnerCard; Andranik,
 // 11-16). (11-12: the user asked for the drawing whole, not pulled apart, a
 // little bigger, and the rooms shown through a cut.)
@@ -42,11 +47,13 @@ const ITEMS = SERVICES.map(({ slug, title, home, href }) => ({ layer: slug, titl
 export default function Services({
   number = "02",
   heading = ["Design-Build,", "under one roof."],
-  intro = "Every project here is design-build: one team designs it, takes it through permits and builds it. Point at one to find it on the home.",
+  intro = "Every project here is design-build: one team designs it, takes it through permits and builds it. Each card lights up its part of the home.",
   items = ITEMS,
 }) {
   const [active, setActive] = useState(null);
   const canvasRef = useRef(null);
+  const listRef = useRef(null);
+  const touchRef = useRef(false); // no hover: the scroll picks the card
   const state = useRef({ cut: 0, active: null, draw: null });
 
   useEffect(() => {
@@ -111,6 +118,55 @@ export default function Services({
     state.current.draw?.();
   }, [active]);
 
+  // The scroll's pick, on a touch screen: of the cards in the part of the
+  // screen the drawing leaves free (below it where it's above them, else
+  // below the navbar), the one at its middle. In a row of two (a tablet),
+  // each card has half the row's height, so both get their turn as the row
+  // passes. The drawing is also marked `data-stuck` while it's held, for
+  // the white above it and the fade below it.
+  useEffect(() => {
+    const panel = canvasRef.current.closest("[data-pin]");
+    const list = listRef.current;
+    const touch = window.matchMedia("(hover: none)");
+    const gap = (r, y) => (y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0);
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const above = window.innerWidth < 1080; // the drawing over the cards
+      const p = panel.getBoundingClientRect();
+      const style = getComputedStyle(panel);
+      panel.toggleAttribute("data-stuck", above && style.position === "sticky" && Math.abs(p.top - parseFloat(style.top)) < 1);
+      touchRef.current = touch.matches;
+      if (!touch.matches) return;
+      const nav = document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0;
+      const top = above ? Math.max(p.bottom, nav) : nav;
+      const bottom = window.innerHeight;
+      const line = (top + bottom) / 2;
+      const cards = [...list.children].map((li) => ({ li, r: li.getBoundingClientRect() })).filter(({ r }) => r.bottom > top && r.top < bottom);
+      let next = null;
+      if (cards.length && bottom - top > 60) {
+        const near = cards.reduce((a, b) => (gap(b.r, line) < gap(a.r, line) ? b : a));
+        const row = cards.filter(({ r }) => Math.abs(r.top - near.r.top) < 4).sort((a, b) => a.r.left - b.r.left);
+        const k = Math.min(0.999, Math.max(0, (line - near.r.top) / near.r.height));
+        next = row[Math.floor(k * row.length)].li.dataset.layer;
+      }
+      setActive(next);
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    touch.addEventListener("change", schedule);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      touch.removeEventListener("change", schedule);
+    };
+  }, []);
+
   return (
     <section id="services" className={`${SECTION} ${LIGHT}`}>
       <div className={CONTAINER}>
@@ -131,26 +187,33 @@ export default function Services({
         </div>
 
         <div className="mt-10 1080:mt-12 grid gap-8 1080:gap-10 1080:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] 1440:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] 1440:gap-14">
-          <Reveal className="relative 1080:sticky 1080:top-28 1080:self-start">
+          {/* held under the navbar while the cards scroll beneath it (on a
+              phone or tablet, the drawing above them; beside them from
+              1080px), on white: white up behind the navbar too, and a fade
+              under it, while it's held */}
+          <Reveal
+            data-pin=""
+            className="relative 1080:sticky 1080:top-28 1080:self-start services-pin:sticky services-pin:top-[84px] 700:services-pin:top-[88px] services-pin:z-10 services-pin:bg-white before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-[88px] before:bg-white before:opacity-0 data-[stuck]:before:opacity-100 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-6 after:bg-gradient-to-b after:from-white after:to-transparent after:opacity-0 after:transition-opacity data-[stuck]:after:opacity-100"
+          >
             <canvas
               ref={canvasRef}
               role="img"
               aria-label="A Craftsman home drawn in line: the house, a one-story addition on its side, the living room, kitchen and bath inside shown through a cutaway, an ADU in the yard and a patio under a pergola, each numbered to match the cards."
-              className="block w-full h-[250px] 400:h-[290px] 550:h-[360px] 700:h-[420px] 1080:h-[440px] 1440:h-[480px] pointer-events-none"
+              className="block w-full h-[250px] 400:h-[290px] 550:h-[360px] 700:h-[420px] 1080:h-[440px] 1440:h-[480px] services-pin:max-h-[calc(40*var(--svh))] pointer-events-none"
             />
           </Reveal>
 
-          <ul className="grid gap-3 700:grid-cols-2" onMouseLeave={() => setActive(null)}>
+          <ul ref={listRef} className="grid gap-3 700:grid-cols-2" onMouseLeave={() => !touchRef.current && setActive(null)}>
             {items.map(({ layer, title, text, href, drawn }, i) => {
               const service = SERVICES.find((x) => x.slug === layer);
               const Icon = service?.icon;
               const on = active === layer;
               const wide = i === 0 || !drawn;
               return (
-                <Reveal as="li" key={layer} delay={0.05 * i} className={wide ? "700:col-span-2" : ""}>
+                <Reveal as="li" key={layer} data-layer={layer} delay={0.05 * i} className={wide ? "700:col-span-2" : ""}>
                   <Link
                     href={href}
-                    onMouseEnter={() => setActive(layer)}
+                    onMouseEnter={() => !touchRef.current && setActive(layer)}
                     onFocus={() => setActive(layer)}
                     onBlur={() => setActive(null)}
                     className={`group relative flex h-full min-h-[230px] 700:min-h-[260px] flex-col overflow-hidden bg-[#0b0b0b] text-neutral-50 p-6 700:p-7 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third ${CHAMFER}`}

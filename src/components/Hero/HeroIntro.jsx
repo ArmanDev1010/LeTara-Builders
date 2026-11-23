@@ -5,8 +5,9 @@ import { CALM_QUERY, STILL_QUERY } from "@/components/Hero/arrival";
 import { LITE_QUERY, sceneDpr, sceneFonts, sceneLayout } from "@/components/Hero/intro/layout";
 import { drawScene } from "@/components/Hero/intro/scene";
 
-// It plays by itself as the page opens (11-23: Andranik asked for it to play "as soon as you open the page,
-// maybe with a little bit of a pause"). The pause: the first frame, the
+// It plays by itself as the page opens (11-23: Andranik asked for it to
+// play "as soon as you open the page, maybe with a little bit of a pause").
+// The pause: the first frame, the
 // house in pieces, holds this long, so a visitor arriving through the page
 // transition sees it play once the wall has opened (UI/PageTransition takes
 // about 0.85s from the first frame), and one landing on the site has a beat
