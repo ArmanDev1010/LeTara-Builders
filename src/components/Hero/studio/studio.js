@@ -30,13 +30,16 @@ import {
   edges,
   faces,
   grainTile,
+  hides,
   lerp,
   mix,
   norm,
   onFace,
   path,
+  planesOf,
   rgba,
   rng,
+  shapeFaces,
   smooth,
   sprite,
   sub,
@@ -113,55 +116,8 @@ function extentOf(project, pts, e = [Infinity, Infinity, -Infinity, -Infinity]) 
 }
 const corners = (b) => edges(b).flat();
 
-// A gable roof inside a box's bounds (`gable: "x"`: its ridge runs along x;
-// `"z"`: along z), the eaves at the bottom and the ridge at the top: two
-// slopes (`ridge`: their top edge catches the light) and two triangular ends
-// (`tri`, the apex written twice). It sits inside its box, so the boxes'
-// drawing order (drawOrder) still holds; keep its box clear of every other.
-function gableFaces({ min: [x0, y0, z0], max: [x1, y1, z1], gable }) {
-  const h = y1 - y0;
-  if (gable === "x") {
-    const zm = (z0 + z1) / 2, d = (z1 - z0) / 2;
-    return {
-      "z-": { n: norm([0, d, -h]), p: [[x0, y0, z0], [x1, y0, z0], [x1, y1, zm], [x0, y1, zm]], ridge: true },
-      "z+": { n: norm([0, d, h]), p: [[x1, y0, z1], [x0, y0, z1], [x0, y1, zm], [x1, y1, zm]], ridge: true },
-      "x-": { n: [-1, 0, 0], p: [[x0, y0, z1], [x0, y0, z0], [x0, y1, zm], [x0, y1, zm]], tri: true },
-      "x+": { n: [1, 0, 0], p: [[x1, y0, z0], [x1, y0, z1], [x1, y1, zm], [x1, y1, zm]], tri: true },
-    };
-  }
-  const xm = (x0 + x1) / 2, d = (x1 - x0) / 2;
-  return {
-    "x-": { n: norm([-h, d, 0]), p: [[x0, y0, z1], [x0, y0, z0], [xm, y1, z0], [xm, y1, z1]], ridge: true },
-    "x+": { n: norm([h, d, 0]), p: [[x1, y0, z0], [x1, y0, z1], [xm, y1, z1], [xm, y1, z0]], ridge: true },
-    "z-": { n: [0, 0, -1], p: [[x0, y0, z0], [x1, y0, z0], [xm, y1, z0], [xm, y1, z0]], tri: true },
-    "z+": { n: [0, 0, 1], p: [[x1, y0, z1], [x0, y0, z1], [xm, y1, z1], [xm, y1, z1]], tri: true },
-  };
-}
-const shapeFaces = (b) => (b.gable ? gableFaces(b) : faces(b));
-
-// A shape's planes, each facing out: its faces' and its floor's.
-function planesOf(b) {
-  const out = Object.values(shapeFaces(b)).map((f) => ({ n: f.n, q: f.p[0] }));
-  out.push({ n: [0, -1, 0], q: b.min });
-  return out;
-}
-// Whether a shape (its planes) stands between the eye and point p: the line
-// from one to the other clipped against each plane, stopping just short of p.
-function hides(planes, eye, p) {
-  const d = sub(p, eye);
-  let t0 = 0, t1 = 0.995;
-  for (const { n, q } of planes) {
-    const den = dot(n, d), num = dot(n, sub(q, eye));
-    if (Math.abs(den) < 1e-9) {
-      if (num < 0) return false;
-      continue;
-    }
-    if (den > 0) t1 = Math.min(t1, num / den);
-    else t0 = Math.max(t0, num / den);
-    if (t0 >= t1) return false;
-  }
-  return true;
-}
+// Gable roofs (gableFaces, shapeFaces), and which shapes hide a glow
+// (planesOf, hides): shared with the homepage's scene (intro/scene.js).
 
 // A window's pane as a thin box on its wall, for the diagram, where the
 // windows come away from the walls as a layer of their own (pushed out

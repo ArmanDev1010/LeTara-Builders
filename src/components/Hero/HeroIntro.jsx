@@ -6,13 +6,10 @@ import { LITE_QUERY, sceneDpr, sceneFonts, sceneLayout } from "@/components/Hero
 import { drawScene } from "@/components/Hero/intro/scene";
 
 // It plays by itself as the page opens (11-23: Andranik asked for it to
-// play "as soon as you open the page, maybe with a little bit of a pause").
-// The pause: the first frame, the
-// house in pieces, holds this long, so a visitor arriving through the page
-// transition sees it play once the wall has opened (UI/PageTransition takes
-// about 0.85s from the first frame), and one landing on the site has a beat
-// to take it in.
-const START_DELAY = 900;
+// play "as soon as you open the page"), at once: there was a pause of 0.9s
+// on its first frame, which the user had taken out the same day. Reached
+// through the page transition, it starts the moment the wall starts to open
+// (UI/PageTransition's `data-page-wall`), so none of it plays behind it.
 
 // How long it plays, in seconds: all three passes, quick enough to finish
 // while the headline is read, not so quick the notes can't be (see T in
@@ -77,7 +74,7 @@ export default function HeroIntro({ children }) {
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label="A house takes shape in the dark, pass by pass: its pieces, in gold glass, come down into place, blue lines draw it as a blueprint, and it fills in, solid, until its windows light up. A modern home with a pool, a pergola and an ADU, on a drafting grid. Behind it, in outline: Dream. Design. Build."
+        aria-label="A house takes shape in the dark, pass by pass: its pieces, in gold glass, come down into place, blue lines draw it as a blueprint, and it fills in, solid, until its windows light up. A Craftsman home with a porch, an addition on its side, an ADU in the yard and a patio under a pergola, on a drafting grid under a dusk sky. Behind it, in outline: Dream. Design. Build."
         className="absolute inset-0 h-full w-full intro-still:relative intro-still:h-[calc(100*var(--vh))]"
       />
       {/* shade under the copy; on a wide screen it eases off to the right,
@@ -160,12 +157,21 @@ function playScene({ section, canvas, copy, still, calm, played }) {
     lastTick = performance.now();
     raf = requestAnimationFrame(tick);
   };
-  const timer = started
-    ? 0
-    : setTimeout(() => {
-        started = true;
-        play();
-      }, START_DELAY);
+  const wallShut = () => {
+    const wall = document.querySelector("[data-page-wall]");
+    return !!wall && wall.dataset.pageWall !== "reveal";
+  };
+  let waiting = 0;
+  const begin = () => {
+    waiting = 0;
+    if (stopped) return;
+    if (wallShut()) {
+      waiting = requestAnimationFrame(begin);
+      return;
+    }
+    started = true;
+    play();
+  };
 
   const onScroll = () => {
     const { top, height } = section.getBoundingClientRect();
@@ -182,11 +188,12 @@ function playScene({ section, canvas, copy, still, calm, played }) {
   document.fonts?.ready.then(() => !stopped && resize());
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
-  play();
+  if (started) play();
+  else begin();
 
   return () => {
     stopped = true;
-    clearTimeout(timer);
+    cancelAnimationFrame(waiting);
     cancelAnimationFrame(raf);
     cancelAnimationFrame(queued);
     observer.disconnect();

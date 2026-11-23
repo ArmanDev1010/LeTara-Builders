@@ -16,6 +16,11 @@ const CUT_TIME = 1300; // ms the cutaway takes to open, once in view
 const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 // a cut corner, top right: the navbar's points, as on the homepage's cards
 const CHAMFER = "[clip-path:polygon(0_0,calc(100%-20px)_0,100%_20px,100%_100%,0_100%)]";
+// While the drawing is held above the cards on a phone or tablet, it's this
+// much of its size, so more of the cards shows (the user asked, 11-23);
+// sitting in its place it's full size.
+const HELD_SCALE = "group-data-[stuck]/pin:[transform:scale(0.75)]";
+const HELD_SCALE_Y = "group-data-[stuck]/pin:[transform:scaleY(0.75)]";
 
 // The homepage's "What we build", on white (11-16: Andranik liked it best,
 // so it moved here from the area pages, which took the homepage's bento,
@@ -37,7 +42,8 @@ const CHAMFER = "[clip-path:polygon(0_0,calc(100%-20px)_0,100%_20px,100%_100%,0_
 // scrolled to (11-23: Andranik saw the section do nothing on his phone);
 // where the drawing is above the cards it's held under the navbar while
 // they scroll beneath it (`services-pin`, globals.css), on white, a fade
-// under it. Under it all, LeTara's partner for
+// under it, a quarter smaller than in its place (HELD_SCALE). On a phone
+// every card is as tall as the tallest, New Construction's (11-23). Under it all, LeTara's partner for
 // patio covers and awnings, Vista Pergolas (UI/PartnerCard; Andranik,
 // 11-16). (11-12: the user asked for the drawing whole, not pulled apart, a
 // little bigger, and the rooms shown through a cut.)
@@ -122,24 +128,33 @@ export default function Services({
   // screen the drawing leaves free (below it where it's above them, else
   // below the navbar), the one at its middle. In a row of two (a tablet),
   // each card has half the row's height, so both get their turn as the row
-  // passes. The drawing is also marked `data-stuck` while it's held, for
-  // the white above it and the fade below it.
+  // passes. The drawing is also marked `data-stuck` while it's held (and
+  // once it's gone past, so it doesn't grow as it leaves), for its smaller
+  // size, the white above it and the fade below it.
   useEffect(() => {
     const panel = canvasRef.current.closest("[data-pin]");
     const list = listRef.current;
     const touch = window.matchMedia("(hover: none)");
     const gap = (r, y) => (y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0);
     let raf = 0;
+    let settle = 0;
     const update = () => {
       raf = 0;
       const above = window.innerWidth < 1080; // the drawing over the cards
       const p = panel.getBoundingClientRect();
       const style = getComputedStyle(panel);
-      panel.toggleAttribute("data-stuck", above && style.position === "sticky" && Math.abs(p.top - parseFloat(style.top)) < 1);
+      const held = above && style.position === "sticky" && p.top - parseFloat(style.top) < 1;
+      if (held !== panel.hasAttribute("data-stuck")) {
+        panel.toggleAttribute("data-stuck", held);
+        // the drawing's size eases in; look again once it has
+        clearTimeout(settle);
+        settle = setTimeout(schedule, 560);
+      }
       touchRef.current = touch.matches;
       if (!touch.matches) return;
       const nav = document.querySelector("nav")?.getBoundingClientRect().bottom ?? 0;
-      const top = above ? Math.max(p.bottom, nav) : nav;
+      // (the drawing as it's shown, smaller while it's held)
+      const top = above ? Math.max(canvasRef.current.getBoundingClientRect().bottom, nav) : nav;
       const bottom = window.innerHeight;
       const line = (top + bottom) / 2;
       const cards = [...list.children].map((li) => ({ li, r: li.getBoundingClientRect() })).filter(({ r }) => r.bottom > top && r.top < bottom);
@@ -161,6 +176,7 @@ export default function Services({
     touch.addEventListener("change", schedule);
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(settle);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       touch.removeEventListener("change", schedule);
@@ -190,20 +206,28 @@ export default function Services({
           {/* held under the navbar while the cards scroll beneath it (on a
               phone or tablet, the drawing above them; beside them from
               1080px), on white: white up behind the navbar too, and a fade
-              under it, while it's held */}
+              under it, while it's held. Held, the drawing and its white are
+              a quarter smaller (by transform: its place in the page keeps
+              its size, so nothing below it moves), and the cards show
+              through what it leaves, so the panel lets taps through. */}
           <Reveal
             data-pin=""
-            className="relative 1080:sticky 1080:top-28 1080:self-start services-pin:sticky services-pin:top-[84px] 700:services-pin:top-[88px] services-pin:z-10 services-pin:bg-white before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-[88px] before:bg-white before:opacity-0 data-[stuck]:before:opacity-100 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-6 after:bg-gradient-to-b after:from-white after:to-transparent after:opacity-0 after:transition-opacity data-[stuck]:after:opacity-100"
+            className="group/pin relative pointer-events-none 1080:sticky 1080:top-28 1080:self-start services-pin:sticky services-pin:top-[84px] 700:services-pin:top-[88px] services-pin:z-10 before:absolute before:inset-x-0 before:bottom-full before:h-[88px] before:bg-white before:opacity-0 data-[stuck]:before:opacity-100"
           >
-            <canvas
-              ref={canvasRef}
-              role="img"
-              aria-label="A Craftsman home drawn in line: the house, a one-story addition on its side, the living room, kitchen and bath inside shown through a cutaway, an ADU in the yard and a patio under a pergola, each numbered to match the cards."
-              className="block w-full h-[250px] 400:h-[290px] 550:h-[360px] 700:h-[420px] 1080:h-[440px] 1440:h-[480px] services-pin:max-h-[calc(40*var(--svh))] pointer-events-none"
-            />
+            <span aria-hidden="true" className={`absolute inset-0 origin-top bg-white transition-transform duration-500 ${EASE} ${HELD_SCALE_Y}`}>
+              <span className="absolute inset-x-0 top-full h-6 bg-gradient-to-b from-white to-transparent opacity-0 transition-opacity group-data-[stuck]/pin:opacity-100" />
+            </span>
+            <div className={`relative origin-top transition-transform duration-500 ${EASE} ${HELD_SCALE}`}>
+              <canvas
+                ref={canvasRef}
+                role="img"
+                aria-label="A Craftsman home drawn in line: the house, a one-story addition on its side, the living room, kitchen and bath inside shown through a cutaway, an ADU in the yard and a patio under a pergola, each numbered to match the cards."
+                className="block w-full h-[250px] 400:h-[290px] 550:h-[360px] 700:h-[420px] 1080:h-[440px] 1440:h-[480px] services-pin:max-h-[calc(40*var(--svh))] pointer-events-none"
+              />
+            </div>
           </Reveal>
 
-          <ul ref={listRef} className="grid gap-3 700:grid-cols-2" onMouseLeave={() => !touchRef.current && setActive(null)}>
+          <ul ref={listRef} className="grid gap-3 max-700:auto-rows-fr 700:grid-cols-2" onMouseLeave={() => !touchRef.current && setActive(null)}>
             {items.map(({ layer, title, text, href, drawn }, i) => {
               const service = SERVICES.find((x) => x.slug === layer);
               const Icon = service?.icon;

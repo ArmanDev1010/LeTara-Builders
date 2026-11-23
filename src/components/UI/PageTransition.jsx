@@ -154,7 +154,9 @@ export default function PageTransition() {
 
   return (
     <MotionConfig reducedMotion="never">
-    <div aria-hidden="true" className="fixed inset-0 z-[100002] overflow-hidden">
+    {/* data-page-wall: its phase, for the homepage hero, which starts
+        playing as the wall opens (Hero/HeroIntro) */}
+    <div aria-hidden="true" data-page-wall={phase} className="fixed inset-0 z-[100002] overflow-hidden">
       {/* the wall, opening up and down from the middle as the lines part
           (by scale, so the compositor runs it while the next page loads) */}
       <motion.div

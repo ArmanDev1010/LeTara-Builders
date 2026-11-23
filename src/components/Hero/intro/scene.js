@@ -2,13 +2,17 @@
 // opens: a house rendered the way a visual-effects shot is, pass by pass
 // (Andranik's first trade), to the tagline, Dream. Design. Build.
 //
+// The home is the Craftsman of the area pages and the Services section (the
+// `property` asset, Hero/studio/assets.js), since 11-23: before, a modern
+// house with a pool.
+//
 //   DREAM   the house as a vision in gold glass, in pieces, as in an
 //           architect's exploded view: each piece hangs over its place, and
 //           from the first scroll they all close in and land, one by one.
 //   DESIGN  the light turns white, and the glass house with it, while a
 //           wireframe draws itself over it, edge by edge; then the light
 //           turns blueprint blue, the glass fades, and the drawing is noted:
-//           the main house, the ADU, the pool, the pergola.
+//           the main house, the addition, the ADU, the pergola.
 //   BUILD   a scan rises through it, leaving it solid behind it; the light
 //           turns gold again and the windows come on, one by one, until it's
 //           the finished render.
@@ -41,6 +45,8 @@
 // with its shafts, bloom and streak, and the dust, are gone from this scene.
 // Its math, colors and those lighting pieces are still exported for the
 // service pages' turntable (Hero/studio/studio.js), which uses them.
+
+import { ASSETS } from "@/components/Hero/studio/assets";
 
 export const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const lerp = (a, b, k) => a + (b - a) * k;
@@ -114,78 +120,49 @@ const PASSES = [
 ];
 
 // ---- the property ----------------------------------------------------------
-// Boxes, [x0, y0, z0] to [x1, y1, z1] in feet, none overlapping (so they can
-// be put in drawing order, see drawOrder). `thin` parts (the pergola's posts,
-// beams and slats) are only edges in DREAM.
-const box = (id, min, max, mat, more = {}) => ({ id, min, max, mat, ...more });
-
-function pergola() {
-  const out = [];
-  const [X0, X1, Z0, Z1, Y, P] = [-36, -23, -14, 2, 9, 0.6];
-  [[X0, Z0], [X1 - P, Z0], [X0, Z1 - P], [X1 - P, Z1 - P]].forEach(([x, z], i) =>
-    out.push(box(`post${i}`, [x, 0.4, z], [x + P, Y, z + P], "wood", { thin: true })),
-  );
-  [Z0, Z1 - P].forEach((z, i) => out.push(box(`beam${i}`, [X0 - 0.6, Y, z], [X1 + 0.6, Y + 0.8, z + P], "wood", { thin: true })));
-  for (let x = X0 + 0.4, i = 0; x < X1 - 0.3; x += 1.25, i++)
-    out.push(box(`slat${i}`, [x, Y + 0.8, Z0 - 0.4], [x + 0.35, Y + 1.5, Z1 + 0.4], "wood", { thin: true }));
-  return out;
-}
-
-const BOXES = [
-  box("patio", [-37, 0, -15], [-22, 0.4, 3], "deck"),
-  ...pergola(),
-  box("fin", [-21, 0, -11], [-18, 16, 12], "concrete"), // a concrete fin wall
-  box("ground", [-18, 0, -8], [14, 10.5, 7], "glass"), // the ground floor, glass all round
-  box("upper", [-12, 10.5, -11], [24, 20, 7], "clad"), // the upper floor, out over the terrace
-  box("tower", [8, 0, 7], [13, 23, 12], "concrete"), // the stair tower
-  box("deck", [-9, 0, -27], [25, 0.35, -12], "deck"), // the pool deck
-  box("adu", [27, 0, 10], [39, 11, 24], "stucco"), // the ADU, at the back
-];
+// The Craftsman home on its lot, as the turntable shows it (not the drawing's
+// cutaway and rooms): the house with its porch on stone piers and its upper
+// floor, the addition on its right, the ADU cottage in the back corner, the
+// patio under the pergola with the outdoor kitchen and the fire pit. Boxes in
+// feet, none overlapping (so they can be put in drawing order, see
+// drawOrder); a `gable` one is a roof inside its box (gableFaces). `thin`
+// parts (posts, beams, slats) are only edges in DREAM.
+const ASSET = ASSETS.property;
+const BOXES = ASSET.boxes
+  .filter((b) => !b.diagramOnly)
+  .map((b) => ({ ...b, thin: Math.min(b.max[0] - b.min[0], b.max[2] - b.min[2]) < 1.2 }));
 const BOX = Object.fromEntries(BOXES.map((b) => [b.id, b]));
-const POOL = { x: [-6, 22], z: [-24, -15], y: 0.36 };
-const LOT = { x: [-40, 42], z: [-30, 27] };
+const LOT = ASSET.lot;
 
 // How each finish takes the light: `albedo`, how much it reflects; `slats`,
-// lines across it every so many feet; `glass`, a glass wall (dark, its
-// mullions every 4 ft, lit from inside once the lights are on).
+// lines across it every so many feet (the siding's boards, the shingles'
+// courses).
 const MATS = {
-  glass: { albedo: 0.05, glass: true },
-  clad: { albedo: 0.17, slats: 1.1 },
+  siding: { albedo: 0.5, slats: 0.75 },
+  shingle: { albedo: 0.2, slats: 0.9 },
   concrete: { albedo: 0.46 },
-  stucco: { albedo: 0.62 },
+  stone: { albedo: 0.38 },
   deck: { albedo: 0.3 },
-  wood: { albedo: 0.24 },
+  wood: { albedo: 0.36 },
 };
-
-// Windows on a box's face: `u` across it (left to right as you face it), `v`
-// up it, as fractions; each comes on at `on`, through T.lights. The glass
-// floor comes on first.
-const WINDOWS = [
-  { box: "upper", face: "z-", u: [0.05, 0.6], v: [0.28, 0.8], on: 0.2 },
-  { box: "upper", face: "z-", u: [0.68, 0.95], v: [0.28, 0.8], on: 0.38 },
-  { box: "upper", face: "x+", u: [0.12, 0.88], v: [0.28, 0.8], on: 0.46 },
-  { box: "upper", face: "x-", u: [0.3, 0.72], v: [0.3, 0.78], on: 0.3 },
-  { box: "tower", face: "x+", u: [0.32, 0.68], v: [0.06, 0.93], on: 0.56 },
-  { box: "adu", face: "z-", u: [0.1, 0.54], v: [0.26, 0.8], on: 0.66 },
-  { box: "adu", face: "z-", u: [0.66, 0.86], v: [0, 0.8], on: 0.72 },
-  { box: "adu", face: "x-", u: [0.22, 0.78], v: [0.3, 0.78], on: 0.78 },
-];
-const GLASS_ON = 0.05;
-const POOL_ON = 0.86;
+const matOf = (b) => MATS[b.mat] ?? MATS.concrete;
 
 // What the drawing is noted with in DESIGN: a point on the property, which
-// way the label leans off it, and the label.
+// way the label leans off it, and the label (its services: the house, the
+// addition, the ADU, outdoor living).
 const NOTES = [
-  { at: [-6, 20, -11], dir: [-1, -1], text: "Main house" },
-  { at: [33, 11, 17], dir: [1, -1], text: "ADU" },
-  { at: [8, POOL.y, -19.5], dir: [1, 1], text: "Pool" },
-  { at: [-29.5, 10.5, -6], dir: [-1, -1], text: "Pergola" },
+  { at: [25.5, 25.6, 8], dir: [-1, -1], text: "Main house" },
+  { at: [39.25, 14.6, 10], dir: [1, -1], text: "Addition" },
+  { at: [1, 14.4, 38], dir: [-1, -1], text: "ADU" },
+  { at: [55, 10.1, 13], dir: [1, 1], text: "Pergola" },
 ];
 
-// The key light: behind the house, a little above its roof, so the roofs and
-// edges catch it (in the pass's color); it isn't drawn.
-const KEY = norm([-6, 18, 95]);
-const FILL = norm([0.25, 0.55, -0.8]); // a little from the camera's side
+// The light on the built house: blue hour's, cool from the sky in front and
+// above (KEY, SKY_LIGHT), and a little of the pass's color from behind (RIM),
+// so its roofs and far edges catch it. The windows are what's warm.
+const KEY = norm([-0.45, 0.6, -0.65]);
+const RIM = norm([0.3, 0.45, 1]);
+const SKY_LIGHT = [190, 205, 235];
 
 // A box's faces: the four corners (bottom left, bottom right, top right, top
 // left, as you face it from outside) and its outward normal. The underside
@@ -211,50 +188,148 @@ export function edges({ min, max }) {
   for (let i = 0; i < 8; i++) for (const bit of [1, 2, 4]) if (!(i & bit)) out.push([c(i), c(i | bit)]);
   return out;
 }
-// a box cut off below or above height y (for the rising scan)
-const below = (b, y) => (y <= b.min[1] ? null : { ...b, max: [b.max[0], Math.min(b.max[1], y), b.max[2]] });
-const above = (b, y) => (y >= b.max[1] ? null : { ...b, min: [b.min[0], Math.max(b.min[1], y), b.min[2]] });
+
+// A gable roof inside a box's bounds (`gable: "x"`: its ridge runs along x;
+// `"z"`: along z), the eaves at the bottom and the ridge at the top: two
+// slopes (`ridge`: their top edge catches the light) and two triangular ends
+// (`tri`, the apex written twice). It sits inside its box, so the boxes'
+// drawing order (drawOrder) still holds; keep its box clear of every other.
+// (Shared with the service pages' turntable, Hero/studio/studio.js.)
+export function gableFaces({ min: [x0, y0, z0], max: [x1, y1, z1], gable }) {
+  const h = y1 - y0;
+  if (gable === "x") {
+    const zm = (z0 + z1) / 2, d = (z1 - z0) / 2;
+    return {
+      "z-": { n: norm([0, d, -h]), p: [[x0, y0, z0], [x1, y0, z0], [x1, y1, zm], [x0, y1, zm]], ridge: true },
+      "z+": { n: norm([0, d, h]), p: [[x1, y0, z1], [x0, y0, z1], [x0, y1, zm], [x1, y1, zm]], ridge: true },
+      "x-": { n: [-1, 0, 0], p: [[x0, y0, z1], [x0, y0, z0], [x0, y1, zm], [x0, y1, zm]], tri: true },
+      "x+": { n: [1, 0, 0], p: [[x1, y0, z0], [x1, y0, z1], [x1, y1, zm], [x1, y1, zm]], tri: true },
+    };
+  }
+  const xm = (x0 + x1) / 2, d = (x1 - x0) / 2;
+  return {
+    "x-": { n: norm([-h, d, 0]), p: [[x0, y0, z1], [x0, y0, z0], [xm, y1, z0], [xm, y1, z1]], ridge: true },
+    "x+": { n: norm([h, d, 0]), p: [[x1, y0, z0], [x1, y0, z1], [xm, y1, z1], [xm, y1, z0]], ridge: true },
+    "z-": { n: [0, 0, -1], p: [[x0, y0, z0], [x1, y0, z0], [xm, y1, z0], [xm, y1, z0]], tri: true },
+    "z+": { n: [0, 0, 1], p: [[x1, y0, z1], [x0, y0, z1], [xm, y1, z1], [xm, y1, z1]], tri: true },
+  };
+}
+export const shapeFaces = (b) => (b.gable ? gableFaces(b) : faces(b));
+// a shape's edges: a box's twelve, or a gable's eaves, ridge and rafters
+export function shapeEdges(b) {
+  if (!b.gable) return edges(b);
+  const { min: [x0, y0, z0], max: [x1, y1, z1] } = b;
+  const eaves = [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]];
+  const out = eaves.map((p, i) => [p, eaves[(i + 1) % 4]]);
+  if (b.gable === "x") {
+    const zm = (z0 + z1) / 2, r0 = [x0, y1, zm], r1 = [x1, y1, zm];
+    out.push([r0, r1], [eaves[0], r0], [eaves[3], r0], [eaves[1], r1], [eaves[2], r1]);
+  } else {
+    const xm = (x0 + x1) / 2, r0 = [xm, y1, z0], r1 = [xm, y1, z1];
+    out.push([r0, r1], [eaves[0], r0], [eaves[1], r0], [eaves[3], r1], [eaves[2], r1]);
+  }
+  return out;
+}
+// its corners (a gable's eaves and ridge ends)
+export const shapeVertices = (b) => {
+  const seen = new Map();
+  for (const p of shapeEdges(b).flat()) seen.set(p.join(","), p);
+  return [...seen.values()];
+};
+// A shape's planes, each facing out: its faces' and its floor's.
+export function planesOf(b) {
+  const out = Object.values(shapeFaces(b)).map((f) => ({ n: f.n, q: f.p[0] }));
+  out.push({ n: [0, -1, 0], q: b.min });
+  return out;
+}
+// Whether a shape (its planes) stands between the eye and point p: the line
+// from one to the other clipped against each plane, stopping just short of p.
+export function hides(planes, eye, p) {
+  const d = sub(p, eye);
+  let t0 = 0, t1 = 0.995;
+  for (const { n, q } of planes) {
+    const den = dot(n, d), num = dot(n, sub(q, eye));
+    if (Math.abs(den) < 1e-9) {
+      if (num < 0) return false;
+      continue;
+    }
+    if (den > 0) t1 = Math.min(t1, num / den);
+    else t0 = Math.max(t0, num / den);
+    if (t0 >= t1) return false;
+  }
+  return true;
+}
+
+// For the rising scan: the part of a face's outline at or below height h
+// (null if none of it is), the part of an edge at or above it, and a shape's
+// cut at h (its cross-section: a gable's narrows toward the ridge).
+function clipBelow(pts, h) {
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    if (a[1] <= h) out.push(a);
+    if (a[1] <= h !== b[1] <= h) out.push(lerp3(a, b, (h - a[1]) / (b[1] - a[1])));
+  }
+  return out.length >= 3 ? out : null;
+}
+function clipAbove([a, c], h) {
+  const [lo, hi] = a[1] <= c[1] ? [a, c] : [c, a];
+  if (hi[1] <= h) return null;
+  if (lo[1] >= h) return [lo, hi];
+  return [lerp3(lo, hi, (h - lo[1]) / (hi[1] - lo[1])), hi];
+}
+function sectionAt(b, h) {
+  const { min: [x0, y0, z0], max: [x1, y1, z1] } = b;
+  if (h <= y0 || h >= y1) return null;
+  let [a0, a1, c0, c1] = [x0, x1, z0, z1];
+  const k = 1 - (h - y0) / (y1 - y0);
+  if (b.gable === "x") [c0, c1] = [(z0 + z1) / 2 - ((z1 - z0) / 2) * k, (z0 + z1) / 2 + ((z1 - z0) / 2) * k];
+  if (b.gable === "z") [a0, a1] = [(x0 + x1) / 2 - ((x1 - x0) / 2) * k, (x0 + x1) / 2 + ((x1 - x0) / 2) * k];
+  return [[a0, h, c0], [a1, h, c0], [a1, h, c1], [a0, h, c1]];
+}
 const HEIGHT = Math.max(...BOXES.map((b) => b.max[1]));
+
+// Its windows (`u` across a face, `v` up it), each coming on in turn
+// through T.lights (`on`), left to right; then the lamps (the fire pit, the
+// pergola's lights), lit at LAMPS_ON. The lamplight falls on the ground round
+// the house from SPILL_ON.
+const WINDOWS = (() => {
+  const shown = ASSET.windows.filter((w) => BOX[w.box]);
+  const x = (w) => onFace(faces(BOX[w.box])[w.face], (w.u[0] + w.u[1]) / 2, 0)[0];
+  const order = [...shown].sort((a, b) => x(a) - x(b));
+  return shown.map((w) => ({ ...w, on: 0.08 + (0.6 * order.indexOf(w)) / Math.max(1, order.length - 1) }));
+})();
+const LAMPS = ASSET.lamps;
+const LAMPS_ON = 0.8;
+const SPILL_ON = 0.1;
 
 // The wireframe's edges, each with when it starts drawing (0-1 through
 // T.lines): from the ground up, left to right. Vertical edges draw upward.
 const EDGES = BOXES.flatMap((b) =>
-  edges(b).map(([a, c]) => {
+  shapeEdges(b).map(([a, c]) => {
     const order = 0.72 * (Math.min(a[1], c[1]) / HEIGHT) + 0.28 * ((a[0] + c[0]) / 2 - LOT.x[0]) / (LOT.x[1] - LOT.x[0]);
     return { a, c, order, box: b };
   }),
 );
 
 // DREAM: at first the house is apart, as in an architect's exploded view:
-// each piece hangs over its place (`lift`, feet), the upper floor highest,
-// the pergola's posts, beams and slats in layers. From the very first scroll
-// they all close in together, easing into place, and land in turn: the
-// lowest first (`land`, as a share of T.dream), the slats last, left to
-// right. With `calm` they start a little closer (CALM_APART).
-const DREAM = {
-  patio: { lift: [0, 2, 0], land: 0.35 },
-  deck: { lift: [0, 2, 0], land: 0.35 },
-  ground: { lift: [0, 6, 0], land: 0.5 },
-  fin: { lift: [-3, 5, 0], land: 0.55 },
-  adu: { lift: [4, 5, 0], land: 0.6 },
-  post: { lift: [0, 4, 0], land: 0.65 },
-  tower: { lift: [0, 9, 4], land: 0.72 },
-  upper: { lift: [0, 12, 0], land: 0.8 },
-  beam: { lift: [0, 8, 0], land: 0.86 },
-  slat: { lift: [0, 11, 0], land: [0.88, 1] },
-};
+// each piece hangs over its place (`lift`, feet), the higher it sits the
+// higher it hangs, the roofs highest. From the very start they all close in
+// together, easing into place, and land in turn (`land`, as a share of
+// T.dream): from the ground up, left to right, the upper floor's roof last.
+// With `calm` they start a little closer (CALM_APART).
 const CALM_APART = 0.75;
 const PIECES = (() => {
-  const slats = BOXES.filter((b) => b.id.startsWith("slat")).length;
-  return BOXES.map((b) => {
-    const [, kind, n] = b.id.match(/^([a-z]+)(\d*)$/);
-    const { lift, land } = DREAM[kind];
-    return { box: b, lift, land: Array.isArray(land) ? lerp(land[0], land[1], Number(n) / (slats - 1)) : land };
-  });
+  const key = (b) => b.min[1] + (0.012 * ((b.min[0] + b.max[0]) / 2 - LOT.x[0]));
+  const ranked = [...BOXES].sort((a, b) => key(a) - key(b));
+  return BOXES.map((b) => ({
+    box: b,
+    lift: [0, 2 + 0.5 * b.min[1] + (b.gable ? 4 : 0), 0],
+    land: 0.35 + (0.65 * ranked.indexOf(b)) / (BOXES.length - 1),
+  }));
 })();
-const PIECE = Object.fromEntries(PIECES.map((q) => [q.box.id, q]));
 // The share of the way a piece has come, k through its time: already moving
-// at the first scroll, slowing as it lands, but still moving to the end (an
+// as it starts, slowing as it lands, but still moving to the end (an
 // ease-out left the second half of DREAM nearly still).
 const closing = (k) => k + k * k - k * k * k;
 // how far piece `q` still has to go, 0-1, and the last piece
@@ -264,7 +339,7 @@ const apart = (t) => apartOf({ land: 1 }, t);
 const offsetOf = (q, t, calm) => q.lift.map((v) => v * apartOf(q, t) * (calm ? CALM_APART : 1));
 const moved = (b, [dx, dy, dz]) => ({ ...b, min: [b.min[0] + dx, b.min[1] + dy, b.min[2] + dz], max: [b.max[0] + dx, b.max[1] + dy, b.max[2] + dz] });
 // every corner of the pieces where they are at `t`
-const dreamCorners = (t, calm) => PIECES.flatMap((q) => edges(moved(q.box, offsetOf(q, t, calm))).flat());
+const dreamCorners = (t, calm) => PIECES.flatMap((q) => shapeVertices(moved(q.box, offsetOf(q, t, calm))));
 
 // ---- drawing order -----------------------------------------------------------
 // Far to near, for boxes that don't overlap: wherever two are apart along an
@@ -319,20 +394,22 @@ export function drawOrder(list, eye) {
 }
 
 // ---- camera ----------------------------------------------------------------
-// It circles the house, looking at the middle of it from DIST feet: from its
-// left (the pergola) round to its right (the ADU), a little lower as it
-// goes, already moving as the play starts (`orbitEase`), with Reduce Motion
+// It circles the home, looking at the middle of the lot from DIST feet:
+// from its left (the ADU's side) round toward its front, a little lower as
+// it goes, already moving as the play starts (`orbitEase`), with Reduce Motion
 // on too (`calm`). Then, as the hero scrolls away, it turns SPIN degrees
 // further (`spin`, as the service pages' turntable does): a touch, nothing
 // to scroll through. The view is fitted into the room the copy leaves (see
-// room), the same size all the way round, and pushes in a little as the
-// scene plays (not with `calm`). In DREAM it also takes in the pieces where
+// room), the same size all the way round, and centred in it as it looks
+// from where the camera is at that moment (11-23: centred on every angle it
+// takes at once, it sat off centre at most of them; the user asked), and
+// pushes in a little as the scene plays (not with `calm`). In DREAM it also takes in the pieces where
 // they hang, closing in as they land (not with `calm`: no zoom).
-const TARGET = [2, 7, -2];
-const DIST = 135;
+const TARGET = ASSET.target;
+const DIST = 150;
 const ORBIT = {
-  desktop: { yaw: [-38, 20], pitch: [17, 11] },
-  portrait: { yaw: [-30, 14], pitch: [24, 18] },
+  desktop: { yaw: [-52, -18], pitch: [24, 18] },
+  portrait: { yaw: [-46, -20], pitch: [30, 24] },
 };
 const SPIN = 14;
 const PUSH_IN = 0.06;
@@ -405,7 +482,7 @@ const UNDER_TITLE = 20;
 // on a screen 1 unit away: [x0, y0, x1, y1] around the target. The lot's
 // line, only a faint dashed one, may run past it.
 const EXTENT = (() => {
-  const pts = BOXES.flatMap((b) => edges(b).flat());
+  const pts = BOXES.flatMap(shapeVertices);
   const out = {};
   for (const [key, orbit] of Object.entries(ORBIT)) {
     const e = [Infinity, Infinity, -Infinity, -Infinity];
@@ -518,10 +595,12 @@ function camera(width, height, portrait, t, spin, calm, box) {
   // pushed in all the way, it still fits
   const s0 = Math.min((box.x1 - box.x0) / (e[2] - e[0]), (box.y1 - box.y0) / (e[3] - e[1])) / (1 + PUSH_IN);
   const s = s0 * (1 + (calm ? 0 : PUSH_IN * smooth(0, 1, t)));
-  // the target's place on screen: the extent centred across the room, and
-  // at its top (as far in as it pushes) or in its middle
-  const ox = (box.x0 + box.x1) / 2 - s0 * ((e[0] + e[2]) / 2);
-  const oy = box.top ? box.y0 - s0 * (calm ? 1 : 1 + PUSH_IN) * e[1] : (box.y0 + box.y1) / 2 - s0 * ((e[1] + e[3]) / 2);
+  // centred in the room as it is now (the pieces where they are): the house
+  // as it looks from here, not the extent of every angle, so it's centred
+  // at each one; it fits, being no bigger than that extent
+  const now = extentOf(project, dreamCorners(t, calm));
+  const ox = (box.x0 + box.x1) / 2 - s * ((now[0] + now[2]) / 2);
+  const oy = (box.y0 + box.y1) / 2 - s * ((now[1] + now[3]) / 2);
   return {
     eye,
     box,
@@ -543,14 +622,12 @@ export function path(ctx, pts) {
 }
 export const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
 
-// A face's color in the light: a little ambient, the fill from the camera's
-// side, and the key light (gold, or blue while it's blue) where it faces it.
-function shade(mat, n, colors) {
-  const a = MATS[mat].albedo;
-  const k = Math.max(0, dot(n, KEY)), f = Math.max(0, dot(n, FILL));
-  return [0, 1, 2].map((i) =>
-    Math.min(255, Math.round(a * (26 + [118, 124, 136][i] * f) + a * colors.mid[i] * 1.25 * k + 4)),
-  );
+// A face's color in the light: a little ambient, the sky's cool light where
+// it faces it (KEY), and the pass's color from behind (RIM).
+function shade(b, n, colors) {
+  const a = matOf(b).albedo;
+  const k = Math.max(0, dot(n, KEY)), r = Math.max(0, dot(n, RIM));
+  return [0, 1, 2].map((i) => Math.min(255, Math.round(a * (34 + SKY_LIGHT[i] * 1.1 * k + colors.mid[i] * 0.6 * r) + 3)));
 }
 
 // a light sprite for a lamp's or a window's glow, a hot core in a glow (the
@@ -587,9 +664,7 @@ function drawDream(ctx, cam, t, calm, colors) {
   ctx.globalCompositeOperation = "lighter";
   for (const { q, b } of parts) {
     if (q.box.thin) continue;
-    const fs = faces(b);
-    for (const key of ["z-", "z+", "x-", "x+", "y+"]) {
-      const f = fs[key];
+    for (const [key, f] of Object.entries(shapeFaces(b))) {
       if (!visible(f, cam.eye)) continue;
       const pts = f.p.map((p) => cam.toScreen(p));
       path(ctx, pts);
@@ -621,22 +696,19 @@ function drawDream(ctx, cam, t, calm, colors) {
     ctx.stroke();
   }
   ctx.restore();
-  // the edges (and the pool, cut into the deck)
-  const pool = [[POOL.x[0], POOL.z[0]], [POOL.x[1], POOL.z[0]], [POOL.x[1], POOL.z[1]], [POOL.x[0], POOL.z[1]]].map(([x, z]) =>
-    [x, POOL.y, z].map((v, i) => v + parts.find((p) => p.q === PIECE.deck).o[i]),
-  );
-  const lines = [...parts.flatMap(({ b }) => edges(b)), ...pool.map((p, i) => [p, pool[(i + 1) % 4]])].map(([a, c]) => ({ a, c }));
+  // the edges
+  const lines = parts.flatMap(({ b }) => shapeEdges(b)).map(([a, c]) => ({ a, c }));
   strokeEdges(ctx, cam, lines, colors, 0.7 * holo);
   if (calm) return;
   for (const { q, b } of parts) {
     const land = T.dream[0] + (T.dream[1] - T.dream[0]) * q.land;
     const glow = smooth(land - 0.012, land, t) * (1 - smooth(land, land + 0.035, t));
-    if (glow > 0.01) strokeEdges(ctx, cam, edges(b).map(([a, c]) => ({ a, c })), colors, glow * holo);
+    if (glow > 0.01) strokeEdges(ctx, cam, shapeEdges(b).map(([a, c]) => ({ a, c })), colors, glow * holo);
   }
 }
 
 // DESIGN: the wireframe, edge by edge, glowing; farther edges dimmer. In
-// BUILD, what the scan hasn't reached yet (see drawBox).
+// BUILD, what the scan hasn't reached yet (see drawShape).
 function strokeEdges(ctx, cam, list, colors, alpha, progress = () => 1) {
   if (alpha <= 0) return;
   const segs = [];
@@ -683,7 +755,7 @@ function drawVertices(ctx, cam, t, colors) {
   ctx.fillStyle = rgba(colors.core, 0.75 * a);
   for (const b of BOXES) {
     if (b.thin) continue;
-    for (const [p] of edges(b)) {
+    for (const p of shapeVertices(b)) {
       const [x, y] = cam.toScreen(p);
       ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
     }
@@ -701,7 +773,7 @@ function drawGround(ctx, cam, t, colors, fonts, grid) {
   const built = smooth(T.rise[0] - 0.02, T.rise[0] + 0.06, t);
   if (built > 0) {
     // an ellipse on screen as wide as the lot and as deep as it looks
-    const [hx, hy] = cam.toScreen([1, 0, -1]);
+    const [hx, hy] = cam.toScreen([TARGET[0], 0, TARGET[2]]);
     const rx = (Math.max(...pts.map(([x]) => x)) - Math.min(...pts.map(([x]) => x))) * 0.62;
     const ry = (Math.max(...pts.map(([, y]) => y)) - Math.min(...pts.map(([, y]) => y))) * 0.62;
     ctx.save();
@@ -722,11 +794,11 @@ function drawGround(ctx, cam, t, colors, fonts, grid) {
     ctx.fillRect(-rx, -rx, 2 * rx, 2 * rx);
     ctx.restore();
   }
-  // the lamplight falling out through the glass floor onto the ground round
-  // it (the house drawn over it), once it's lit
-  const spill = litAt(t, GLASS_ON);
+  // the lamplight falling out of the windows onto the ground round the
+  // house (the house drawn over it), once it's lit
+  const spill = litAt(t, SPILL_ON);
   if (spill > 0) {
-    const { min, max } = BOX.ground;
+    const { min, max } = BOX.hGround;
     const foot = [[min[0], 0, min[2]], [max[0], 0, min[2]], [max[0], 0, max[2]], [min[0], 0, max[2]]].map((p) => cam.toScreen(p));
     const [sx, sy] = cam.toScreen([(min[0] + max[0]) / 2, 0, (min[2] + max[2]) / 2]);
     const rx = (Math.max(...foot.map(([x]) => x)) - Math.min(...foot.map(([x]) => x))) * 0.95;
@@ -870,161 +942,112 @@ function drawSheet(ctx, width, height, dpr, room, strength) {
 // How far each window is lit, 0-1.
 const litAt = (t, on) => smooth(on, on + 0.08, clamp((t - T.lights[0]) / (T.lights[1] - T.lights[0])));
 
-// furniture along the floor behind a glass wall: [u0, u1, height] in feet
-const FURNITURE = [[0.08, 0.27, 2.6], [0.33, 0.35, 5.5], [0.47, 0.64, 3.4], [0.74, 0.79, 4.2], [0.86, 0.95, 2.2]];
-
-// A lit room seen through glass, in a face's rectangle `u` across and `v`
-// up: warm lamplight (ROOM), a little brighter toward the ceiling and
-// falling off toward the floor, the furniture dark against it where the
-// glass comes down to the floor, and a little glare round it (`glows`, see
-// drawGlows). `vHead` is where the window's top is when the scan has only
-// built part of it.
+// A lit room seen through a window, in a face's rectangle `u` across and
+// `v` up: warm lamplight (ROOM), a little brighter toward the ceiling and
+// falling off toward the floor, and a little glare round it (`glows`, see
+// drawGlows; `box`, its wall, which doesn't hide it).
 const ROOM = { floor: [150, 76, 22], mid: [242, 164, 74], ceiling: [252, 206, 138] };
-function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, vHead = v1) {
+function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, box) {
   const quad = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
   const [fx, fy] = cam.toScreen(onFace(face, (u0 + u1) / 2, v0));
-  const [hx, hy] = cam.toScreen(onFace(face, (u0 + u1) / 2, vHead));
+  const [hx, hy] = cam.toScreen(onFace(face, (u0 + u1) / 2, v1));
   const g = ctx.createLinearGradient(fx, fy, hx, hy + 0.01);
   g.addColorStop(0, rgba(ROOM.floor, 0.9 * lit));
   g.addColorStop(0.55, rgba(ROOM.mid, 0.92 * lit));
   g.addColorStop(0.92, rgba(ROOM.ceiling, 0.94 * lit));
   g.addColorStop(1, rgba(ROOM.mid, 0.92 * lit));
-  ctx.save();
   path(ctx, quad);
   ctx.fillStyle = g;
   ctx.fill();
-  const height = face.p[3][1] - face.p[0][1];
-  if (v0 < 0.05) {
-    ctx.clip();
-    ctx.fillStyle = `rgba(22,12,4,${0.8 * lit})`;
-    for (const [a, b, h] of FURNITURE) {
-      if (a < u0 || b > u1) continue;
-      const top = Math.min(h / height, v1);
-      path(ctx, [[a, 0], [b, 0], [b, top], [a, top]].map(([u, v]) => cam.toScreen(onFace(face, u, v))));
-      ctx.fill();
-    }
-  }
-  ctx.restore();
   const span = Math.hypot(...sub(onFace(face, u0, v0), onFace(face, u1, v1)));
-  glows.push({ at: onFace(face, (u0 + u1) / 2, (v0 + v1) / 2), r: span * 0.4, a: lit });
+  glows.push({ at: onFace(face, (u0 + u1) / 2, (v0 + v1) / 2), r: span * 0.4, a: lit, box });
 }
 
-// One face of a built box: its shade (darker at the foot), and its finish:
-// glass with its mullions (lit from inside once the lights come on), or
-// slats; windows; a fine edge.
-function drawFace(ctx, cam, b, part, key, face, colors, t, glows) {
-  const mat = MATS[b.mat];
-  const pts = face.p.map((p) => cam.toScreen(p));
-  const base = shade(b.mat, face.n, colors);
-  path(ctx, pts);
+// One face of a built shape, as far as the scan has built it (`h`, feet):
+// its shade (darker at the foot), its boards or shingle courses, its windows
+// (dark glass, lamplight once lit), a fine edge, and the pass's color
+// catching its ridge or its top. Cut by the scan, everything is drawn whole
+// and clipped to the built part.
+function drawFace(ctx, cam, b, key, face, colors, t, glows, h) {
+  const whole = h >= b.max[1];
+  const cut = whole ? face.p : clipBelow(face.p, h);
+  if (!cut) return;
+  const full = face.p.map((p) => cam.toScreen(p));
+  const pts = whole ? full : cut.map((p) => cam.toScreen(p));
+  const mat = matOf(b);
+  ctx.save();
+  if (!whole) {
+    path(ctx, pts);
+    ctx.clip();
+  }
+  const base = shade(b, face.n, colors);
+  path(ctx, full);
   if (key === "y+") ctx.fillStyle = rgba(base);
   else {
-    const foot = [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2];
-    const head = [(pts[2][0] + pts[3][0]) / 2, (pts[2][1] + pts[3][1]) / 2];
+    const foot = [(full[0][0] + full[1][0]) / 2, (full[0][1] + full[1][1]) / 2];
+    const head = [(full[2][0] + full[3][0]) / 2, (full[2][1] + full[3][1]) / 2];
     const g = ctx.createLinearGradient(foot[0], foot[1], head[0], head[1] + 0.01);
-    g.addColorStop(0, rgba(base.map((v) => v * 0.55)));
-    g.addColorStop(1, rgba(base.map((v) => Math.min(255, v * 1.12))));
+    g.addColorStop(0, rgba(base.map((v) => v * 0.6)));
+    g.addColorStop(1, rgba(base.map((v) => Math.min(255, v * 1.1))));
     ctx.fillStyle = g;
   }
   ctx.fill();
-
-  const sideFace = key !== "y+";
-  if (mat.glass && sideFace) {
-    // dark glass catching a little of the fog at its top; then the room
-    // behind it, lit (see drawRoom), and the frame: mullions every 6 ft, a
-    // sill and a head
-    const full = faces(b)[key];
-    const vTop = (part.max[1] - b.min[1]) / (b.max[1] - b.min[1]);
-    const lit = litAt(t, GLASS_ON);
-    const [fx, fy] = cam.toScreen(onFace(full, 0.5, 0)), [hx, hy] = cam.toScreen(onFace(full, 0.5, 1));
-    let g = ctx.createLinearGradient(fx, fy, hx, hy + 0.01);
-    g.addColorStop(0, "rgba(40,44,52,0)");
-    g.addColorStop(1, `rgba(90,96,110,${0.22 * (1 - lit)})`);
-    path(ctx, pts);
-    ctx.fillStyle = g;
-    ctx.fill();
-    if (lit > 0) drawRoom(ctx, cam, full, [0, 1], [0, vTop], lit, glows, vTop);
-    const w = Math.hypot(full.p[1][0] - full.p[0][0], full.p[1][2] - full.p[0][2]);
+  if (mat.slats && key !== "y+" && !face.tri) {
+    const rise = b.max[1] - b.min[1];
     ctx.beginPath();
-    for (let u = 6 / w; u < 1 - 1 / w; u += 6 / w) {
-      const [x0, y0] = cam.toScreen(onFace(full, u, 0)), [x1, y1] = cam.toScreen(onFace(full, u, vTop));
-      ctx.moveTo(x0, y0);
-      ctx.lineTo(x1, y1);
-    }
-    for (const v of [0.03, 0.94]) {
-      if (v > vTop) continue;
-      const [x0, y0] = cam.toScreen(onFace(full, 0, v)), [x1, y1] = cam.toScreen(onFace(full, 1, v));
-      ctx.moveTo(x0, y0);
-      ctx.lineTo(x1, y1);
-    }
-    ctx.strokeStyle = "rgba(6,6,6,0.85)";
-    ctx.lineWidth = 1.4;
-    ctx.stroke();
-  }
-  if (mat.slats && sideFace) {
-    const h = part.max[1] - part.min[1];
-    ctx.beginPath();
-    for (let v = mat.slats / h; v < 1; v += mat.slats / h) {
+    for (let v = mat.slats / rise; v < 1; v += mat.slats / rise) {
       const [x0, y0] = cam.toScreen(onFace(face, 0, v)), [x1, y1] = cam.toScreen(onFace(face, 1, v));
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.045)";
+    ctx.strokeStyle = b.mat === "shingle" ? "rgba(0,0,0,0.22)" : "rgba(255,255,255,0.05)";
     ctx.lineWidth = 1;
     ctx.stroke();
   }
-
-  // windows: dark glass until they come on, warm after; only what the scan
-  // has built so far
-  const full = faces(b)[key];
   for (const w of WINDOWS) {
     if (w.box !== b.id || w.face !== key) continue;
-    const yAt = (v) => lerp(full.p[0][1], full.p[3][1], v);
-    const top = Math.min(yAt(w.v[1]), part.max[1]);
-    if (top <= yAt(w.v[0])) continue;
-    const vTop = (top - full.p[0][1]) / (full.p[3][1] - full.p[0][1]);
-    const quad = [[w.u[0], w.v[0]], [w.u[1], w.v[0]], [w.u[1], vTop], [w.u[0], vTop]].map(([u, v]) => cam.toScreen(onFace(full, u, v)));
-    const lit = litAt(t, w.on);
+    const quad = [[w.u[0], w.v[0]], [w.u[1], w.v[0]], [w.u[1], w.v[1]], [w.u[0], w.v[1]]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
     path(ctx, quad);
-    ctx.fillStyle = "rgb(12,13,16)";
+    ctx.fillStyle = "rgb(12,14,20)";
     ctx.fill();
-    if (lit > 0) drawRoom(ctx, cam, full, w.u, [w.v[0], vTop], lit, glows, w.v[1]);
+    const lit = litAt(t, w.on);
+    if (lit > 0) drawRoom(ctx, cam, face, w.u, w.v, lit, glows, b.id);
     path(ctx, quad);
-    ctx.strokeStyle = "rgba(4,4,4,0.9)";
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = "rgba(230,228,220,0.55)"; // a painted frame
+    ctx.lineWidth = 1.2;
     ctx.stroke();
   }
-
-  // a fine edge, and the light catching the top edges that face it
+  ctx.restore();
   path(ctx, pts);
-  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  if (key === "y+" && part.max[1] === b.max[1]) {
-    const catchK = Math.max(0, dot([0, 1, 0], KEY));
-    ctx.strokeStyle = rgba(colors.mid, 0.45 * catchK);
+  if (!whole) return;
+  if (key === "y+") {
+    ctx.strokeStyle = rgba(colors.mid, 0.3);
+    ctx.stroke();
+  }
+  if (face.ridge) {
+    ctx.beginPath();
+    ctx.moveTo(full[3][0], full[3][1]);
+    ctx.lineTo(full[2][0], full[2][1]);
+    ctx.strokeStyle = rgba(colors.mid, 0.45);
+    ctx.lineWidth = 1.2;
     ctx.stroke();
   }
 }
 
-// One box in BUILD: the part below the scan solid (its cut glowing where the
-// scan is passing through it), the part above still wireframe.
-function drawBox(ctx, cam, b, t, colors, glows) {
-  const k = clamp((t - T.rise[0]) / (T.rise[1] - T.rise[0]));
-  const h = k * (HEIGHT + 0.5);
-  const solid = below(b, h);
-  if (solid) {
-    const fs = faces(solid);
-    for (const key of ["z-", "z+", "x-", "x+", "y+"]) {
-      if (!visible(fs[key], cam.eye)) continue;
-      drawFace(ctx, cam, b, solid, key, fs[key], colors, t, glows);
-      if (b.id === "deck" && key === "y+") drawPool(ctx, cam, t);
-    }
-    // the cut, where the scan is passing through
-    if (solid.max[1] < b.max[1]) {
+// One shape in BUILD: the part below the scan solid (its cut glowing where
+// the scan is passing through it), the part above still wireframe.
+function drawShape(ctx, cam, b, t, colors, glows) {
+  const h = clamp((t - T.rise[0]) / (T.rise[1] - T.rise[0])) * (HEIGHT + 0.5);
+  if (h > b.min[1]) {
+    for (const [key, f] of Object.entries(shapeFaces(b))) if (visible(f, cam.eye)) drawFace(ctx, cam, b, key, f, colors, t, glows, h);
+    const cap = sectionAt(b, h);
+    if (cap) {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      path(ctx, fs["y+"].p.map((p) => cam.toScreen(p)));
+      path(ctx, cap.map((p) => cam.toScreen(p)));
       ctx.fillStyle = rgba(colors.mid, 0.22);
       ctx.fill();
       ctx.strokeStyle = rgba(colors.core, 0.9);
@@ -1033,46 +1056,10 @@ function drawBox(ctx, cam, b, t, colors, glows) {
       ctx.restore();
     }
   }
-  const rest = above(b, h);
-  if (rest) strokeEdges(ctx, cam, edges(rest).map(([a, c]) => ({ a, c })), colors, 1 - smooth(T.rise[1] - 0.04, T.rise[1], t));
-}
-
-// The pool in the deck: dark water, then lit from below, ripples of light
-// across it.
-function drawPool(ctx, cam, t) {
-  const pts = [[POOL.x[0], POOL.z[0]], [POOL.x[1], POOL.z[0]], [POOL.x[1], POOL.z[1]], [POOL.x[0], POOL.z[1]]].map(([x, z]) =>
-    cam.toScreen([x, POOL.y, z]),
-  );
-  const lit = litAt(t, POOL_ON);
-  ctx.save();
-  path(ctx, pts);
-  ctx.fillStyle = rgba(mix([8, 14, 26], [40, 120, 230], lit));
-  ctx.fill();
-  ctx.clip();
-  if (lit > 0) {
-    ctx.globalCompositeOperation = "lighter";
-    const [cx, cy] = cam.toScreen([(POOL.x[0] + POOL.x[1]) / 2, POOL.y, (POOL.z[0] + POOL.z[1]) / 2]);
-    const r = Math.abs(pts[1][0] - pts[0][0]) * 0.7;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0, rgba(BLUE.core, 0.5 * lit));
-    g.addColorStop(1, rgba(BLUE.mid, 0));
-    ctx.fillStyle = g;
-    ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
-    // ripples of light across it
-    ctx.strokeStyle = rgba(BLUE.core, 0.22 * lit);
-    ctx.lineWidth = 1;
-    const r2 = rng(9);
-    for (let i = 0; i < 9; i++) {
-      const z = lerp(POOL.z[0] + 1, POOL.z[1] - 1, r2());
-      const x0 = lerp(POOL.x[0], POOL.x[1] - 6, r2());
-      const a = cam.toScreen([x0, POOL.y, z]), b = cam.toScreen([x0 + 4 + r2() * 4, POOL.y, z + (r2() - 0.5)]);
-      ctx.beginPath();
-      ctx.moveTo(a[0], a[1]);
-      ctx.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 1.5, b[0], b[1]);
-      ctx.stroke();
-    }
+  if (h < b.max[1]) {
+    const rest = shapeEdges(b).map((e) => clipAbove(e, h)).filter(Boolean).map(([a, c]) => ({ a, c }));
+    strokeEdges(ctx, cam, rest, colors, 1 - smooth(T.rise[1] - 0.04, T.rise[1], t));
   }
-  ctx.restore();
 }
 
 // The windows' glare, a little (11-23): a soft warm haze round each lit
@@ -1083,8 +1070,18 @@ function drawPool(ctx, cam, t) {
 // window's size).
 const GLARE = { a: 0.45, size: 3 };
 let glare = null;
+// Each is dimmed by how much of it the solid shapes in front of it hide (its
+// middle and four points round it; not posts, beams or slats, which would
+// make it flicker as the camera turns, and not its own wall), as on the
+// turntable: the porch's roof covers the windows under it.
+const OCCLUDERS = BOXES.filter((b) => Math.min(b.max[0] - b.min[0], b.max[2] - b.min[2]) >= 1.5).map((b) => ({ id: b.id, planes: planesOf(b) }));
 function drawGlows(ctx, cam, glows) {
   if (!glows.length) return;
+  for (const g of glows) {
+    const k = g.r * 0.45;
+    const pts = [g.at, [g.at[0] + k, g.at[1], g.at[2]], [g.at[0] - k, g.at[1], g.at[2]], [g.at[0], g.at[1] + k, g.at[2]], [g.at[0], g.at[1] - k, g.at[2]]];
+    g.a *= pts.filter((p) => !OCCLUDERS.some((o) => o.id !== g.box && hides(o.planes, cam.eye, p))).length / pts.length;
+  }
   if (!glare) {
     glare = makeCanvas(64, 64);
     const g = glare.getContext("2d");
@@ -1098,6 +1095,7 @@ function drawGlows(ctx, cam, glows) {
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   for (const { at, r, a } of glows) {
+    if (a <= 0.01) continue;
     const [x, y, z] = cam.toScreen(at);
     const size = r * (cam.s / z) * GLARE.size;
     ctx.globalAlpha = a * GLARE.a;
@@ -1401,7 +1399,10 @@ export function drawScene(ctx, { width, height, dpr = 1, t, spin = 0, portrait =
   // BUILD, far to near
   const glows = [];
   if (t >= T.rise[0]) {
-    for (const b of drawOrder(BOXES, cam.eye)) drawBox(ctx, cam, b, t, colors, glows);
+    for (const b of drawOrder(BOXES, cam.eye)) drawShape(ctx, cam, b, t, colors, glows);
+    // the fire pit and the pergola's lights
+    const lamps = litAt(t, LAMPS_ON);
+    if (lamps > 0) for (const l of LAMPS) glows.push({ at: l.at, r: l.r, a: (l.a ?? 1) * lamps });
   }
   drawGlows(ctx, cam, glows);
   drawNotes(ctx, cam, smooth(T.notes[0], T.notes[1], t) * (1 - smooth(T.rise[0], T.rise[0] + 0.05, t)), NOTES, fonts, width);
