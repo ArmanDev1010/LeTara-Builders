@@ -179,23 +179,43 @@ function room(width, height, portrait, layout) {
   return { x0: left * width, x1: 0.975 * width, y0: nav + 24, y1: 0.94 * height };
 }
 
-// The service's name in outline at the object's back, as wide as its room,
-// as faint as the homepage's "DREAM. DESIGN. BUILD." lit (11-24) and, on a
-// phone, stretched tall as that is (WORD).
+// The service's name in outline at the object's back. On a wide screen, as
+// wide as its room and as faint as the homepage's "DREAM. DESIGN. BUILD."
+// lit (11-24). On a phone (11-24, the user's sketch: "a little seasoning",
+// not the star) it fills the room behind the object, stretched tall like a
+// lock screen's clock, and fainter: a long name ("NEW BUILD") across the
+// room's width, stretched up to MAX times its height; a short one ("ADU")
+// narrower, centred, stretched at least MIN times; `height`, how much of the
+// room's height it takes at most, `width`, of its width.
 const WORD = {
-  portrait: { stroke: 0.45, fill: 0.08, stretch: 1.55 },
-  desktop: { stroke: 0.2, fill: 0.035, stretch: 1 },
+  portrait: { stroke: 0.18, fill: 0.03, height: 0.82, width: 0.94, min: 1.35, max: 3.2 },
+  desktop: { stroke: 0.2, fill: 0.035 },
 };
 function drawWord(ctx, word, box, portrait, fonts) {
-  const { stroke, fill, stretch } = WORD[portrait ? "portrait" : "desktop"];
+  const cfg = WORD[portrait ? "portrait" : "desktop"];
+  const { stroke, fill } = cfg;
   ctx.save();
   ctx.font = `100px ${fonts.display}`;
   const m = ctx.measureText(word);
-  const capH = ((m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100) * stretch;
-  const size = Math.min(((box.x1 - box.x0) * 0.98 * 100) / m.width, ((box.y1 - box.y0) * 0.62) / capH);
+  const w1 = m.width / 100, c1 = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100; // at 1px
+  let size, stretch, baseline;
+  if (portrait) {
+    const H = (box.y1 - box.y0) * cfg.height;
+    size = ((box.x1 - box.x0) * cfg.width) / w1;
+    stretch = H / (c1 * size);
+    if (stretch < cfg.min) {
+      stretch = cfg.min;
+      size = H / (c1 * stretch);
+    }
+    stretch = Math.min(stretch, cfg.max);
+    baseline = (box.y0 + box.y1) / 2 + (c1 * size * stretch) / 2;
+  } else {
+    stretch = 1;
+    size = Math.min(((box.x1 - box.x0) * 0.98) / w1, ((box.y1 - box.y0) * 0.62) / c1);
+    baseline = box.y0 + (box.y1 - box.y0) * 0.36 + (c1 * size) / 2;
+  }
   ctx.font = `${size}px ${fonts.display}`;
   const w = ctx.measureText(word).width;
-  const baseline = box.y0 + (box.y1 - box.y0) * (portrait ? 0.5 : 0.36) + (capH * size) / 2;
   ctx.textBaseline = "alphabetic";
   ctx.lineJoin = "round";
   ctx.translate((box.x0 + box.x1) / 2 - w / 2, baseline);
@@ -325,15 +345,16 @@ function drawLot(ctx, cam, lot, dark) {
 export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrait = false, build = 1, spin = 0, calm = false, lite = false, fonts }) {
   const P = prepare(asset);
   const room0 = room(width, height, portrait, layout);
-  // On a phone the name has a band of its own above the object, where it
-  // reads (behind the object it was mostly hidden; the user caught it), and
-  // the object fits under it. On a wide screen it stays behind the object.
-  const tall = room0.y1 - room0.y0;
-  const wordBox = portrait ? { ...room0, y1: room0.y0 + tall * 0.24 } : room0;
-  const box = portrait ? { ...room0, y0: room0.y0 + tall * 0.2 } : room0;
-  // it comes round a little as it assembles, then turns with the scroll
-  // (neither with Reduce Motion: the camera holds still)
-  const yaw = calm ? asset.yaw[0] : lerp(asset.yaw[0], asset.yaw[1], spin) - 18 * (1 - easeInOut(build));
+  // The name stands behind the object, in the whole room, on a phone too
+  // since 11-24 (see drawWord); until then it had a band of its own over the
+  // object there, which the user found read as a random line of text.
+  const wordBox = room0;
+  const box = room0;
+  // it comes round a little as it assembles (not with Reduce Motion), then
+  // turns with the scroll, with Reduce Motion too, as the homepage's does
+  // (11-24: the user's iPhone has it on and saw the turn only on desktop;
+  // the visitor's own scroll moves it)
+  const yaw = lerp(asset.yaw[0], asset.yaw[1], spin) - (calm ? 0 : 18 * (1 - easeInOut(build)));
   const { eye, project } = view(asset.target, asset.dist, yaw, asset.pitch);
   const e = P.extent;
   // a little short of its room, so the name behind it shows round it
@@ -366,11 +387,10 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalCompositeOperation = "source-over";
   ctx.globalAlpha = 1;
-  // the homepage's sky (its warm band kept under the word's band on a
-  // phone, and never above the object's room: close up, the camera sees the
-  // horizon high, behind the navbar), its flat grid, the word, then the
-  // ground's grid round the stage
-  drawSky(ctx, width, height, cam, GOLD, 0, portrait ? wordBox.y1 : room0.y0, asset.target);
+  // the homepage's sky (its warm band never above the object's room: close
+  // up, the camera sees the horizon high, behind the navbar), its flat grid,
+  // the word, then the ground's grid round the stage
+  drawSky(ctx, width, height, cam, GOLD, 0, room0.y0, asset.target);
   drawSheet(ctx, width, height, dpr, room0, 1);
   drawWord(ctx, asset.word, wordBox, portrait, fonts);
   drawGrid(ctx, cam, 1, asset.target, asset.stage * 1.7);

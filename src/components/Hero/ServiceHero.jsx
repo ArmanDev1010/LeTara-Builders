@@ -21,9 +21,10 @@ const BUILD_TIME = 2400;
 // its lights coming on, then turns a little as the hero scrolls away. The
 // copy (`children`) sits at the bottom left as on the homepage, the object
 // beside it or above it. With Reduce Motion it comes together from half as
-// far and the camera holds still. A phone held sideways shows it with the
-// copy below, as the homepage does. An area page shows its street (the
-// `street` asset) with the area's name as the `word`.
+// far without swinging round, and still turns with the scroll, as the
+// homepage's does. A phone held sideways shows it with the copy below, as
+// the homepage does. An area page shows its home (the `property` asset)
+// with the area's name as the `word`.
 export default function ServiceHero({ asset: key, label, word, children }) {
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
