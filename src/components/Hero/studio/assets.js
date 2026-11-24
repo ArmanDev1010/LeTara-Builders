@@ -6,7 +6,6 @@
 //   word      the service's name, in outline behind it
 //   target, dist, yaw, pitch   the camera: what it looks at, from how far,
 //             the turn it makes as the page scrolls (degrees), how high
-//   light     where the gold light shows, behind and above it
 //   stage     the turntable's radius
 //   order     the layers in the order they come down into place as the
 //             hero opens; layers not in it are there from the start
@@ -38,7 +37,6 @@ const adu = {
   dist: 72,
   yaw: [-38, -14],
   pitch: 21,
-  light: [7, 12.5, 19],
   stage: 19,
   order: ["site", "foundation", "walls", "roof"],
   paneLayer: "windows",
@@ -78,7 +76,6 @@ const addition = {
   dist: 92,
   yaw: [-38, -14],
   pitch: 22,
-  light: [16, 17.5, 30],
   stage: 25,
   order: ["foundation", "walls", "roof"],
   paneLayer: "windows",
@@ -121,7 +118,6 @@ const commercial = {
   dist: 92,
   yaw: [-36, -12],
   pitch: 20,
-  light: [12, 21, 26],
   stage: 24,
   order: ["site", "foundation", "walls", "storefront", "roof"],
   paneLayer: "storefront",
@@ -162,7 +158,6 @@ const remodel = {
   dist: 64,
   yaw: [26, 46],
   pitch: 30,
-  light: [5, 13, 22],
   stage: 18,
   order: ["cabinets", "counters", "lighting"],
   layers: {
@@ -205,7 +200,6 @@ const outdoor = {
   dist: 80,
   yaw: [-34, -10],
   pitch: 24,
-  light: [12, 14, 28],
   stage: 21,
   order: ["hardscape", "frame", "roof", "kitchen", "fire", "decor"],
   layers: {
@@ -238,16 +232,19 @@ const outdoor = {
   diagram: { yaw: -30, pitch: 26 },
 };
 
-// a new two-story home, from the ground up (both floors are one "walls"
-// layer in the list, each with its own lift)
+// a new two-story home, from the ground up: a full-size family house, so it
+// never reads as the ADU (11-24: the user found the small flat-roofed box
+// that was here looked like one): two floors in lap siding under a shingled
+// gable roof, an attached two-car garage with its own gable and a paneled
+// door, the drive to it, a covered front porch on posts and the walk to the
+// door. Both floors are one "walls" layer in the list, each with its own lift.
 const house = {
   word: "NEW BUILD",
-  target: [13, 9, 8],
-  dist: 92,
+  target: [11, 10, 8],
+  dist: 140,
   yaw: [-36, -12],
   pitch: 20,
-  light: [10, 22, 24],
-  stage: 23,
+  stage: 35,
   order: ["site", "foundation", "walls", "roof"],
   paneLayer: "windows",
   layers: {
@@ -258,22 +255,35 @@ const house = {
     interior: { explode: [0, 3, 0] },
   },
   boxes: [
-    { id: "drive", min: [-4, 0, -9], max: [30, 0.3, -2], mat: "deck", layer: "site" },
-    { id: "utility", min: [-16, 0, 9], max: [0, 0.3, 9.8], mat: "metal", layer: "site", diagramOnly: true },
-    { id: "slab", min: [0, 0, 0], max: [26, 0.8, 18], mat: "concrete", layer: "foundation" },
-    { id: "ground", min: [0, 0.8, 0], max: [26, 10.8, 18], mat: "stucco", layer: "walls" },
-    { id: "upper", min: [4, 10.8, -2], max: [26, 20, 18], mat: "clad", layer: "walls", explode: [0, 18, 0], build: [0, 13, 0] },
-    { id: "roof", min: [3, 20, -3], max: [27, 20.8, 19], mat: "roof", layer: "roof" },
-    { id: "kitchen", min: [2, 0.8, 14], max: [12, 3.8, 16.5], mat: "cabinet", layer: "interior", diagramOnly: true },
-    { id: "sofa", min: [14, 0.8, 4], max: [22, 2.4, 7], mat: "fabric", layer: "interior", diagramOnly: true },
+    { id: "drive", min: [-14, 0, -16], max: [0, 0.3, 2], mat: "deck", layer: "site" },
+    { id: "walk", min: [17.5, 0, -14], max: [20.5, 0.2, -6], mat: "concrete", layer: "site" },
+    { id: "utility", min: [36, 0, 12], max: [50, 0.3, 12.8], mat: "metal", layer: "site", diagramOnly: true },
+    { id: "slab", min: [0, 0, 0], max: [36, 0.8, 26], mat: "concrete", layer: "foundation" },
+    { id: "gSlab", min: [-14, 0, 2], max: [0, 0.8, 24], mat: "concrete", layer: "foundation" },
+    { id: "porch", min: [12, 0, -6], max: [26, 0.6, 0], mat: "concrete", layer: "foundation" },
+    { id: "ground", min: [0, 0.8, 0], max: [36, 10.8, 26], mat: "siding", layer: "walls" },
+    { id: "garage", min: [-14, 0.8, 2], max: [0, 10, 24], mat: "siding", layer: "walls" },
+    { id: "garageDoor", min: [-12, 0.8, 1.7], max: [-2, 8.2, 2], mat: "garage", layer: "walls" },
+    { id: "postL", min: [12.4, 0.6, -5.6], max: [13.2, 9.2, -4.8], mat: "wood", layer: "walls" },
+    { id: "postR", min: [24.8, 0.6, -5.6], max: [25.6, 9.2, -4.8], mat: "wood", layer: "walls" },
+    { id: "upper", min: [0, 10.8, 0], max: [36, 20, 26], mat: "siding", layer: "walls", explode: [0, 18, 0], build: [0, 13, 0] },
+    { id: "porchRoof", min: [11.5, 9.2, -6.5], max: [26.5, 10, 0], mat: "roof", layer: "roof", explode: [0, 13, 0] }, // in the drawing, just over its posts
+    { id: "garageRoof", min: [-15, 10, 1], max: [0, 15.5, 25], mat: "shingle", gable: "z", layer: "roof", explode: [0, 16, 0] }, // just over the garage
+    { id: "roof", min: [-1, 20, -1.5], max: [37, 27, 27.5], mat: "shingle", gable: "x", layer: "roof" },
+    { id: "kitchen", min: [24, 0.8, 21], max: [34, 3.8, 24], mat: "cabinet", layer: "interior", diagramOnly: true },
+    { id: "island", min: [26, 0.8, 14], max: [31, 3.6, 17], mat: "counter", layer: "interior", diagramOnly: true },
+    { id: "sofa", min: [4, 0.8, 8], max: [12, 2.4, 11], mat: "fabric", layer: "interior", diagramOnly: true },
   ],
   windows: [
-    { box: "ground", face: "z-", u: [0.05, 0.55], v: [0, 0.86] },
-    { box: "ground", face: "z-", u: [0.68, 0.8], v: [0, 0.8] },
-    { box: "ground", face: "x-", u: [0.3, 0.7], v: [0.35, 0.78] },
-    { box: "upper", face: "z-", u: [0.08, 0.46], v: [0.25, 0.85] },
-    { box: "upper", face: "z-", u: [0.56, 0.92], v: [0.25, 0.85] },
-    { box: "upper", face: "x-", u: [0.25, 0.75], v: [0.3, 0.8] },
+    { box: "ground", face: "z-", u: [0.04, 0.28], v: [0.3, 0.82] },
+    { box: "ground", face: "z-", u: [0.47, 0.55], v: [0, 0.8] },
+    { box: "ground", face: "z-", u: [0.74, 0.96], v: [0.3, 0.82] },
+    { box: "ground", face: "x+", u: [0.3, 0.7], v: [0.35, 0.78] },
+    { box: "upper", face: "z-", u: [0.06, 0.26], v: [0.3, 0.8] },
+    { box: "upper", face: "z-", u: [0.4, 0.6], v: [0.3, 0.8] },
+    { box: "upper", face: "z-", u: [0.74, 0.94], v: [0.3, 0.8] },
+    { box: "upper", face: "x-", u: [0.35, 0.65], v: [0.35, 0.8] },
+    { box: "garage", face: "x-", u: [0.4, 0.6], v: [0.4, 0.75] },
   ],
   diagram: { yaw: -32, pitch: 22 },
 };
@@ -316,7 +326,6 @@ const property = {
   dist: 168,
   yaw: [-34, -14],
   pitch: 26,
-  light: [24, 30, 52],
   stage: 62, // round the whole lot, the ADU's corner included
   lot: { x: [-30, 58 + PATIO_X], z: [-15, 49] },
   order: ["site", "new-construction", "home-additions", "adu-contractor", "outdoor-living"],

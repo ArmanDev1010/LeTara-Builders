@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { TbArrowRight } from "react-icons/tb";
+import { TbArrowRight, TbArrowUpRight } from "react-icons/tb";
 import { sceneFonts } from "@/components/Hero/intro/layout";
 import { ASSETS } from "@/components/Hero/studio/assets";
 import { drawDiagram } from "@/components/Hero/studio/studio";
 import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, LIGHT, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
-import PartnerCard from "@/components/UI/PartnerCard";
+import VistaLogo from "@/components/UI/VistaLogo";
+import { BUSINESS } from "@/data/business";
 import { SERVICES } from "@/data/services";
 
 const CUT_TIME = 1300; // ms the cutaway takes to open, once in view
@@ -44,9 +45,12 @@ const HELD_SCALE_Y = "group-data-[stuck]/pin:[transform:scaleY(0.75)]";
 // where the drawing is above the cards it's held under the navbar while
 // they scroll beneath it (`services-pin`, globals.css), on white, a fade
 // under it, a quarter smaller than in its place (HELD_SCALE). On a phone
-// every card is as tall as the tallest, New Construction's (11-23). Under it all, LeTara's partner for
-// patio covers and awnings, Vista Pergolas (UI/PartnerCard; Andranik,
-// 11-16). (11-12: the user asked for the drawing whole, not pulled apart, a
+// every card is as tall as the tallest, New Construction's (11-23).
+// LeTara's partner for patio covers and awnings, Vista Pergolas,
+// is named in a strip under the Outdoor Living card, its logo a link to its
+// site (Andranik, 11-24: a mention there, not a section of its own; until
+// then its card, UI/PartnerCard, closed the section, as it still does on the
+// outdoor living page). (11-12: the user asked for the drawing whole, not pulled apart, a
 // little bigger, and the rooms shown through a cut.)
 const ON_THE_HOME = new Set(Object.keys(ASSETS.property.layers));
 const ITEMS = SERVICES.map(({ slug, title, home, href }) => ({ layer: slug, title, text: home, href, drawn: ON_THE_HOME.has(slug) }));
@@ -58,6 +62,7 @@ export default function Services({
   items = ITEMS,
 }) {
   const [active, setActive] = useState(null);
+  const { partner } = BUSINESS;
   const canvasRef = useRef(null);
   const listRef = useRef(null);
   const touchRef = useRef(false); // no hover: the scroll picks the card
@@ -250,13 +255,13 @@ export default function Services({
               const on = active === layer;
               const wide = i === 0 || !drawn;
               return (
-                <Reveal as="li" key={layer} data-layer={layer} delay={0.05 * i} className={wide ? "700:col-span-2" : ""}>
+                <Reveal as="li" key={layer} data-layer={layer} delay={0.05 * i} className={`flex flex-col ${wide ? "700:col-span-2" : ""}`}>
                   <Link
                     href={href}
                     onMouseEnter={() => !touchRef.current && setActive(layer)}
                     onFocus={() => setActive(layer)}
                     onBlur={() => setActive(null)}
-                    className={`group relative flex h-full min-h-[230px] 700:min-h-[260px] flex-col overflow-hidden bg-[#0b0b0b] text-neutral-50 p-6 700:p-7 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third ${CHAMFER}`}
+                    className={`group relative flex flex-1 min-h-[230px] 700:min-h-[260px] flex-col overflow-hidden bg-[#0b0b0b] text-neutral-50 p-6 700:p-7 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-third ${CHAMFER}`}
                   >
                     {/* a warm glow from the top, stronger when lit */}
                     <span
@@ -310,15 +315,30 @@ export default function Services({
                       <TbArrowRight className={`text-[18px] transition-transform duration-300 ${EASE} ${on ? "motion-safe:[transform:translateX(2px)]" : ""}`} />
                     </span>
                   </Link>
+                  {layer === "outdoor-living" && partner && (
+                    // Vista Pergolas, under the card it belongs with: a strip
+                    // in the card's dark, a link to its site (a new tab)
+                    <a
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener"
+                      className="group/vista flex items-center gap-3 border-t border-white/10 bg-[#0b0b0b] px-6 700:px-7 py-3.5 text-[12.5px] text-white/55 hover:text-white/85 transition-colors duration-200 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vista"
+                    >
+                      {/* one line, in the narrowest card too */}
+                      <span className="whitespace-nowrap">Patio covers &amp; awnings by</span>{" "}
+                      <VistaLogo title={partner.name} className="h-[20px] w-auto shrink-0 text-white" />
+                      <TbArrowUpRight
+                        aria-hidden="true"
+                        className="ml-auto shrink-0 text-[16px] text-vista transition-transform duration-200 motion-safe:group-hover/vista:[transform:translate(2px,-2px)]"
+                      />
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  )}
                 </Reveal>
               );
             })}
           </ul>
         </div>
-
-        <Reveal delay={0.1} className="mt-12 1080:mt-16">
-          <PartnerCard />
-        </Reveal>
       </div>
     </section>
   );

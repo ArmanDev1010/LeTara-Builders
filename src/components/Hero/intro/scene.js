@@ -41,10 +41,11 @@
 // passes' colors.
 //
 // No light of its own since 11-23 (when it began playing by itself rather
-// than with the scroll, the user asked for no light or flare and no dust): the backlight
-// with its shafts, bloom and streak, and the dust, are gone from this scene.
-// Its math, colors and those lighting pieces are still exported for the
-// service pages' turntable (Hero/studio/studio.js), which uses them.
+// than with the scroll, the user asked for no light or flare and no dust):
+// the backlight with its shafts, bloom and streak, and the dust, are gone.
+// Its math, colors, sky, grid, light on faces, lamplit rooms and glare are
+// exported for the service and area pages' turntable (Hero/studio/studio.js),
+// which has had the same look since 11-24 (Andranik asked).
 
 import { ASSETS } from "@/components/Hero/studio/assets";
 
@@ -626,31 +627,15 @@ export function path(ctx, pts) {
 }
 export const visible = (face, eye) => dot(face.n, sub(eye, face.p[0])) > 0;
 
-// A face's color in the light: a little ambient, the sky's cool light where
-// it faces it (KEY), and the pass's color from behind (RIM).
-function shade(b, n, colors) {
-  const a = matOf(b).albedo;
+// A face's color in blue hour's light (shared with the turntable): a little
+// ambient, the sky's cool light where it faces it (KEY), and `rim` (a color:
+// here the pass's) from behind (RIM); `albedo`, how much the finish gives
+// back, `tint`, its own color.
+export function duskShade(albedo, n, rim, tint = [1, 1, 1]) {
   const k = Math.max(0, dot(n, KEY)), r = Math.max(0, dot(n, RIM));
-  const tint = matOf(b).tint ?? [1, 1, 1];
-  return [0, 1, 2].map((i) => Math.min(255, Math.round(a * tint[i] * (34 + SKY_LIGHT[i] * 1.1 * k + colors.mid[i] * 0.6 * r) + 3)));
+  return [0, 1, 2].map((i) => Math.min(255, Math.round(albedo * tint[i] * (34 + SKY_LIGHT[i] * 1.1 * k + rim[i] * 0.6 * r) + 3)));
 }
-
-// a light sprite for a lamp's or a window's glow, a hot core in a glow (the
-// service pages' turntable; this scene's windows have a softer one, GLARE)
-const sprites = {};
-export function sprite(color) {
-  const key = color.join(",");
-  if (sprites[key]) return sprites[key];
-  const c = makeCanvas(64, 64), g = c.getContext("2d");
-  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grad.addColorStop(0, rgba([255, 255, 255], 1));
-  grad.addColorStop(0.12, rgba(color, 0.95));
-  grad.addColorStop(0.35, rgba(color, 0.28));
-  grad.addColorStop(1, rgba(color, 0));
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 64, 64);
-  return (sprites[key] = c);
-}
+const shade = (b, n, colors) => duskShade(matOf(b).albedo, n, colors.mid, matOf(b).tint);
 
 // ---- the passes --------------------------------------------------------------
 // DREAM: the house as a vision in gold glass, in pieces (see DREAM): each
@@ -867,19 +852,19 @@ function drawGround(ctx, cam, t, colors, fonts, grid) {
 // stronger while the house is a drawing (`grid`, 1 to 1.6). Each line is one
 // stroke, its fade a gradient along it with a stop at each of GRID_STOPS
 // (placed where those points fall on screen, so the perspective is right):
-// cut into short pieces instead, it cost a phone several ms a frame.
+// cut into short pieces instead, it cost a phone several ms a frame. Round
+// `center` within `radius` feet (the turntable passes its own).
 const GRID_R = 78;
 const GRID_STEP = 4;
 const GRID_STOPS = [0, 0.12, 0.25, 0.38, 0.5, 0.62, 0.75, 0.88, 1];
-function drawGrid(ctx, cam, strength) {
-  const [cx, , cz] = TARGET;
+export function drawGrid(ctx, cam, strength, [cx, , cz] = TARGET, radius = GRID_R) {
   ctx.save();
   ctx.lineWidth = 1;
   // lines along z (at x = c), then along x (at z = c)
   for (const [mid, along, point] of [[cx, cz, (c, v) => [c, 0, v]], [cz, cx, (c, v) => [v, 0, c]]]) {
-    for (let c = Math.ceil((mid - GRID_R) / GRID_STEP) * GRID_STEP; c < mid + GRID_R; c += GRID_STEP) {
+    for (let c = Math.ceil((mid - radius) / GRID_STEP) * GRID_STEP; c < mid + radius; c += GRID_STEP) {
       const off = c - mid;
-      const half = Math.sqrt(GRID_R * GRID_R - off * off);
+      const half = Math.sqrt(radius * radius - off * off);
       if (!(half > 1)) continue;
       const at = (k) => cam.toScreen(point(c, along - half + 2 * half * k));
       const [ax, ay] = at(0), [bx, by] = at(1);
@@ -890,7 +875,7 @@ function drawGrid(ctx, cam, strength) {
       for (const k of GRID_STOPS) {
         const [px, py] = at(k);
         const v = (2 * k - 1) * half;
-        const fade = Math.max(0, 1 - (off * off + v * v) / (GRID_R * GRID_R)) ** 2;
+        const fade = Math.max(0, 1 - (off * off + v * v) / (radius * radius)) ** 2;
         g.addColorStop(clamp(((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / len2), rgba(GRID, peak * fade));
       }
       ctx.strokeStyle = g;
@@ -907,7 +892,7 @@ function drawGrid(ctx, cam, strength) {
 // 120, centred on the house's room and fading out from it, fainter than the
 // ground's. It doesn't move, so it's drawn once per size and kept.
 let sheet = null;
-function drawSheet(ctx, width, height, dpr, room, strength) {
+export function drawSheet(ctx, width, height, dpr, room, strength) {
   const cx = Math.round((room.x0 + room.x1) / 2), cy = Math.round((room.y0 + room.y1) / 2);
   const key = [width, height, dpr, cx, cy].join(":");
   if (sheet?.key !== key) {
@@ -952,17 +937,22 @@ const litAt = (t, on) => smooth(on, on + 0.08, clamp((t - T.lights[0]) / (T.ligh
 // falling off toward the floor, and a little glare round it (`glows`, see
 // drawGlows; `box`, its wall, which doesn't hide it).
 const ROOM = { floor: [150, 76, 22], mid: [242, 164, 74], ceiling: [252, 206, 138] };
-function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, box) {
-  const quad = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
-  const [fx, fy] = cam.toScreen(onFace(face, (u0 + u1) / 2, v0));
-  const [hx, hy] = cam.toScreen(onFace(face, (u0 + u1) / 2, v1));
+// the lamplight's gradient, from a window's foot to its head (screen px),
+// `lit` 0-1 (shared with the turntable)
+export function roomLight(ctx, [fx, fy], [hx, hy], lit) {
   const g = ctx.createLinearGradient(fx, fy, hx, hy + 0.01);
   g.addColorStop(0, rgba(ROOM.floor, 0.9 * lit));
   g.addColorStop(0.55, rgba(ROOM.mid, 0.92 * lit));
   g.addColorStop(0.92, rgba(ROOM.ceiling, 0.94 * lit));
   g.addColorStop(1, rgba(ROOM.mid, 0.92 * lit));
+  return g;
+}
+function drawRoom(ctx, cam, face, [u0, u1], [v0, v1], lit, glows, box) {
+  const quad = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
+  const foot = cam.toScreen(onFace(face, (u0 + u1) / 2, v0));
+  const head = cam.toScreen(onFace(face, (u0 + u1) / 2, v1));
   path(ctx, quad);
-  ctx.fillStyle = g;
+  ctx.fillStyle = roomLight(ctx, foot, head, lit);
   ctx.fill();
   const span = Math.hypot(...sub(onFace(face, u0, v0), onFace(face, u1, v1)));
   glows.push({ at: onFace(face, (u0 + u1) / 2, (v0 + v1) / 2), r: span * 0.4, a: lit, box });
@@ -1087,6 +1077,12 @@ function drawGlows(ctx, cam, glows) {
     const pts = [g.at, [g.at[0] + k, g.at[1], g.at[2]], [g.at[0] - k, g.at[1], g.at[2]], [g.at[0], g.at[1] + k, g.at[2]], [g.at[0], g.at[1] - k, g.at[2]]];
     g.a *= pts.filter((p) => !OCCLUDERS.some((o) => o.id !== g.box && hides(o.planes, cam.eye, p))).length / pts.length;
   }
+  drawGlare(ctx, cam, glows);
+}
+// The glows themselves (shared with the turntable, which dims its own
+// first): { at (feet), r (feet), a (0-1) } each.
+export function drawGlare(ctx, cam, glows) {
+  if (!glows.length) return;
   if (!glare) {
     glare = makeCanvas(64, 64);
     const g = glare.getContext("2d");
@@ -1151,101 +1147,6 @@ function drawNotes(ctx, cam, a, notes, fonts, width, tone = NOTE_TONES.blue) {
     ctx.strokeRect(px + 0.5, py + 0.5, plateW - 1, plateH - 1);
     ctx.fillStyle = rgba(tone.ink, 1);
     ctx.fillText(label, px + padX, ey + 1);
-  }
-  ctx.restore();
-}
-
-// ---- the light and the air (the service pages' turntable) -----------------------
-// The source, the haze around it, and a bank of fog behind the object that
-// it reads against.
-export function drawLight(ctx, colors, flare, [lx, ly], scale) {
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  ctx.save();
-  ctx.translate(lx, ly + scale * 0.35);
-  ctx.scale(1.6, 0.36);
-  const R = scale * 2.6;
-  const fog = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
-  fog.addColorStop(0, rgba(colors.mid, 0.3));
-  fog.addColorStop(0.5, rgba(colors.deep, 0.15));
-  fog.addColorStop(1, rgba(colors.deep, 0));
-  ctx.fillStyle = fog;
-  ctx.fillRect(-R, -R, 2 * R, 2 * R);
-  ctx.restore();
-  let g = ctx.createRadialGradient(lx, ly, 0, lx, ly, scale * 1.9);
-  g.addColorStop(0, rgba(colors.mid, 0.28));
-  g.addColorStop(0.3, rgba(colors.deep, 0.09));
-  g.addColorStop(1, rgba(colors.deep, 0));
-  ctx.fillStyle = g;
-  ctx.fillRect(lx - scale * 2, ly - scale * 2, scale * 4, scale * 4);
-  const r = scale * 0.15 * flare;
-  g = ctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-  g.addColorStop(0, rgba(colors.core, 1));
-  g.addColorStop(0.08, rgba(colors.core, 0.85));
-  g.addColorStop(0.3, rgba(colors.mid, 0.32));
-  g.addColorStop(1, rgba(colors.deep, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(lx, ly, r, 0, TAU);
-  ctx.fill();
-  ctx.restore();
-}
-
-// over everything: a bloom round the light, and an anamorphic streak through it
-export function drawBloom(ctx, colors, flare, [lx, ly], scale) {
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  const R = scale * 0.15 * flare;
-  let g = ctx.createRadialGradient(lx, ly, 0, lx, ly, R);
-  g.addColorStop(0, rgba(colors.core, 0.75));
-  g.addColorStop(0.35, rgba(colors.mid, 0.2));
-  g.addColorStop(1, rgba(colors.mid, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(lx, ly, R, 0, TAU);
-  ctx.fill();
-  ctx.translate(lx, ly);
-  ctx.scale(1, 0.016);
-  const S = scale * 2.8;
-  g = ctx.createRadialGradient(0, 0, 0, 0, 0, S);
-  g.addColorStop(0, rgba(colors.core, 0.36 * flare));
-  g.addColorStop(0.25, rgba(colors.mid, 0.11 * flare));
-  g.addColorStop(1, rgba(colors.mid, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(0, 0, S, 0, TAU);
-  ctx.fill();
-  ctx.restore();
-}
-
-// Dust drifting through the light (screen space): specks behind the object,
-// a few big out-of-focus ones in front. `t` and `idle` (seconds) move it.
-const DUST = (() => {
-  const r = rng(42), out = [];
-  for (let i = 0; i < 140; i++) out.push({ x: r(), y: r(), d: 0.35 + r() * 1.35, p: r() * TAU, s: 0.6 + r() });
-  return out;
-})();
-export function drawDust(ctx, t, idle, colors, width, height, [lx, ly], front) {
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  for (const q of DUST) {
-    if (front !== q.d > 1.3 || (front && q.d < 1.5)) continue;
-    const drift = t + idle * 0.02;
-    const x = ((((q.x * 1.3 - drift * 0.25 * q.d + Math.sin(q.p + t * 3 + idle * 0.6) * 0.02) % 1.3) + 1.3) % 1.3) * width - 0.15 * width;
-    const y = ((((q.y - drift * 0.12 * q.d) % 1) + 1) % 1) * height;
-    const near = Math.exp(-((x - lx) ** 2 + (y - ly) ** 2) / (2 * (0.42 * Math.max(width, height)) ** 2));
-    const a = (0.08 + 0.92 * near) * (front ? 0.16 : 0.7);
-    const size = q.s * q.d * (front ? 12 : 1.5) * (width / 1440);
-    if (front) {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, size);
-      g.addColorStop(0, rgba(colors.core, a * 0.45));
-      g.addColorStop(0.75, rgba(colors.mid, a * 0.22));
-      g.addColorStop(1, rgba(colors.mid, 0));
-      ctx.fillStyle = g;
-    } else ctx.fillStyle = rgba(mix([190, 190, 190], colors.core, near), a);
-    ctx.beginPath();
-    ctx.arc(x, y, Math.max(0.6, size), 0, TAU);
-    ctx.fill();
   }
   ctx.restore();
 }
@@ -1331,17 +1232,19 @@ function drawFrame(ctx, cam, portrait, width) {
 // pass's color (gold, white, blue, gold), the last of the day behind the
 // house: warm in the gold passes, like a dusk sky's last light, blue in
 // DESIGN's. A band, never a light: no source, no rays (the user had the
-// light taken out). Kept below the title (`title`), so it never washes the
-// words out (looking down at the start, the camera sees the horizon at the
-// title's height). `hue` 0-1 is the passes' color, gold to blue.
-function drawSky(ctx, width, height, cam, colors, hue, title) {
+// light taken out). Kept below `floor` (px: the title's foot), so it never
+// washes the words out (looking down at the start, the camera sees the
+// horizon at the title's height). `hue` 0-1 is the passes' color, gold to
+// blue. `cam` has the room it frames (`box`); `target`, what it looks at.
+// (Shared with the turntable.)
+export function drawSky(ctx, width, height, cam, colors, hue, floor, target = TARGET) {
   const { box } = cam;
   const rx = Math.max(box.x1 - box.x0, width * 0.5) * 0.85;
   const ry = Math.max(40, (box.y1 - box.y0) * 0.3);
-  const d = sub(TARGET, cam.eye);
+  const d = sub(target, cam.eye);
   const ahead = norm([d[0], 0, d[2]]);
   const [, horizon] = cam.toScreen([cam.eye[0] + ahead[0] * 1e5, cam.eye[1], cam.eye[2] + ahead[2] * 1e5]);
-  const line = Math.max(horizon, title.bottom + 0.55 * ry);
+  const line = Math.max(horizon, floor + 0.55 * ry);
   const at = clamp(line / height, 0.05, 0.9);
   const blue = clamp(hue * 2 - 1); // 0, until the house is drawn in blue
   const c = (k) => mix(SKY.dusk[k], SKY.blueprint[k], blue);
@@ -1390,7 +1293,7 @@ export function drawScene(ctx, { width, height, dpr = 1, t, spin = 0, portrait =
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalCompositeOperation = "source-over";
   ctx.globalAlpha = 1;
-  drawSky(ctx, width, height, cam, colors, hue, title);
+  drawSky(ctx, width, height, cam, colors, hue, title.bottom);
   drawSheet(ctx, width, height, dpr, room, grid);
   drawTitle(ctx, width, portrait, title, t, fonts);
   drawGround(ctx, cam, t, colors, fonts, grid);

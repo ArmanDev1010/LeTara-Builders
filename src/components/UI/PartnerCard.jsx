@@ -14,8 +14,9 @@ const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visi
 // its logo in its own green and charcoal, and its green button. Cut at the
 // corner like the services' cards: its logo (a link to its site, 11-16: the
 // user asked for the logo in place of the name), what Vista offers and a
-// button to its site (both a new tab). At the foot of the homepage's
-// services, and in its own section on the outdoor living page. `as` is the
+// button to its site (both a new tab). In its own section on the outdoor
+// living page (on the homepage it's a mention under the Outdoor Living
+// card since 11-24, Home/Services). `as` is the
 // title's element (h3, under the section's h2).
 export default function PartnerCard({ className = "", as: Title = "h3" }) {
   const { partner } = BUSINESS;

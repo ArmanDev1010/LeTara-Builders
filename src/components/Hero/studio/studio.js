@@ -1,8 +1,10 @@
 // The service pages' "turntable": one object (an asset, see assets.js), the
 // ADU, the addition, the remodeled kitchen or the outdoor room, drawn the
-// way a visual-effects asset is shown for review: alone in the dark on a
-// turntable, under a studio key light with the homepage's gold behind it,
-// the service's name in huge outline at its back. It assembles when the page
+// way a visual-effects asset is shown for review: alone on a turntable, the
+// service's name in huge outline at its back. In the homepage hero's look
+// since 11-24 (Andranik asked): under its blue-hour sky with the warm band
+// along the horizon, on its drafting grid, in its cool dusk light with the
+// windows lamplit and a little glare; no light of its own, no dust. It assembles when the page
 // opens (`build` 0-1: its layers come down into place, then its lights come
 // on) and turns a little as the visitor scrolls (`spin` 0-1).
 //
@@ -13,8 +15,8 @@
 // apart (`spread` 0-1), numbered, the one being read in gold (`active`).
 //
 // Everything is drawn from numbers, nothing downloaded; world units are feet,
-// y up, the front facing -z. The math, colors and the light's glow, bloom
-// and dust are the homepage scene's (intro/scene.js).
+// y up, the front facing -z. The math, colors, sky, grid, light on faces,
+// lamplight and glare are the homepage scene's (intro/scene.js).
 
 import {
   GOLD,
@@ -23,10 +25,12 @@ import {
   clamp,
   cross,
   dot,
-  drawBloom,
-  drawDust,
-  drawLight,
+  drawGlare,
+  drawGrid,
   drawOrder,
+  drawSheet,
+  drawSky,
+  duskShade,
   edges,
   faces,
   grainTile,
@@ -39,9 +43,9 @@ import {
   planesOf,
   rgba,
   rng,
+  roomLight,
   shapeFaces,
   smooth,
-  sprite,
   sub,
   visible,
 } from "@/components/Hero/intro/scene";
@@ -49,12 +53,13 @@ import {
 const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
 
 // ---- materials and light ----------------------------------------------------
-// How much light each finish gives back, and `slats`: lines across it every
-// so many feet (cladding).
+// How much light each finish gives back, `slats`: lines across it every so
+// many feet (cladding), and `tint`, its own color (as the homepage's).
 const MATS = {
-  stucco: { albedo: 0.62 },
-  siding: { albedo: 0.4, slats: 0.75 },
-  shingle: { albedo: 0.17, slats: 0.9 },
+  stucco: { albedo: 0.62, tint: [1.14, 1.04, 0.86] },
+  siding: { albedo: 0.5, slats: 0.75 },
+  garage: { albedo: 0.62, slats: 1.2 }, // a paneled garage door, painted
+  shingle: { albedo: 0.2, slats: 0.9 },
   existing: { albedo: 0.4 },
   clad: { albedo: 0.2, slats: 1.1 },
   concrete: { albedo: 0.46 },
@@ -71,15 +76,9 @@ const MATS = {
   lamp: { albedo: 0.95 },
   glass: { albedo: 0.08 },
 };
-// A studio's light: a key from the front left, above, so the object reads;
-// the homepage's gold from behind, catching its tops and edges.
-const KEY = norm([-0.55, 0.75, -0.5]);
-const RIM = norm([0.3, 0.45, 1]);
-const KEY_COLOR = [235, 222, 204];
-function shade(albedo, n) {
-  const k = Math.max(0, dot(n, KEY)), r = Math.max(0, dot(n, RIM));
-  return [0, 1, 2].map((i) => Math.min(255, Math.round(albedo * (20 + KEY_COLOR[i] * 0.62 * k + GOLD.mid[i] * 0.85 * r) + 3)));
-}
+// The homepage's dusk light: the sky's cool light from the front left,
+// above, and its gold from behind (intro/scene.js, duskShade).
+const shade = (mat, n) => duskShade(mat.albedo, n, GOLD.mid, mat.tint);
 
 // ---- geometry ---------------------------------------------------------------
 const moved = (b, [dx, dy, dz]) => ({ ...b, min: [b.min[0] + dx, b.min[1] + dy, b.min[2] + dz], max: [b.max[0] + dx, b.max[1] + dy, b.max[2] + dz] });
@@ -180,28 +179,37 @@ function room(width, height, portrait, layout) {
   return { x0: left * width, x1: 0.975 * width, y0: nav + 24, y1: 0.94 * height };
 }
 
-// The service's name in outline at the object's back, as wide as its room.
+// The service's name in outline at the object's back, as wide as its room,
+// as faint as the homepage's "DREAM. DESIGN. BUILD." lit (11-24) and, on a
+// phone, stretched tall as that is (WORD).
+const WORD = {
+  portrait: { stroke: 0.45, fill: 0.08, stretch: 1.55 },
+  desktop: { stroke: 0.2, fill: 0.035, stretch: 1 },
+};
 function drawWord(ctx, word, box, portrait, fonts) {
+  const { stroke, fill, stretch } = WORD[portrait ? "portrait" : "desktop"];
   ctx.save();
   ctx.font = `100px ${fonts.display}`;
   const m = ctx.measureText(word);
-  const capH = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100;
+  const capH = ((m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 100) * stretch;
   const size = Math.min(((box.x1 - box.x0) * 0.98 * 100) / m.width, ((box.y1 - box.y0) * 0.62) / capH);
   ctx.font = `${size}px ${fonts.display}`;
   const w = ctx.measureText(word).width;
   const baseline = box.y0 + (box.y1 - box.y0) * (portrait ? 0.5 : 0.36) + (capH * size) / 2;
   ctx.textBaseline = "alphabetic";
   ctx.lineJoin = "round";
-  ctx.fillStyle = rgba(GOLD.mid, portrait ? 0.12 : 0.05);
-  ctx.fillText(word, (box.x0 + box.x1) / 2 - w / 2, baseline);
-  ctx.strokeStyle = rgba(GOLD.mid, portrait ? 0.55 : 0.24);
-  ctx.lineWidth = Math.max(1, size / 140);
-  ctx.strokeText(word, (box.x0 + box.x1) / 2 - w / 2, baseline);
+  ctx.translate((box.x0 + box.x1) / 2 - w / 2, baseline);
+  ctx.scale(1, stretch);
+  ctx.fillStyle = rgba(GOLD.mid, fill);
+  ctx.fillText(word, 0, 0);
+  ctx.strokeStyle = rgba(GOLD.mid, stroke);
+  ctx.lineWidth = Math.max(0.8, size / 140 / ((1 + stretch) / 2));
+  ctx.strokeText(word, 0, 0);
   ctx.restore();
 }
 
-// The turntable under it: a dark disc lit warm toward the middle, a gold
-// ring at its edge.
+// The turntable under it: a dark blue disc, the grid fading under it, a
+// faint gold ring at its edge.
 function drawStage(ctx, cam, asset) {
   const [cx, , cz] = asset.target, R = asset.stage;
   const ring = (r) => Array.from({ length: 72 }, (_, i) => cam.toScreen([cx + r * Math.cos((i / 72) * TAU), 0, cz + r * Math.sin((i / 72) * TAU)]));
@@ -211,36 +219,36 @@ function drawStage(ctx, cam, asset) {
   ctx.save();
   path(ctx, pts);
   const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, rx);
-  g.addColorStop(0, "rgba(28,20,12,0.9)");
-  g.addColorStop(0.7, "rgba(14,12,10,0.85)");
-  g.addColorStop(1, "rgba(8,8,8,0.6)");
+  g.addColorStop(0, "rgba(12,18,34,0.82)");
+  g.addColorStop(0.7, "rgba(7,11,22,0.72)");
+  g.addColorStop(1, "rgba(5,8,17,0.5)");
   ctx.fillStyle = g;
   ctx.fill();
   ctx.globalCompositeOperation = "lighter";
-  ctx.strokeStyle = rgba(GOLD.mid, 0.32);
+  ctx.strokeStyle = rgba(GOLD.mid, 0.26);
   ctx.lineWidth = 1.2;
   ctx.stroke();
   path(ctx, ring(R * 1.06));
-  ctx.strokeStyle = rgba(GOLD.mid, 0.1);
+  ctx.strokeStyle = rgba(GOLD.mid, 0.08);
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.restore();
 }
 
 // One face of a box: its shade (darker at the foot), its cladding lines,
-// its windows (dark glass, warm once lit), a fine edge, and the gold light
-// catching its top edge.
+// its windows (dark glass, lamplit once lit, a light frame), a fine edge,
+// and the gold catching its top edge or ridge, as on the homepage.
 function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
   const mat = MATS[b.mat] ?? MATS.stucco;
   const pts = face.p.map((p) => cam.toScreen(p));
-  const base = shade(mat.albedo, face.n);
+  const base = shade(mat, face.n);
   path(ctx, pts);
   if (key === "y+") ctx.fillStyle = rgba(base);
   else {
     const foot = [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2];
     const head = [(pts[2][0] + pts[3][0]) / 2, (pts[2][1] + pts[3][1]) / 2];
     const g = ctx.createLinearGradient(foot[0], foot[1], head[0], head[1] + 0.01);
-    g.addColorStop(0, rgba(base.map((v) => v * 0.55)));
+    g.addColorStop(0, rgba(base.map((v) => v * 0.6)));
     g.addColorStop(1, rgba(base.map((v) => Math.min(255, v * 1.1))));
     ctx.fillStyle = g;
   }
@@ -253,7 +261,7 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.strokeStyle = b.mat === "shingle" ? "rgba(0,0,0,0.22)" : "rgba(255,255,255,0.05)";
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -261,25 +269,20 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
     if (w.box !== b.id || w.face !== key) continue;
     const quad = [[w.u[0], w.v[0]], [w.u[1], w.v[0]], [w.u[1], w.v[1]], [w.u[0], w.v[1]]].map(([u, v]) => cam.toScreen(onFace(face, u, v)));
     path(ctx, quad);
-    ctx.fillStyle = "rgb(12,13,16)";
+    ctx.fillStyle = "rgb(12,14,20)";
     ctx.fill();
     if (lit > 0) {
-      const [fx, fy] = cam.toScreen(onFace(face, (w.u[0] + w.u[1]) / 2, w.v[0]));
-      const [hx, hy] = cam.toScreen(onFace(face, (w.u[0] + w.u[1]) / 2, w.v[1]));
-      const g = ctx.createLinearGradient(fx, fy, hx, hy + 0.01);
-      g.addColorStop(0, rgba(GOLD.deep, 0.6 * lit));
-      g.addColorStop(0.55, rgba(GOLD.mid, 0.8 * lit));
-      g.addColorStop(0.92, rgba(GOLD.core, 0.92 * lit));
-      g.addColorStop(1, rgba(GOLD.mid, 0.7 * lit));
+      const foot = cam.toScreen(onFace(face, (w.u[0] + w.u[1]) / 2, w.v[0]));
+      const head = cam.toScreen(onFace(face, (w.u[0] + w.u[1]) / 2, w.v[1]));
       path(ctx, quad);
-      ctx.fillStyle = g;
+      ctx.fillStyle = roomLight(ctx, foot, head, lit);
       ctx.fill();
       const span = Math.hypot(...sub(onFace(face, w.u[0], w.v[0]), onFace(face, w.u[1], w.v[1])));
-      glows.push({ at: onFace(face, (w.u[0] + w.u[1]) / 2, (w.v[0] + w.v[1]) / 2), r: span * 0.55, a: 0.45 * lit, box: b.id });
+      glows.push({ at: onFace(face, (w.u[0] + w.u[1]) / 2, (w.v[0] + w.v[1]) / 2), r: span * 0.4, a: lit, box: b.id });
     }
     path(ctx, quad);
-    ctx.strokeStyle = "rgba(4,4,4,0.9)";
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = "rgba(230,228,220,0.55)"; // a painted frame
+    ctx.lineWidth = 1.2;
     ctx.stroke();
   }
   path(ctx, pts);
@@ -287,14 +290,14 @@ function drawFace(ctx, cam, asset, b, key, face, lit, glows) {
   ctx.lineWidth = 1;
   ctx.stroke();
   if (key === "y+") {
-    ctx.strokeStyle = rgba(GOLD.mid, 0.38);
+    ctx.strokeStyle = rgba(GOLD.mid, 0.3);
     ctx.stroke();
   }
   if (face.ridge) {
     ctx.beginPath();
     ctx.moveTo(pts[3][0], pts[3][1]);
     ctx.lineTo(pts[2][0], pts[2][1]);
-    ctx.strokeStyle = rgba(GOLD.mid, 0.5);
+    ctx.strokeStyle = rgba(GOLD.mid, 0.45);
     ctx.lineWidth = 1.2;
     ctx.stroke();
   }
@@ -315,21 +318,6 @@ function drawLot(ctx, cam, lot, dark) {
   ctx.strokeStyle = dark ? rgba(GOLD.mid, 0.4) : "rgba(17,17,17,0.16)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.restore();
-}
-
-// light spilling from the windows and the lamps
-function drawGlows(ctx, cam, glows) {
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  const img = sprite(GOLD.mid);
-  for (const { at, r, a } of glows) {
-    if (a <= 0) continue;
-    const [x, y, z] = cam.toScreen(at);
-    const size = r * (cam.s / z) * 3;
-    ctx.globalAlpha = Math.min(1, a);
-    ctx.drawImage(img, x - size / 2, y - size / 2, size, size * 0.85);
-  }
   ctx.restore();
 }
 
@@ -355,6 +343,7 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
   const cam = {
     eye,
     s,
+    box: room0,
     toScreen: (p) => {
       const [x, y, z] = project(p);
       return [ox + x * s, oy + y * s, z];
@@ -377,14 +366,14 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalCompositeOperation = "source-over";
   ctx.globalAlpha = 1;
-  ctx.fillStyle = "#030303";
-  ctx.fillRect(0, 0, width, height);
-
-  const light = cam.toScreen(asset.light);
-  const lightScale = Math.max(box.x1 - box.x0, box.y1 - box.y0) * 0.6;
-  drawLight(ctx, GOLD, 1, light, lightScale);
+  // the homepage's sky (its warm band kept under the word's band on a
+  // phone, and never above the object's room: close up, the camera sees the
+  // horizon high, behind the navbar), its flat grid, the word, then the
+  // ground's grid round the stage
+  drawSky(ctx, width, height, cam, GOLD, 0, portrait ? wordBox.y1 : room0.y0, asset.target);
+  drawSheet(ctx, width, height, dpr, room0, 1);
   drawWord(ctx, asset.word, wordBox, portrait, fonts);
-  drawDust(ctx, calm ? 0 : spin * 0.6, 0, GOLD, width, height, light, false);
+  drawGrid(ctx, cam, 1, asset.target, asset.stage * 1.7);
   drawStage(ctx, cam, asset);
   if (asset.lot) drawLot(ctx, cam, asset.lot, true);
 
@@ -418,14 +407,12 @@ export function drawStudio(ctx, { width, height, dpr = 1, asset, layout, portrai
     const seen = pts.filter((p) => !occluders.some((o) => o.id !== g.box && hides(o.planes, eye, p))).length;
     g.a *= seen / pts.length;
   }
-  drawGlows(ctx, cam, glows);
-  drawBloom(ctx, GOLD, 1, light, lightScale);
+  drawGlare(ctx, cam, glows);
 
-  drawDust(ctx, calm ? 0 : spin * 0.6, 0, GOLD, width, height, light, true);
   const vx = (box.x0 + box.x1) / 2, vy = height * 0.45;
   const v = ctx.createRadialGradient(vx, vy, Math.min(width, height) * 0.3, vx, vy, Math.max(width, height) * 0.85);
   v.addColorStop(0, "rgba(0,0,0,0)");
-  v.addColorStop(1, "rgba(0,0,0,0.7)");
+  v.addColorStop(1, "rgba(1,3,10,0.65)");
   ctx.fillStyle = v;
   ctx.fillRect(0, 0, width, height);
   if (!lite) {

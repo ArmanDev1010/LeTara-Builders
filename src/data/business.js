@@ -27,8 +27,9 @@ export const BUSINESS = {
   address: { locality: "North Hills", region: "CA", country: "US" },
   instagram: "https://www.instagram.com/letarabuilders/",
   // Andranik's other company, LeTara's partner for patio covers and awnings
-  // (Andranik, 11-16): a card on the homepage and on the outdoor living page
-  // (UI/PartnerCard), and a link on its name in the About portrait. What it
+  // (Andranik, 11-16): a mention under the Outdoor Living card on the homepage
+  // (11-24, Home/Services), a card on the outdoor living page (UI/
+  // PartnerCard), and a link on its name in the About portrait. What it
   // offers is from its own site.
   partner: {
     name: "Vista Pergolas",

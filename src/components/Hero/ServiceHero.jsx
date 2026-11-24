@@ -14,8 +14,9 @@ const BUILD_TIME = 2400;
 
 // A service page's hero: the service itself as the star. Its object (Hero/
 // studio/assets.js: the ADU, the addition, the kitchen, the outdoor room)
-// alone on a turntable in the dark, the way a visual-effects asset is shown
-// for review, with the service's name in huge outline behind it (studio.js).
+// alone on a turntable, the way a visual-effects asset is shown for review,
+// with the service's name in huge outline behind it (studio.js), in the
+// homepage hero's look (its blue-hour sky and drafting grid, 11-24).
 // It comes together as the page opens, its layers coming down into place and
 // its lights coming on, then turns a little as the hero scrolls away. The
 // copy (`children`) sits at the bottom left as on the homepage, the object
@@ -111,20 +112,20 @@ export default function ServiceHero({ asset: key, label, word, children }) {
     // the copy, and in Safari, its bars showing (about 664px tall), there
     // wasn't room for both at screen height. There it runs a little past the
     // screen, the quote button still on the first screen. Until the first
-    // frame, the gold glow, so it doesn't flash black.
+    // frame, the sky's blue, so it doesn't flash.
     <section
       ref={sectionRef}
       id="hero"
-      className="relative flex items-end overflow-hidden h-[calc(100*var(--svh))] min-h-[760px] 700:min-h-[600px] pt-28 intro-still:block intro-still:h-auto intro-still:min-h-0 intro-still:pt-0 bg-[#030303] bg-[radial-gradient(ellipse_80%_45%_at_60%_18%,rgba(255,170,58,0.2),rgba(196,92,16,0.06)_45%,transparent_75%)] text-neutral-50"
+      className="relative flex items-end overflow-hidden h-[calc(100*var(--svh))] min-h-[760px] 700:min-h-[600px] pt-28 intro-still:block intro-still:h-auto intro-still:min-h-0 intro-still:pt-0 bg-[#050b1b] text-neutral-50"
     >
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label={`${label}, drawn alone on a turntable in the dark, coming together piece by piece.`}
+        aria-label={`${label}, drawn on a turntable under a dusk sky, coming together piece by piece.`}
         className="absolute inset-0 h-full w-full intro-still:relative intro-still:h-[calc(100*var(--vh))]"
       />
       {/* shade under the copy, easing off to the right on a wide screen */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-black/75 via-black/35 to-transparent 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] max-700:h-[62%] bg-gradient-to-t from-[#02050d]/80 via-[#02050d]/35 to-transparent 1080:[mask-image:linear-gradient(to_right,#000_40%,rgba(0,0,0,0.3)_75%)] intro-still:hidden" />
       <div ref={copyRef} className="wide-zoom relative z-20 900:pb-16 pb-20 mx-auto w-full 700:px-[32px] px-[24px] intro-still:pt-10">
         {children}
       </div>
