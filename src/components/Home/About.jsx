@@ -14,7 +14,7 @@ const { founder } = BUSINESS;
 const CREDENTIALS = [
   BUSINESS.license && { kicker: "Licensed", title: `CSLB #${BUSINESS.license}`, note: "California contractor" },
   { kicker: "How we work", title: "Design-build", note: "one team, sketch to walkthrough" },
-  { kicker: "Building across", title: "Los Angeles County", note: "the city, the Valley and beyond" },
+  { kicker: "Building across", title: "Los Angeles", note: "and the San Fernando Valley" },
 ].filter(Boolean);
 
 // Andranik's own words, from his LinkedIn: the setup, then the line that
@@ -189,7 +189,7 @@ export default function About() {
         <div className="[grid-area:body] max-w-2xl 1080:pt-2">
           <Reveal delay={0.1}>
             <p className={LEDE.light}>
-              LeTara Builders is a licensed general contractor in Los Angeles County, building new homes, home
+              LeTara Builders is a licensed general contractor in Los Angeles, building new homes, home
               additions, ADUs, remodels, outdoor living spaces and commercial build-outs. Every project is design-build: careful
               planning, clear communication and precise execution, from one team.
             </p>

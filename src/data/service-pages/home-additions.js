@@ -9,10 +9,10 @@ import { ADDITION_PLANS } from "./plans";
 const homeAdditions = {
   slug: "home-additions",
   title: "Home Additions",
-  metaTitle: "Home Additions Contractor in Los Angeles County",
+  metaTitle: "Home Additions Contractor in Los Angeles",
   serviceType: "Home additions",
   description:
-    "Ground-floor additions in Los Angeles County: rear and side wings, primary suites and bump-outs, designed, permitted and built by one licensed design-build team.",
+    "Ground-floor additions in Los Angeles: rear and side wings, primary suites and bump-outs, designed, permitted and built by one licensed design-build team.",
   asset: "addition",
   assetLabel: "A one-story addition on the side of a one-story house",
   hero: "More room on one level: a new wing at the back or side of the house, a primary suite, a bigger kitchen or family room. We design the addition to look like it was always there, take it through permits and build it.",
@@ -108,16 +108,16 @@ const homeAdditions = {
   },
 
   areas: {
-    heading: ["Additions across", "Los Angeles County."],
+    heading: ["Additions across", "Los Angeles."],
     intro:
-      "We build additions throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
+      "We build additions throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
   },
 
   faqHeading: ["Addition questions,", "answered."],
   faqIntro: "What homeowners ask most before adding on. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does a home addition cost in Los Angeles County?",
+      question: "How much does a home addition cost in Los Angeles?",
       answer:
         "It depends on the size, the foundation, how the new roof ties into the old one, the work where the addition joins the house, and the finishes. We price your addition after seeing the house. {{Get a free quote}}",
     },

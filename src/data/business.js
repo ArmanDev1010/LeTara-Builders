@@ -22,7 +22,7 @@ export const BUSINESS = {
   // No opening hours on the site or in the schema: Andranik asked for them
   // to come off (11-16).
   // The SOS filing's principal office: in the schema's address only. The
-  // page names no office town, only Los Angeles County, the target (the
+  // page names no office town, only Los Angeles, the target (the
   // user's call); whether to show a street address is still to decide.
   address: { locality: "North Hills", region: "CA", country: "US" },
   instagram: "https://www.instagram.com/letarabuilders/",

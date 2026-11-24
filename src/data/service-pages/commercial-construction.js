@@ -14,10 +14,10 @@ import { COMMERCIAL_PLANS } from "./plans";
 const commercialConstruction = {
   slug: "commercial-construction",
   title: "Commercial Construction",
-  metaTitle: "Commercial Contractor in Los Angeles County",
+  metaTitle: "Commercial Contractor in Los Angeles",
   serviceType: "Commercial construction",
   description:
-    "Commercial build-outs, tenant improvements and renovations in Los Angeles County: offices, shops, restaurants and cafés, designed, permitted and built by one licensed team.",
+    "Commercial build-outs, tenant improvements and renovations in Los Angeles: offices, shops, restaurants and cafés, designed, permitted and built by one licensed team.",
   asset: "commercial",
   assetLabel: "A single-story commercial building with a storefront, an awning and a unit on the roof",
   hero: "Build-outs, tenant improvements and renovations for offices, shops, restaurants and cafés. We design the space around how your business runs, take it through permits and build it.",
@@ -127,16 +127,16 @@ const commercialConstruction = {
   },
 
   areas: {
-    heading: ["Commercial work across", "Los Angeles County."],
+    heading: ["Commercial work across", "Los Angeles."],
     intro:
-      "We build out spaces throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still work there.",
+      "We build out spaces throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still work there.",
   },
 
   faqHeading: ["Commercial questions,", "answered."],
   faqIntro: "What business owners ask most before a build-out. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does a commercial build-out cost in Los Angeles County?",
+      question: "How much does a commercial build-out cost in Los Angeles?",
       answer:
         "It depends on the space you start with, what the business needs (a kitchen, restrooms, a new storefront), what the city requires and the finishes. We price it after seeing the space. {{Get a free quote}}",
     },

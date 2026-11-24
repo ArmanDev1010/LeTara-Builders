@@ -90,10 +90,10 @@ function StepTracker() {
 // picked but not booked (taken in the meantime, or the calendar didn't
 // answer), or no time picked ("call me").
 function nextCallText(visit) {
-  const talk = "you talk through the project, the property and your budget, and if it's a fit, Andy sets a free site visit.";
-  if (visit?.booked) return `Andy calls you at the number you gave us. On the call ${talk}`;
-  if (visit) return `We couldn't hold that time on the calendar, so Andy will call the number you gave us to set one that works. Then ${talk}`;
-  return `Andy will call the number you gave us to set a time that works for you. Then ${talk}`;
+  const talk = "you talk through the project, the property and your budget, and if it's a fit, we set a free site visit.";
+  if (visit?.booked) return `Someone from our team calls you at the number you gave us. On the call ${talk}`;
+  if (visit) return `We couldn't hold that time on the calendar, so someone from our team will call the number you gave us to set one that works. Then ${talk}`;
+  return `Someone from our team will call the number you gave us to set a time that works for you. Then ${talk}`;
 }
 
 // Opens in place of the quote request once it's sent (openThanks in

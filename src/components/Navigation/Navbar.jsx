@@ -211,7 +211,7 @@ export default function Navbar() {
 
           <div className="relative flex items-center justify-between h-full pl-[34px] pr-[30px] 1080:pl-[calc(40px*var(--wide-zoom))] 1080:pr-[calc(36px*var(--wide-zoom))]">
             <Link href="/" className="wide-zoom shrink-0 text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-third">
-              <Logo layout="horizontal" className="h-[32px] 700:h-[35px] 1080:h-[40px]" />
+              <Logo layout="horizontal" className="h-[40px] 700:h-[44px] 1080:h-[48px]" />
             </Link>
 
             <ul className="max-1080:hidden absolute inset-y-0 left-1/2 -translate-x-1/2 flex gap-6 1280:gap-[calc(2.75rem*var(--wide-zoom))]">

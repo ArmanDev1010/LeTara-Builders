@@ -23,7 +23,7 @@ const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-
 function Loading() {
   return (
     <div role="status" className="pointer-events-none">
-      <p className="font-script text-[11.5px] uppercase tracking-[0.14em] text-white/45">Checking Andy&apos;s calendar…</p>
+      <p className="font-script text-[11.5px] uppercase tracking-[0.14em] text-white/45">Checking our calendar…</p>
       <div aria-hidden="true" className="mt-4 grid grid-cols-7 gap-1 animate-pulse">
         {Array.from({ length: 35 }, (_, i) => (
           <span key={i} className="h-10 bg-white/[0.05]" />
@@ -34,7 +34,7 @@ function Loading() {
 }
 
 // No times to offer (none open, or the calendar didn't load): carry on, and
-// Andy calls to set one.
+// someone from the team calls to set one.
 function Unavailable({ failed, onCall }) {
   return (
     <div className="border border-white/12 bg-white/[0.02] p-5 550:p-6">
@@ -44,7 +44,7 @@ function Unavailable({ failed, onCall }) {
           {failed ? "The calendar didn't load just now." : "No open times online right now."}
         </p>
         <p className="mt-1.5 text-[14px] leading-relaxed text-white/55">
-          Continue, and Andy will call you to set a time that works.
+          Continue, and someone from our team will call you to set a time that works.
         </p>
       </div>
       <ArrowButton type="button" onClick={onCall} className="mt-5">

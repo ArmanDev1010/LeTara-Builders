@@ -30,7 +30,7 @@ export const ESTIMATE_STEPS = [
     id: "call",
     label: "When",
     question: "When can we call you?",
-    lede: "A free phone consultation with Andy. If your project's a fit, we set a free site visit after.",
+    lede: "A free phone consultation with our team. If your project's a fit, we set a free site visit after.",
   },
   { id: "contact", label: "Who", question: "How can we reach you?" },
   { id: "details", label: "More", question: "Tell us more", optional: true },

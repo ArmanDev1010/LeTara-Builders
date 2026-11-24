@@ -25,9 +25,9 @@ const CARD_CROP = 140;
 // Where we build, laid out like HB Links' section (in LeTara's
 // own design): the heading and a line about it, the areas (data/areas.js)
 // in a grid, then the map across the foot, under a
-// bar naming the place it shows. Los Angeles County, the target, leads, wide
+// bar naming the place it shows. Los Angeles, the target, leads, wide
 // on a phone and on a wide screen. Pick a city and the map goes to it; it
-// opens on the county. A service page passes its own `number`, `heading`
+// opens on Los Angeles. A service page passes its own `number`, `heading`
 // (its lines) and `intro`.
 //
 // `tone="light"` puts the section on white (the homepage, 11-10: after the
@@ -50,13 +50,13 @@ const TONES = {
 };
 
 // `initial` names the area the map opens on (an area page's own); the bar
-// over the map links to the picked area's page, unless it's this page or the
-// county (whose page is the homepage).
+// over the map links to the picked area's page, unless it's this page or Los
+// Angeles (whose page is the homepage).
 export default function ServiceAreas({
   number = "06",
   tone = "dark",
   initial,
-  heading = ["Building across", "Los Angeles County."],
+  heading = ["Building across", "Los Angeles."],
   intro = "From the Valley to the hills around it. Pick a city to see it on the map, and if yours isn't here, ask: we may still build there.",
 }) {
   const [active, setActive] = useState(() => Math.max(0, SERVICE_AREAS.findIndex(({ name }) => name === initial)));

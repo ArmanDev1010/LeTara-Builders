@@ -21,7 +21,7 @@ export const metadata = {
   metadataBase: new URL(BASE_URL),
   ...buildPageMetadata({ description: BUSINESS.description, path: null }),
   title: {
-    default: `${BUSINESS.name} | Design-Build Contractor in Los Angeles County`,
+    default: `${BUSINESS.name} | Design-Build Contractor in Los Angeles`,
     template: `%s | ${BUSINESS.name}`,
   },
   authors: [{ name: BUSINESS.name }],

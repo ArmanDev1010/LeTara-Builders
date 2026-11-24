@@ -71,7 +71,7 @@ export function buildBusinessSchema() {
       addressCountry: BUSINESS.address.country,
     },
     // the target city (the page names no office town; the user's call)
-    areaServed: { "@type": "AdministrativeArea", name: "Los Angeles County, CA" },
+    areaServed: { "@type": "City", name: "Los Angeles, CA" },
     founder: { "@type": "Person", name: BUSINESS.founder.name },
     sameAs: [BUSINESS.instagram],
   };
@@ -122,7 +122,7 @@ function provider() {
   };
 }
 
-// A service page's Service, provided by LeTara, in the target area (the county).
+// A service page's Service, provided by LeTara, in the target area (Los Angeles).
 export function buildServiceSchema(page) {
   return {
     "@context": "https://schema.org",
@@ -132,7 +132,7 @@ export function buildServiceSchema(page) {
     description: page.description,
     url: `${BASE_URL}${page.href}`,
     provider: provider(),
-    areaServed: { "@type": "AdministrativeArea", name: "Los Angeles County, CA" },
+    areaServed: { "@type": "City", name: "Los Angeles, CA" },
   };
 }
 

@@ -57,7 +57,7 @@ export default function ServicePage({ page }) {
           ]}
           title={
             <>
-              {page.title} <br /> in <span className="italic whitespace-nowrap">Los Angeles County.</span>
+              {page.title} <br /> in <span className="italic whitespace-nowrap">Los Angeles.</span>
             </>
           }
           lede={page.hero}

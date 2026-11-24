@@ -14,7 +14,7 @@ const LINES = [
   phoneHref() && { icon: TbPhone, label: "Call", value: phoneDisplay(), href: phoneHref(), big: true },
   BUSINESS.email && { icon: TbMail, label: "Email", value: BUSINESS.email, href: emailHref() },
   instagramHandle && { icon: BsInstagram, label: "Instagram", value: `@${instagramHandle}`, href: BUSINESS.instagram, external: true },
-  { icon: TbMapPin, label: "Building across", value: "Los Angeles County, CA" },
+  { icon: TbMapPin, label: "Building across", value: "Los Angeles, CA" },
   BUSINESS.license && { icon: TbCertificate, label: "Licensed & insured", value: `CSLB #${BUSINESS.license}` },
 ].filter(Boolean);
 

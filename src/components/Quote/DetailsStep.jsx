@@ -25,11 +25,11 @@ function Received({ slot, booked }) {
       <span>
         <strong className="text-neutral-50">Request received.</strong>{" "}
         {slot && booked
-          ? `Andy will call you ${visitDay(slot)} at ${visitTime(slot)}, Pacific time.`
+          ? `Someone from our team will call you ${visitDay(slot)} at ${visitTime(slot)}, Pacific time.`
           : slot
-            ? "We couldn't hold that time, so Andy will call you to set one."
-            : "Andy will call you to set a time for your consultation."}{" "}
-        Anything below helps him prepare.
+            ? "We couldn't hold that time, so someone from our team will call you to set one."
+            : "Someone from our team will call you to set a time for your consultation."}{" "}
+        Anything below helps us prepare.
       </span>
     </p>
   );
@@ -247,7 +247,7 @@ export default function DetailsStep({ project, slot, sent, onDone }) {
       });
       if (!res.ok) throw new Error(String(res.status));
     } catch {
-      toast.error("Your details didn't go through, but your request did. Tell Andy on the call.");
+      toast.error("Your details didn't go through, but your request did. Tell us on the call.");
     }
     if (failed.length) {
       toast.error(`${failed.length === 1 ? "A file" : `${failed.length} files`} didn't go through. You can text ${failed.length === 1 ? "it" : "them"} to ${phoneDisplay()}.`, { duration: 8000 });
@@ -317,7 +317,7 @@ export default function DetailsStep({ project, slot, sent, onDone }) {
           onChange={(event) => setMessage(event.target.value)}
           rows={3}
           maxLength={5000}
-          placeholder="What you have in mind, what matters most, questions for Andy."
+          placeholder="What you have in mind, what matters most, questions for us."
           className="mt-2 w-full bg-white/[0.04] border border-white/12 px-4 py-3 text-[16px] leading-relaxed text-neutral-50 outline-none resize-none placeholder:text-white/30 focus:border-third transition-colors duration-200"
         />
       </label>

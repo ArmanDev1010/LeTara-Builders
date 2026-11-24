@@ -12,10 +12,10 @@ import { OUTDOOR_PLANS } from "./plans";
 const outdoorLiving = {
   slug: "outdoor-living",
   title: "Outdoor Living",
-  metaTitle: "Outdoor Living Contractor in Los Angeles County",
+  metaTitle: "Outdoor Living Contractor in Los Angeles",
   serviceType: "Outdoor living construction",
   description:
-    "Pergolas, patio covers, outdoor kitchens, decks and patios in Los Angeles County, designed, permitted and built by one licensed team. Free consultation.",
+    "Pergolas, patio covers, outdoor kitchens, decks and patios in Los Angeles, designed, permitted and built by one licensed team. Free consultation.",
   asset: "outdoor",
   assetLabel: "A patio under a louvered pergola, with an outdoor kitchen and a fire pit",
   hero: "Pergolas, patio covers, outdoor kitchens, decks and patios: the yard made into rooms you'll use most of the year. Designed with the house, permitted and built by one team.",
@@ -127,16 +127,16 @@ const outdoorLiving = {
   },
 
   areas: {
-    heading: ["Outdoor living across", "Los Angeles County."],
+    heading: ["Outdoor living", "across Los Angeles."],
     intro:
-      "We build outdoor spaces throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
+      "We build outdoor spaces throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
   },
 
   faqHeading: ["Outdoor questions,", "answered."],
   faqIntro: "What homeowners ask most before building outside. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does a pergola or outdoor kitchen cost in Los Angeles County?",
+      question: "How much does a pergola or outdoor kitchen cost in Los Angeles?",
       answer:
         "It depends on the size, the materials and the utilities involved: an outdoor kitchen with gas, power and water costs more than a pergola over an existing patio. We price your project after seeing the yard. {{Get a free quote}}",
     },

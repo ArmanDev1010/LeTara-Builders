@@ -15,11 +15,13 @@
 //
 // Rerun it whenever logo.json changes. sharp comes with Next.js.
 //
-// logo.json is a vector rebuild of LeTara's logo from a 1023px JPEG: the mark
-// redrawn from its geometry (a regular hexagon, bands 26 units wide, seams
-// about 2), the lettering set in Bebas Neue, and both checked against the
-// JPEG pixel by pixel. If Andranik has the original vector file, it replaces
-// these paths.
+// logo.json is LeTara's logo traced from Andranik's own file (11-24: a
+// 6707px white-on-transparent PNG, letara_logo4_WH.png, traced at 4000px;
+// against it only the outline's edge pixels differ, 0.13%), in its own
+// horizontal lockup: `width`/`height` and both parts in place. If he has the
+// vector original (SVG, AI, PDF), its paths replace these. The traced shapes
+// cut their holes (the letters' insides) by the even-odd rule, so every path
+// is drawn with fill-rule="evenodd" (in Logo.jsx too).
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
@@ -44,7 +46,7 @@ function place({ box: [x, y, w, h], paths }, { width, height, fill, background =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
     `<rect width="${width}" height="${height}" fill="${background}"/>` +
     `<g transform="translate(${round(left)} ${round(top)}) scale(${round(scale, 5)})">` +
-    paths.map((d) => `<path d="${d}"/>`).join("") +
+    paths.map((d) => `<path fill-rule="evenodd" d="${d}"/>`).join("") +
     `</g></svg>`
   );
 }
@@ -65,7 +67,7 @@ async function png(svg, file) {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">` +
     `<style>path{fill:#000}@media (prefers-color-scheme:dark){path{fill:#fff}}</style>` +
-    `<path d="${MARK.paths[0]}"/></svg>\n`;
+    `<path fill-rule="evenodd" d="${MARK.paths[0]}"/></svg>\n`;
   await writeFile(path.join(ROOT, "src", "app", "icon.svg"), svg);
   console.log("wrote src/app/icon.svg");
 }

@@ -37,7 +37,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-x-8 gap-y-12 1080:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
           <div className="col-span-2 1080:col-span-1">
             <Link href="/" className="inline-block text-neutral-950" aria-label={`${BUSINESS.name}, home`}>
-              <Logo layout="horizontal" className="h-12" title={BUSINESS.name} />
+              <Logo layout="horizontal" className="h-16" title={BUSINESS.name} />
             </Link>
             {BUSINESS.tagline && (
               <p className="mt-6 flex items-center gap-2.5 font-script text-[12px] uppercase tracking-[0.24em] text-neutral-950 pointer-events-none">
@@ -100,7 +100,7 @@ export default function Footer() {
                 </li>
               )}
               <li className="text-[15px] text-black/65 pointer-events-none">
-                Los Angeles County, CA
+                Los Angeles, CA
               </li>
             </ul>
             <p className={`mt-9 ${heading}`}>Credentials</p>

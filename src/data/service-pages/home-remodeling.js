@@ -9,10 +9,10 @@ import { REMODEL_PLANS } from "./plans";
 const homeRemodeling = {
   slug: "home-remodeling",
   title: "Home Remodeling",
-  metaTitle: "Home Remodeling Contractor in Los Angeles County",
+  metaTitle: "Home Remodeling Contractor in Los Angeles",
   serviceType: "Home remodeling",
   description:
-    "Kitchen, bathroom and whole-house remodels in Los Angeles County, designed, permitted and built by one licensed design-build team. Free consultation.",
+    "Kitchen, bathroom and whole-house remodels in Los Angeles, designed, permitted and built by one licensed design-build team. Free consultation.",
   asset: "remodel",
   assetLabel: "A remodeled kitchen with an island and pendant lights",
   hero: "Kitchens, bathrooms or the whole house: walls moved, layouts reworked and every finish chosen with you. One team designs the remodel, handles the permits and builds it.",
@@ -107,16 +107,16 @@ const homeRemodeling = {
   },
 
   areas: {
-    heading: ["Remodels across", "Los Angeles County."],
+    heading: ["Remodels across", "Los Angeles."],
     intro:
-      "We remodel homes throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still work there.",
+      "We remodel homes throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still work there.",
   },
 
   faqHeading: ["Remodel questions,", "answered."],
   faqIntro: "What homeowners ask most before a remodel. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does a home remodel cost in Los Angeles County?",
+      question: "How much does a home remodel cost in Los Angeles?",
       answer:
         "It depends on the rooms, how much the layout changes, what's behind the walls and the finishes you choose. Keeping plumbing and walls where they are costs less than moving them. We price your remodel after seeing the house and talking through your plans. {{Get a free quote}}",
     },

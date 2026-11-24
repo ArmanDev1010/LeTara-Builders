@@ -2,13 +2,13 @@ import { BUSINESS } from "@/data/business";
 import { answerLines } from "@/data/projectDetails";
 import { visitSentence } from "@/lib/visitTimes";
 
-// Off while the site is being built: a request is checked as usual, then
-// logged to the server's console instead of sent anywhere, and the visitor
-// sees the thank-you (a picked time shows as booked). The calendar shows
-// sample openings unless GoHighLevel is connected (app/api/availability).
-// Turn it on, with GoHighLevel connected (lib/ghl.js), once leads should
-// actually reach Andranik.
-export const DELIVER = false;
+// On since 11-24: requests go to Andranik's GoHighLevel (lib/ghl.js), and by
+// email when that fails. Tested end to end that day against his account
+// (the contact, the opportunity, the booked call, the notes, the tags and
+// an attached photo, all deleted after). Off, a request is checked as
+// usual, then logged to the server's console instead of sent anywhere, and
+// the visitor sees the thank-you (a picked time shows as booked).
+export const DELIVER = true;
 
 // How far ahead a picked call time may be; anything outside it is treated as
 // "call me to set a time".

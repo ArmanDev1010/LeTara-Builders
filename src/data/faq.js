@@ -40,7 +40,7 @@ export const FAQS = [
   {
     question: "Which areas do you serve?",
     answer:
-      "Across Los Angeles County, from the San Fernando Valley to the city and beyond. If your city isn't in our list of service areas, ask: we may still build there.",
+      "Across Los Angeles and the San Fernando Valley. If your city isn't in our list of service areas, ask: we may still build there.",
   },
   {
     question: "Do you take on commercial projects?",

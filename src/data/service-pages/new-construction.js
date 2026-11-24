@@ -9,10 +9,10 @@ import { NEW_PLANS } from "./plans";
 const newConstruction = {
   slug: "new-construction",
   title: "New Construction",
-  metaTitle: "New Home Construction in Los Angeles County",
+  metaTitle: "New Home Construction in Los Angeles",
   serviceType: "New home construction",
   description:
-    "New homes built from the ground up in Los Angeles County: custom homes, knock-down rebuilds and rebuilds after a loss, by one licensed design-build team.",
+    "New homes built from the ground up in Los Angeles: custom homes, knock-down rebuilds and rebuilds after a loss, by one licensed design-build team.",
   asset: "house",
   assetLabel: "A new two-story home",
   hero: "A new home from the ground up: on an empty lot, in place of the house you have, or rebuilt after a loss. We design it, take it through permits and build it, as one team.",
@@ -108,16 +108,16 @@ const newConstruction = {
   },
 
   areas: {
-    heading: ["New homes across", "Los Angeles County."],
+    heading: ["New homes across", "Los Angeles."],
     intro:
-      "We build new homes throughout Los Angeles County. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
+      "We build new homes throughout Los Angeles and the Valley. Pick a city to see it on the map, and if yours isn't listed, ask: we may still build there.",
   },
 
   faqHeading: ["New build questions,", "answered."],
   faqIntro: "What homeowners ask most before building new. Don't see yours? Ask us directly.",
   faqs: [
     {
-      question: "How much does it cost to build a new home in Los Angeles County?",
+      question: "How much does it cost to build a new home in Los Angeles?",
       answer:
         "It depends on the size of the house, the lot, the design and the finishes, and on what the site needs before building starts, from demolition to utilities. We price your home after seeing the lot and talking through the design. {{Get a free quote}}",
     },
