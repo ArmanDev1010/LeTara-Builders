@@ -18,16 +18,23 @@ const mapSrc = ({ name, zoom }) =>
 
 // The embed always shows Google's place card in its top left, and North
 // Hills' says "No reviews" (the neighborhood's), which reads as LeTara's. So
-// the map runs this far above its frame and the card stays out of sight;
+// a city's map runs this far above its frame and the card stays out of sight;
 // Google's logo and attribution along the bottom stay in view.
 const CARD_CROP = 140;
+
+// Los Angeles (the map's first view) is LeTara's own Google listing, like
+// HB Links' map (the user, 11-25): the outline of its service areas, with its
+// card ("Open in Maps"). Google centres it on those areas whatever centre is
+// asked for; at zoom 9 they fit even a phone's frame. The outline is the
+// profile's own: change the areas there and the map follows.
+const PROFILE_SRC = BUSINESS.googleCid && `https://maps.google.com/maps?cid=${BUSINESS.googleCid}&z=9&output=embed`;
 
 // Where we build, laid out like HB Links' section (in LeTara's
 // own design): the heading and a line about it, the areas (data/areas.js)
 // in a grid, then the map across the foot, under a
 // bar naming the place it shows. Los Angeles, the target, leads, wide
 // on a phone and on a wide screen. Pick a city and the map goes to it; it
-// opens on Los Angeles. A service page passes its own `number`, `heading`
+// opens on Los Angeles, which shows the Google listing's service area. A service page passes its own `number`, `heading`
 // (its lines) and `intro`.
 //
 // `tone="light"` puts the section on white (the homepage, 11-10: after the
@@ -61,6 +68,7 @@ export default function ServiceAreas({
 }) {
   const [active, setActive] = useState(() => Math.max(0, SERVICE_AREAS.findIndex(({ name }) => name === initial)));
   const area = SERVICE_AREAS[active];
+  const profile = area.home && PROFILE_SRC;
   const pathname = usePathname();
   const pageLink = !area.home && area.href !== pathname;
   const c = TONES[tone];
@@ -108,9 +116,7 @@ export default function ServiceAreas({
                 <HexDot />
                 <span className="text-neutral-50">Map</span>
                 <span aria-hidden="true" className="h-3 w-px bg-white/20" />
-                <span className="truncate text-white/60">
-                  {area.name}, {region}
-                </span>
+                <span className="truncate text-white/60">{profile ? "Our service area" : `${area.name}, ${region}`}</span>
               </span>
               {pageLink ? (
                 <Link
@@ -131,12 +137,12 @@ export default function ServiceAreas({
                     it didn't match (11-17): harmless, so it's told to expect it */}
                 <iframe
                   suppressHydrationWarning
-                  key={area.name}
-                  title={`Map of ${area.name}, ${region}`}
-                  src={mapSrc(area)}
+                  key={profile ? "profile" : area.name}
+                  title={profile ? `${BUSINESS.name}'s service area on Google Maps` : `Map of ${area.name}, ${region}`}
+                  src={profile || mapSrc(area)}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  style={{ top: -CARD_CROP, height: `calc(100% + ${CARD_CROP}px)` }}
+                  style={profile ? { top: 0, height: "100%" } : { top: -CARD_CROP, height: `calc(100% + ${CARD_CROP}px)` }}
                   className="absolute left-0 w-full border-0 [filter:grayscale(1)_invert(0.92)_contrast(0.85)]"
                 />
               </div>

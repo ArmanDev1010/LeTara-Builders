@@ -4,7 +4,7 @@ import Reveal from "@/components/Home/Reveal";
 import { CONTAINER, H2, LEDE, Lines, SECTION, SectionLabel } from "@/components/Home/parts";
 import { HEX } from "@/components/Navigation/HexButton";
 import EstimateForm from "@/components/Quote/EstimateForm";
-import { BUSINESS, emailHref, phoneDisplay, phoneHref } from "@/data/business";
+import { BUSINESS, emailHref, googleProfileHref, phoneDisplay, phoneHref } from "@/data/business";
 
 const instagramHandle = BUSINESS.instagram?.match(/instagram\.com\/([^/?]+)/)?.[1];
 
@@ -14,7 +14,8 @@ const LINES = [
   phoneHref() && { icon: TbPhone, label: "Call", value: phoneDisplay(), href: phoneHref(), big: true },
   BUSINESS.email && { icon: TbMail, label: "Email", value: BUSINESS.email, href: emailHref() },
   instagramHandle && { icon: BsInstagram, label: "Instagram", value: `@${instagramHandle}`, href: BUSINESS.instagram, external: true },
-  { icon: TbMapPin, label: "Building across", value: "Los Angeles, CA" },
+  // the place opens the Google listing (its service area on the map)
+  { icon: TbMapPin, label: "Building across", value: "Los Angeles, CA", href: googleProfileHref(), external: true },
   BUSINESS.license && { icon: TbCertificate, label: "Licensed & insured", value: `CSLB #${BUSINESS.license}` },
 ].filter(Boolean);
 

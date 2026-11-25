@@ -1,16 +1,18 @@
+import { googleProfileHref } from "@/data/business";
+
 // The reviews themselves are added in the editor (/keystatic → Reviews; see
-// lib/reviews.js). This is the line over them: with LeTara's Google Business
-// Profile, the Google "G", the rating, the count, and links to the reviews
-// and the profile; without one, the rating and the count of the reviews on
-// the site, with no Google name or links (Home/Testimonials).
+// lib/reviews.js). This is the line over them (Home/Testimonials): the rating
+// and the count, then a link to LeTara's Google Business Profile.
 //
-// The profile isn't set up yet, so the line is the plain one (11-17, the
-// user's call). Once it exists: its link in `profile`, its reviews link in
-// `readAll`, and its own rating and count (they must match Google's). Never
-// put the rating in the structured data unless those reviews are on the page.
+// The profile is linked since 11-25 (BUSINESS.googleCid) but has no reviews
+// yet, so the line shows the site's own reviews' rating and count, with no
+// Google "G" and no "on Google". Once it has reviews: its reviews link in
+// `readAll`, and Google's own `rating` and `count` (they must match Google's);
+// the G and "N reviews on Google" then come back. Never put the rating in the
+// structured data unless those reviews are on the page.
 export const REVIEWS_SUMMARY = {
   rating: null,
   count: null,
   readAll: null,
-  profile: null,
+  profile: googleProfileHref(),
 };

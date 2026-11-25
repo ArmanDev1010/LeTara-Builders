@@ -26,6 +26,11 @@ export const BUSINESS = {
   // user's call); whether to show a street address is still to decide.
   address: { locality: "North Hills", region: "CA", country: "US" },
   instagram: "https://www.instagram.com/letarabuilders/",
+  // The Google Business Profile, by its listing's CID (looked up 11-25): a
+  // service-area listing, its address hidden, so Google draws its service
+  // areas as an outline. The map in Where we build opens on it, the reviews
+  // line and "Los Angeles, CA" link to it, and the schema names it.
+  googleCid: "2847538905739951585",
   // Andranik's other company, LeTara's partner for patio covers and awnings
   // (Andranik, 11-16): a mention under the Outdoor Living card on the homepage
   // (11-24, Home/Services), a card on the outdoor living page (UI/
@@ -60,6 +65,11 @@ export function phoneDisplay(digits = BUSINESS.phone) {
 // "mailto:andranik@…", or null while there is no email
 export function emailHref(email = BUSINESS.email) {
   return email ? `mailto:${email}` : null;
+}
+
+// The Google listing's own address (opens it in Google Maps), or null
+export function googleProfileHref(cid = BUSINESS.googleCid) {
+  return cid ? `https://maps.google.com/?cid=${cid}` : null;
 }
 
 // "8180000000" -> "tel:+18180000000"

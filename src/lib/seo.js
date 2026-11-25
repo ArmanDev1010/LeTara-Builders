@@ -1,4 +1,4 @@
-import { BUSINESS, phoneHref } from "@/data/business";
+import { BUSINESS, googleProfileHref, phoneHref } from "@/data/business";
 
 // letarabuilders.com is Andranik's — it already points at GoHighLevel, with
 // nothing published on it yet (checked 2026-10-14).
@@ -54,6 +54,7 @@ export function buildPageMetadata({ title, description, path = "", image = DEFAU
 // page to back it.
 export function buildBusinessSchema() {
   const phone = phoneHref();
+  const google = googleProfileHref();
   return {
     "@context": "https://schema.org",
     "@type": "GeneralContractor",
@@ -73,7 +74,9 @@ export function buildBusinessSchema() {
     // the target city (the page names no office town; the user's call)
     areaServed: { "@type": "City", name: "Los Angeles, CA" },
     founder: { "@type": "Person", name: BUSINESS.founder.name },
-    sameAs: [BUSINESS.instagram],
+    // the Google Business Profile, as HB Links names its own
+    ...(google && { hasMap: google }),
+    sameAs: [BUSINESS.instagram, google].filter(Boolean),
   };
 }
 

@@ -97,9 +97,9 @@ function Run({ reviews, run, time, repeat = 1, compact, className }) {
   );
 }
 
-// What clients say, on white: the heading and a line, the rating (on Google
-// with links to the reviews once the profile exists; data/testimonials.js),
-// then
+// What clients say, on white: the heading and a line, the rating and a link
+// to the Google profile (Google's own numbers and its reviews once it has
+// them; data/testimonials.js), then
 // a black canvas across the whole width with the white reviews inside it
 // (the user asked for that too), several in view at once (HB Links shows
 // one at a time). With enough reviews (MOVING_COLUMNS) they move: three
@@ -114,12 +114,13 @@ export default async function Testimonials({ number = "04" }) {
   const reviews = await getReviews();
   if (!reviews.length) return null;
   const n = reviews.length;
-  // Google's line with the real profile; until then the rating with no
-  // Google name or links
+  // the Google profile (its link); `onGoogle` once Google's own rating and
+  // count are filled in (the G and "N reviews on Google"), until then the
+  // reviews' own numbers, with no Google name on them
   const google = REVIEWS_SUMMARY.profile ? REVIEWS_SUMMARY : null;
-  // Google's numbers once they're filled in; until then the reviews' own
-  const rating = (google && REVIEWS_SUMMARY.rating) || reviews.reduce((sum, review) => sum + review.stars, 0) / n;
-  const count = (google && REVIEWS_SUMMARY.count) || n;
+  const onGoogle = !!(google && REVIEWS_SUMMARY.count);
+  const rating = (onGoogle && REVIEWS_SUMMARY.rating) || reviews.reduce((sum, review) => sum + review.stars, 0) / n;
+  const count = (onGoogle && REVIEWS_SUMMARY.count) || n;
   const plural = count === 1 ? "" : "s";
   const shift = (k) => [...reviews.slice(k % n), ...reviews.slice(0, k % n)];
   const moving = n >= MOVING_COLUMNS;
@@ -147,10 +148,10 @@ export default async function Testimonials({ number = "04" }) {
             we&apos;ve built for.
           </Reveal>
 
-          {/* the rating, on Google with the way to the reviews */}
+          {/* the rating (Google's once it has reviews), then the way to the profile */}
           <Reveal delay={0.15} className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-5">
             <div className="flex items-center gap-3.5 pointer-events-none">
-              {google && (
+              {onGoogle && (
                 <span className="grid place-items-center w-12 h-12 shrink-0 rounded-full border border-black/10 bg-white">
                   <FcGoogle aria-hidden="true" className="text-[26px]" />
                 </span>
@@ -162,8 +163,8 @@ export default async function Testimonials({ number = "04" }) {
                     <span className="sr-only"> out of 5</span>
                   </span>
                   <Stars className="text-[16px]" />
-                  {/* without Google, the count on the same line (11-17, the user asked) */}
-                  {!google && (
+                  {/* without Google's numbers, the count on the same line (11-17, the user asked) */}
+                  {!onGoogle && (
                     <>
                       <span aria-hidden="true" className="text-black/30">
                         ·
@@ -172,12 +173,12 @@ export default async function Testimonials({ number = "04" }) {
                     </>
                   )}
                 </span>
-                {google && <span className="block mt-1 text-[13.5px] text-black/55">{`${count} review${plural} on Google`}</span>}
+                {onGoogle && <span className="block mt-1 text-[13.5px] text-black/55">{`${count} review${plural} on Google`}</span>}
               </span>
             </div>
             {google && (
               <>
-                <span aria-hidden="true" className="max-550:hidden h-11 w-px bg-black/10" />
+                <span aria-hidden="true" className={`max-550:hidden ${onGoogle ? "h-11" : "h-7"} w-px bg-black/10`} />
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                   {google.readAll && (
                     <a href={google.readAll} target="_blank" rel="noopener noreferrer" className={link}>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CONTAINER, HexDot } from "@/components/Home/parts";
 import QuoteButton from "@/components/Quote/QuoteButton";
 import Logo from "@/components/UI/Logo";
-import { BUSINESS, emailHref, phoneDisplay, phoneHref } from "@/data/business";
+import { BUSINESS, emailHref, googleProfileHref, phoneDisplay, phoneHref } from "@/data/business";
 import { LEGAL_PAGES } from "@/data/legalPages";
 import { SERVICES } from "@/data/services";
 
@@ -99,9 +99,16 @@ export default function Footer() {
                   </a>
                 </li>
               )}
-              <li className="text-[15px] text-black/65 pointer-events-none">
-                Los Angeles, CA
-              </li>
+              {/* the place opens the Google listing (its service area on the map) */}
+              {googleProfileHref() ? (
+                <li>
+                  <a href={googleProfileHref()} target="_blank" rel="noopener noreferrer" className={link}>
+                    Los Angeles, CA
+                  </a>
+                </li>
+              ) : (
+                <li className="text-[15px] text-black/65 pointer-events-none">Los Angeles, CA</li>
+              )}
             </ul>
             <p className={`mt-9 ${heading}`}>Credentials</p>
             <ul className="mt-5 space-y-2 text-[14px] text-black/55 pointer-events-none">
