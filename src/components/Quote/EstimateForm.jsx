@@ -495,7 +495,8 @@ function TalkStrip() {
 
 // The five-step quote request (what, where, when, who, then more), the
 // same mechanics as HB Links' estimate form in LeTara's dress: each question
-// is a "scene", a pick moves straight on, and the tiles under the question
+// is a "Part N of 5" (it read "Scene" until 11-28, when the user asked for
+// "Part"), a pick moves straight on, and the tiles under the question
 // fill in with the answers as they come. "When" books the free phone
 // consultation on Andranik's GoHighLevel calendar; its times start loading as
 // soon as a project is picked. "Who" sends the request, so the lead is in
@@ -694,7 +695,7 @@ export default function EstimateForm({ talk = true }) {
         <div className="flex-1 min-w-0 px-5 550:px-8 1080:px-10 pt-5 550:pt-8 short:pt-5 pb-5 550:pb-6 short:pb-4 flex flex-col">
           <div className="pointer-events-none">
             <p className="font-script text-[12px] font-bold uppercase tracking-[0.14em] text-third">
-              Scene {step + 1} of {total}
+              Part {step + 1} of {total}
             </p>
             <AnimatePresence mode="wait" initial={false}>
               <motion.h2
