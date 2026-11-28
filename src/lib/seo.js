@@ -94,6 +94,18 @@ export function buildBreadcrumbs(trail) {
   };
 }
 
+// The contact page's ContactPage: what it is, about the business.
+export function buildContactPageSchema({ title, description, path }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: `${title} | ${BUSINESS.name}`,
+    description,
+    url: `${BASE_URL}${path}`,
+    about: { "@type": "GeneralContractor", name: BUSINESS.name, url: BASE_URL },
+  };
+}
+
 // An FAQ answer as plain text: "{{Get a free quote}}" (a button on the
 // page, see Home/FAQ) becomes its words.
 export const plainAnswer = (answer) => answer.replace(/\{\{(.+?)\}\}/g, "$1.");

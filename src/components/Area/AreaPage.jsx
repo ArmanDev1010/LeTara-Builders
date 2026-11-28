@@ -21,8 +21,9 @@ import { buildAreaSchema, buildBreadcrumbs } from "@/lib/seo";
 //   How we work: the homepage's five steps;
 //   the quote form (the homepage's);
 //   the area's own questions (the homepage's FAQ);
-//   Where we build: the map, opening on this area, linking to the others,
-//     last (the user tried it before the questions on 11-12 and swapped
+//   Where we build: the map, opening on the Google listing as on every
+//     page (11-25, the user; it opened on this area until then), linking
+//     to the areas' pages, last (the user tried it before the questions on 11-12 and swapped
 //     them back).
 //
 // Mainly white; the hero, the form and the areas are black. Scene numbers
@@ -85,7 +86,6 @@ export default function AreaPage({ page }) {
       />
       <ServiceAreas
         number={number("areas")}
-        initial={name}
         intro="From the Valley to the hills around it. Pick a city to see it on the map and open its page; if yours isn't here, ask: we may still build there."
       />
     </main>

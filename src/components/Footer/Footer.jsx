@@ -5,15 +5,17 @@ import Logo from "@/components/UI/Logo";
 import { BUSINESS, emailHref, googleProfileHref, phoneDisplay, phoneHref } from "@/data/business";
 import { LEGAL_PAGES } from "@/data/legalPages";
 import { SERVICES } from "@/data/services";
+import { CONTACT_HREF } from "@/lib/routes";
 
 const EXPLORE = [
   { label: "Home", href: "/" },
   { label: "About", href: "/#about" },
   { label: "Services", href: "/#services" },
+  // the contact page, after Services (the user, 11-28: FAQ and "Get a free
+  // quote" came out of this list; the quote button is just above it)
+  { label: "Contact Us", href: CONTACT_HREF },
   { label: "How we work", href: "/#process" },
   { label: "Service Areas", href: "/#service-areas" },
-  { label: "FAQ", href: "/#faq" },
-  { label: "Get a free quote", href: "/#contact" },
 ];
 
 // the legal pages (data/legalPages.js)

@@ -7,3 +7,6 @@ export const servicePageHref = (slug) => `/${slug}-los-angeles`;
 // rewrite): what LeTara is, then where. Los Angeles, the target city, has no
 // area page: its page is the homepage, so the two never compete.
 export const areaPageHref = (slug) => `/design-build-contractor-${slug}`;
+
+// The contact page (11-25): the form, the ways to reach us and the map.
+export const CONTACT_HREF = "/contact";

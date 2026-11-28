@@ -9,8 +9,9 @@ import { BUSINESS, emailHref, googleProfileHref, phoneDisplay, phoneHref } from 
 const instagramHandle = BUSINESS.instagram?.match(/instagram\.com\/([^/?]+)/)?.[1];
 
 // The ways to reach LeTara besides the form, each on a hexagon. Unconfirmed
-// ones (null in data/business.js) are left out.
-const LINES = [
+// ones (null in data/business.js) are left out. Shared with the /contact
+// page (Contact/ContactPage), as are `Line` and `FORM_CARD`.
+export const LINES = [
   phoneHref() && { icon: TbPhone, label: "Call", value: phoneDisplay(), href: phoneHref(), big: true },
   BUSINESS.email && { icon: TbMail, label: "Email", value: BUSINESS.email, href: emailHref() },
   instagramHandle && { icon: BsInstagram, label: "Instagram", value: `@${instagramHandle}`, href: BUSINESS.instagram, external: true },
@@ -19,7 +20,7 @@ const LINES = [
   BUSINESS.license && { icon: TbCertificate, label: "Licensed & insured", value: `CSLB #${BUSINESS.license}` },
 ].filter(Boolean);
 
-function Line({ icon: Icon, label, value, href, big, external }) {
+export function Line({ icon: Icon, label, value, href, big, external }) {
   const body = (
     <>
       <span aria-hidden="true" className="relative grid place-items-center w-10 h-[46px] shrink-0 text-third">
@@ -53,6 +54,11 @@ function Line({ icon: Icon, label, value, href, big, external }) {
     </li>
   );
 }
+
+// The form's card: a dark panel with a gold rule along its top (the rule is
+// its first child).
+export const FORM_CARD = "relative self-start border border-white/10 bg-[#0d0c0b] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]";
+export const FORM_RULE = "h-[2px] bg-gradient-to-r from-third via-third/60 to-transparent";
 
 // Get a free quote: the same step-by-step form as the quote dialog, set in the
 // page beside the other ways to reach us (HB Links' idea, LeTara's design),
@@ -93,8 +99,8 @@ export default function Contact({
           ))}
         </Reveal>
 
-        <Reveal delay={0.1} className="[grid-area:form] relative self-start border border-white/10 bg-[#0d0c0b] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-          <div aria-hidden="true" className="h-[2px] bg-gradient-to-r from-third via-third/60 to-transparent" />
+        <Reveal delay={0.1} className={`[grid-area:form] ${FORM_CARD}`}>
+          <div aria-hidden="true" className={FORM_RULE} />
           <EstimateForm talk={false} />
         </Reveal>
       </div>

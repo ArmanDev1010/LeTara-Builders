@@ -56,17 +56,17 @@ const TONES = {
   },
 };
 
-// `initial` names the area the map opens on (an area page's own); the bar
-// over the map links to the picked area's page, unless it's this page or Los
+// The map opens on Los Angeles, the Google listing, on every page (11-25,
+// the user: an area page opened on its own area until then); the bar over
+// the map links to the picked area's page, unless it's this page or Los
 // Angeles (whose page is the homepage).
 export default function ServiceAreas({
   number = "06",
   tone = "dark",
-  initial,
   heading = ["Building across", "Los Angeles."],
   intro = "From the Valley to the hills around it. Pick a city to see it on the map, and if yours isn't here, ask: we may still build there.",
 }) {
-  const [active, setActive] = useState(() => Math.max(0, SERVICE_AREAS.findIndex(({ name }) => name === initial)));
+  const [active, setActive] = useState(0);
   const area = SERVICE_AREAS[active];
   const profile = area.home && PROFILE_SRC;
   const pathname = usePathname();
